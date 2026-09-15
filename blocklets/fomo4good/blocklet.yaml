@@ -1,0 +1,32 @@
+specVersion: 2
+id: fomo4good
+did: did:blocklet:fomo4good
+name: FOMO4GOOD
+description: The last donor wins nothing. Their charity gets the pool.
+version: 0.1.0
+logo: logo.svg
+license: MIT
+author:
+  name: FOMO4GOOD
+repository:
+  type: git
+  url: https://github.com/ArcBlock/FOMO4GOOD
+  directory: blocklets/fomo4good
+keywords: [charity, donations, usdc]
+tags: [charity]
+surfaces: [/]
+sites:
+  - name: fomo4good
+    domains: [fomo4good.localhost, localhost]
+
+collections:
+  media:
+    type: local:media
+    scope: /packages
+    indexable: ["content/media/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: false
+      sitemap: false
+      jsonld: false

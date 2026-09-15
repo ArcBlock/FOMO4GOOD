@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local state and generated Arc output
+node_modules/
+var/
+.env
+.env.*
+!.env.example
+**/.web-cache/
+**/dist/
+artifacts/

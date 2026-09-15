@@ -1,0 +1,5 @@
+site: fomo4good
+path: /
+source: .
+handler: web
+access: public
