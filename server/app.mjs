@@ -32,6 +32,9 @@ export function createApp(config, store, watcher) {
 				return send(res, 400, { error: "Invalid path." });
 			const url = new URL(req.url, config.origin),
 				path = url.pathname;
+			const pageMatch = path.match(/^\/arc(?:\/(rules|teams|leaderboard))?\/?$/);
+			const pageView = pageMatch ? (pageMatch[1] || "play") : null;
+			const pagePath = pageView === "play" ? "/arc" : `/arc/${pageView}`;
 			if (path === "/") {
 				res.writeHead(302, { Location: "/arc" });
 				res.end();
@@ -41,7 +44,7 @@ export function createApp(config, store, watcher) {
 				if (
 					!["GET", "HEAD"].includes(req.method) ||
 					!(
-						/^\/arc\/?$/.test(path) ||
+						!!pageMatch ||
 						/^\/(?:_arc\/assets\/|media\/)/.test(path) ||
 						/^\/aup(?:-core|-app|-ssr|-inspect-bridge)?\.[a-z0-9]+\.(?:js|css)$/.test(
 							path,
@@ -51,7 +54,7 @@ export function createApp(config, store, watcher) {
 				)
 					return send(res, 404, { error: "Not found." });
 				const upstream = new URL(config.arcUrl);
-				upstream.pathname = /^\/arc\/?$/.test(path) ? "/en/" : path;
+				upstream.pathname = !!pageMatch ? "/en/" : path;
 				upstream.search = url.search;
 				// node:fetch may discard an overridden Host header. ARC selects the site by Host.
 				const response = await new Promise((resolve, reject) => {
@@ -106,13 +109,15 @@ export function createApp(config, store, watcher) {
 					content = Buffer.from(
 						content
 							.toString()
+							.replace('data-view="play"', `data-view="${pageView}"`)
+							.replace(`data-nav="${pageView}"`, `data-nav="${pageView}" aria-current="page"`)
 							.replace(
 								/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
 								"",
 							)
 							.replace(
 								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/en\//g,
-								config.origin + "/arc",
+								config.origin + pagePath,
 							)
 							.replace(
 								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/media\//g,

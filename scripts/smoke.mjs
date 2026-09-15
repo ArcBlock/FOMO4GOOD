@@ -29,6 +29,19 @@ assert.equal(redirect.headers.get("location"), "/arc");
 const html = await (await api("/arc")).text();
 assert.match(html, /data-fomo/);
 assert.match(html, /MAKE CRYPTO/);
+for (const page of ["rules", "teams", "leaderboard"]) {
+ const response = await api(`/arc/${page}`);
+ assert.equal(response.status, 200);
+ const body = await response.text();
+ assert.ok(body.includes(`data-view="${page}"`));
+ assert.ok(body.includes(`data-nav="${page}" aria-current="page"`));
+ assert.ok(body.includes('data-live-timer'));
+ assert.ok(body.includes('href="/arc#play"'));
+ assert.ok(body.includes(`rel="canonical" href="${origin}/arc/${page}"`));
+ assert.equal((await api(`/arc/${page}/`)).status, 200);
+}
+assert.equal((await api('/arc/unknown')).status, 404);
+
 assert.ok(html.includes(`rel="canonical" href="${origin}/arc"`));
 for (const match of html.matchAll(
 	/(?:src|href)="(\/(?:_arc\/assets\/|aup[^"\s]*\.(?:css|js)|media\/)[^"]*)"/g,

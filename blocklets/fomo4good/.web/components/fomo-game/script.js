@@ -1,6 +1,12 @@
 (() => {
 	const root = document.querySelector("[data-fomo]");
 	if (!root || root.dataset.ready) return;
+	const legacyPage = { "#rules": "rules", "#faq": "rules", "#teams": "teams", "#donors": "leaderboard" }[location.hash];
+	if (root.dataset.view === "play" && legacyPage) {
+		location.replace(`/arc/${legacyPage}${location.hash}`);
+		return;
+	}
+
 	root.dataset.ready = "true";
 	const $ = (key) => root.querySelector(`[data-${key}]`);
 	const esc = (value) =>
@@ -101,6 +107,11 @@
 							? "ONE MINUTE. NO PRESSURE."
 							: "TIME UNTIL SOMEONE GETS NOTHING";
 		const stale = Date.now() - lastSync > 15000 || state.watcher.stale;
+		$("live-round").textContent = $("round-label").textContent;
+		$("live-timer").textContent = $("timer").textContent;
+		$("live-pool").textContent = `${money(r?.amount || "0")} USDC`;
+		$("live-status").textContent = stale ? "Connection delayed" : state.campaign.ended ? "Campaign ended" : !r ? "Waiting for first donation" : remaining === 0 ? "Confirming result…" : `${team(r.team)?.team || "Charity"} leads`;
+
 		$("submit").disabled =
 			busy ||
 			stale ||

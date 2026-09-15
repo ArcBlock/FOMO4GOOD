@@ -19,6 +19,15 @@ Open **http://localhost:4931/arc**. `/` redirects to `/arc`. Preview uses simula
 
 The ARC web daemon runs as the separate `fomo4good-local` instance on port 4930. The public application binds to loopback on 4931. `Ctrl-C` stops the app; stop the named ARC instance separately with `node ../arc/runtimes/node/dist/cli.mjs service stop --instance fomo4good-local` when it is no longer needed. No desktop automation is used by these scripts.
 
+## Pages
+
+- `/arc`: pool, countdown and donation flow.
+- `/arc/teams`: charities, allocations and the ArcBlock guarantee.
+- `/arc/leaderboard`: donors, recent activity, Rogue Donors, round history and research jokes.
+- `/arc/rules`: game rules, all FAQs, upgrade notes and campaign terms.
+
+Every page keeps a sticky live round strip with countdown, pool and a link to participate. Old home-page anchors redirect to their new pages. Body copy is enlarged, with pixel typography reserved for display headings and key numbers.
+
 ## Architecture
 
 - `blocklets/fomo4good`: real Blocklet + AUP page + web component, following ArcBlock-site's web-device structure. ARC renders HTML/CSS/JS and serves media.
