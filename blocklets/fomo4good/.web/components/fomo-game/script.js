@@ -741,8 +741,8 @@ Object.assign(messages["zh-Hant"], {
   canvas.toBlob(blob=>{if(!blob)return;const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fomo4good-brag.png";a.textContent=t("SAVE CARD ↓");$("share-feedback").replaceChildren(a);a.click();},"image/png");
  });
 
- let soundOn = false, audioContext;
- try { soundOn = localStorage.getItem("fomo4good.sound") === "on"; } catch {}
+ let soundOn = true, audioContext;
+ try { soundOn = localStorage.getItem("fomo4good.sound") !== "off"; } catch {}
  function soundLabel() { $("sound").textContent = t(soundOn ? "SOUND ON" : "SOUND OFF"); $("sound").setAttribute("aria-pressed", String(soundOn)); }
  function unlockAudio() {
   if (!soundOn) return;

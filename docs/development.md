@@ -112,4 +112,4 @@ A browser identity receives 1,000 FUSD initially, counting as its print for that
 
 The private Worker alarm runs opponents marked with a 🤖 before their names after a human play. Sixteen names rotate randomly; all robots together spend at most 8 FUSD in four moves per round, in 1–2 FUSD plays. They never print through the user faucet, restart an expired round, or participate in real USDC. They stop after 30 minutes without a human play. Their contributions count in practice totals and rankings.
 
-Footer sound preference persists locally. Short square-wave cues distinguish amount, team, navigation, sharing and successful actions. No audio plays until user interaction unlocks it. The hero and GIT OOPS SVG are embedded to work in both native live rendering and static pages.
+Footer sound defaults on, and an explicit opt-out persists locally. Short square-wave cues distinguish amount, team, navigation, sharing and successful actions. Browser autoplay rules still delay audio until the first user interaction unlocks it. The hero and GIT OOPS SVG are embedded to work in both native live rendering and static pages.
