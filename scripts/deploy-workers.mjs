@@ -30,7 +30,33 @@ catch (error) {
 const provider = JSON.parse(readFileSync('worker/wrangler.jsonc', 'utf8'));
 provider.name = `${prefix}-provider`;
 provider.account_id = process.env.CLOUDFLARE_ACCOUNT_ID;
-provider.vars = { FOMO_MODE: 'practice', FOMO_ORIGIN: origin, FOMO_OWNER_DID: owner, FOMO_INSTANCE_DID: `did:blocklet:${prefix}` };
+if (target === 'staging') {
+	if (process.env.FOMO_ACCEPT_REAL && process.env.FOMO_ACCEPT_REAL !== '1' && process.env.FOMO_ACCEPT_REAL !== 'true')
+		throw new Error('Staging collection uses FOMO_ACCEPT_REAL=1');
+	const campaign = JSON.parse(readFileSync(new URL('../config/staging-campaign.json', import.meta.url), 'utf8'));
+	provider.vars = {
+		FOMO_MODE: 'testnet',
+		FOMO_ACCEPT_REAL: '1',
+		FOMO_ORIGIN: origin,
+		FOMO_OWNER_DID: owner,
+		FOMO_INSTANCE_DID: campaign.instanceDid,
+		FOMO_PRACTICE_INSTANCE_DID: campaign.practiceInstanceDid,
+		FOMO_RECIPIENT: campaign.recipient,
+		FOMO_RPC_URL: campaign.rpcUrl,
+		FOMO_START_BLOCK: String(campaign.startBlock),
+		FOMO_STARTS_AT: campaign.startsAt,
+		FOMO_ENDS_AT: campaign.endsAt,
+	};
+} else {
+	if (process.env.FOMO_ACCEPT_REAL === '1' || process.env.FOMO_ACCEPT_REAL === 'true')
+		throw new Error('Refusing to enable real collection on production');
+	provider.vars = {
+		FOMO_MODE: 'practice',
+		FOMO_ORIGIN: origin,
+		FOMO_OWNER_DID: owner,
+		FOMO_INSTANCE_DID: `did:blocklet:${prefix}`,
+	};
+}
 provider.r2_buckets[0].bucket_name = bucket;
 Object.assign(provider.d1_databases[0], { database_name: dbName, database_id: database.uuid });
 const gateway = JSON.parse(readFileSync('worker/gateway.wrangler.jsonc', 'utf8'));
@@ -44,7 +70,11 @@ gateway.ratelimits[0].namespace_id = target === 'staging' ? '49311' : '49312';
 const providerPath = 'worker/.deploy-provider.json', gatewayPath = 'worker/.deploy-gateway.json';
 writeFileSync(providerPath, JSON.stringify(provider, null, 2));
 writeFileSync(gatewayPath, JSON.stringify(gateway, null, 2));
-console.log(`Deploying practice API to ${origin}; page routes remain on ARC.`);
+console.log(
+	target === 'staging'
+		? `Deploying Arc testnet collection API to ${origin}; page routes remain on ARC.`
+		: `Deploying practice API to ${origin}; real collection stays closed. Page routes remain on ARC.`,
+);
 run('d1', 'migrations', 'apply', 'FOMO_INDEX', '--config', providerPath, '--remote');
 console.log(run('deploy', '--config', providerPath));
 console.log(run('deploy', '--config', gatewayPath));

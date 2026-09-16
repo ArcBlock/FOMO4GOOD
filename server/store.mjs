@@ -278,6 +278,7 @@ export class Store {
 		const round = s.round
 			? { ...s.round, amount: amount(s.round.units) }
 			: null;
+		const ended = !!this.config.endsAt && now >= this.config.endsAt;
 		return {
 			now,
 			mode: this.config.mode,
@@ -304,7 +305,9 @@ export class Store {
 			campaign: {
 				startsAt: this.config.startsAt,
 				endsAt: this.config.endsAt,
-				ended: !!this.config.endsAt && now >= this.config.endsAt,
+				ended,
+				accepting:
+					!ended && (!this.config.startsAt || now >= this.config.startsAt),
 			},
 			metrics: analytics(s),
 			receipts: s.receipts || [],

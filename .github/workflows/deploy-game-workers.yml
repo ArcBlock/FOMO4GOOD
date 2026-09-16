@@ -76,7 +76,7 @@ jobs:
           npm test
           npm run build:worker
           npm run test:worker
-      - name: Deploy practice workers
+      - name: Deploy game workers
         run: node scripts/deploy-workers.mjs
-      - name: Verify live practice API
+      - name: Verify live game API
         run: node scripts/smoke-workers.mjs

@@ -14,6 +14,7 @@ async function fixture(t, extra = {}) {
 		...configuration({
 			...process.env,
 			FOMO_MODE: "preview",
+			FOMO_ACCEPT_REAL: "",
 			FOMO_SPACE_ROOT: root,
 		}),
 		...extra,
@@ -103,8 +104,11 @@ test("campaign end caps round and does not mix ArcBlock top-ups into community t
 	const { store } = await fixture(t, { startsAt: 1000, endsAt: 10000 });
 	const i = await store.intent({ amount: "1", team: "internet" }, 2000);
 	await store.update((s) => store.ingest(s, event(i, 3000, "1")));
+	assert.equal((await store.state(2000)).campaign.accepting, true);
 	const state = await store.state(10000);
 	assert.equal(state.round, null);
+	assert.equal(state.campaign.ended, true);
+	assert.equal(state.campaign.accepting, false);
 	assert.equal(state.history[0].closedAt, 10000);
 	assert.equal(state.community, i.amount);
 	assert.equal(state.teams.find((t) => t.id === "dogs").topUp, "100");

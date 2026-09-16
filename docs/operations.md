@@ -33,7 +33,7 @@
 - https://docs.arc.io/arc/references/usdc-system-events：系统 emitter `0xfffffffffffffffffffffffffffffffffffffffe`，18 位 Transfer；ERC-20 镜像 6 位，不能双计。
 - https://docs.arc.io/build/evm-differences：非递减块时间、确定性终局、native 转账日志。
 
-官方 index 写 Testnet only，但事件历史页面提及 mainnet，资料有不一致；本实现不推测真实 mainnet 参数。底层只支持 preview/testnet 配置，公共真实捐款 API 在两种配置下都不开放；公共演练使用独立的 FUSD Practice。
+官方 index 写 Testnet only，但事件历史页面提及 mainnet，资料有不一致；本实现不推测真实 mainnet 参数。底层只支持 preview/testnet 配置。公共真实捐款 API 默认关闭。开放条件：`FOMO_MODE=testnet` 且 `FOMO_ACCEPT_REAL=1`。本地 companion 还要求绑定 loopback；staging Workers 使用 `config/staging-campaign.json`。production origin（`fomo4good.com`）拒绝该开关。公共演练使用独立的 FUSD Practice。
 
 ## ARC 集成与 Cloudflare
 

@@ -3,8 +3,14 @@ import { runProviderTests } from "@aigne/afs-testing";
 import { FomoProvider } from "./provider.ts";
 const create = () =>
 	new FomoProvider({
-		config: { mode: "preview" },
+		config: { mode: "preview", acceptReal: false },
 		unavailableRealState: () => ({ mode: "unavailable", community: "0" }),
+		store: {
+			state: async () => ({ mode: "unavailable", watcher: { stale: false } }),
+			intent: async () => ({ id: "test" }),
+			status: async () => null,
+			update: async (fn) => fn({ visits: 0 }),
+		},
 		practice: {
 			state: async () => ({ mode: "practice", community: "0" }),
 			session: async () => ({ balance: "1000" }),

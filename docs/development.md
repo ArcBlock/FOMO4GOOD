@@ -78,7 +78,7 @@ node --env-file=.env server/index.mjs
 
 No private key is requested or used. The recipient is an operator-owned, dedicated wallet. The cursor starts at `FOMO_START_BLOCK`; set it before the first campaign deposit and after the current native-event activation. The watcher verifies chain ID 5042002 and consumes **only the 18-decimal USDC system Transfer stream**, avoiding double-counting the ERC-20 mirror. It retains sub-micro-USDC precision. Network errors, inconsistent hashes and storage failures stop cursor advancement and pause new intents once stale.
 
-The current verified network profile is Arc Network **testnet**. The watcher remains available for internal integration testing; public real-payment endpoints stay closed in both preview and testnet configurations. Real-fund mode is deliberately unavailable until a mainnet profile, recipient, campaign dates and complete onchain acceptance test are verified. See [docs/operations.md](operations.md). No real transactions have been performed.
+The current verified network profile is Arc Network **testnet**. Public real-payment endpoints stay closed by default. Local loopback collection can be opened with `FOMO_MODE=testnet`, `HOST=127.0.0.1`, and `FOMO_ACCEPT_REAL=1` on the companion Node service; browse `http://localhost:4931/arc/` (not the ARC page port). Staging Workers use the same testnet flag (`config/staging-campaign.json`); production Workers stay on practice and refuse `FOMO_ACCEPT_REAL`. Real-fund / mainnet mode is still unavailable. See [docs/operations.md](operations.md).
 
 ## Validation
 

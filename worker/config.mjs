@@ -43,6 +43,14 @@ export function workerConfig(env) {
 	)
 		throw new Error("Public origin requires HTTPS");
 	config.origin = origin.origin;
+	const wantReal =
+		env.FOMO_ACCEPT_REAL === "1" || env.FOMO_ACCEPT_REAL === "true";
+	if (wantReal && preview)
+		throw new Error("FOMO_ACCEPT_REAL requires FOMO_MODE=testnet");
+	if (wantReal && /(?:^|\.)fomo4good\.com$/i.test(origin.hostname))
+		throw new Error("FOMO_ACCEPT_REAL is not allowed on production");
+	config.acceptReal = Boolean(wantReal && !preview);
+	config.practiceInstanceDid = env.FOMO_PRACTICE_INSTANCE_DID || "";
 	return config;
 }
 export function practiceConfig(config) {
@@ -50,6 +58,7 @@ export function practiceConfig(config) {
 		...config,
 		mode: "practice",
 		preview: true,
+		acceptReal: false,
 		chainId: 0,
 		recipient: "",
 		rpcUrl: "",
@@ -57,6 +66,7 @@ export function practiceConfig(config) {
 		startBlock: 0,
 		startsAt: 0,
 		endsAt: 0,
-		instanceDid: config.instanceDid + "-practice",
+		instanceDid:
+			config.practiceInstanceDid || config.instanceDid + "-practice",
 	};
 }

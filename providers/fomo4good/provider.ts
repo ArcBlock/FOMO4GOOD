@@ -26,7 +26,10 @@ export class FomoProvider extends AFSBaseProvider {
 			operations: ["read", "list", "stat", "explain", "exec"],
 			tree: {
 				"/": { kind: "fomo:root" },
-				"/real": { kind: "fomo:state" },
+				"/real": {
+					kind: "fomo:state",
+					actions: ["intent", "status", "visit"],
+				},
 				"/practice": {
 					kind: "fomo:state",
 					actions: ["session", "state", "donate", "refill"],
@@ -57,10 +60,9 @@ export class FomoProvider extends AFSBaseProvider {
 	async real() {
 		const { config, store, unavailableRealState } = this.services;
 		return this.buildEntry("/real", {
-			content:
-				config.mode === "mainnet"
-					? await store.state()
-					: unavailableRealState(config),
+			content: config.acceptReal
+				? await store.state()
+				: unavailableRealState(config),
 		});
 	}
 	@Read("/practice")
@@ -118,7 +120,10 @@ export class FomoProvider extends AFSBaseProvider {
 				provider: this.name,
 				operations: this.getOperationsDeclaration(),
 				tools: [],
-				actions: [{ discovery: { pathTemplate: "/practice/.actions" } }],
+				actions: [
+					{ discovery: { pathTemplate: "/practice/.actions" } },
+					{ discovery: { pathTemplate: "/real/.actions" } },
+				],
 			},
 		});
 	}
@@ -127,7 +132,7 @@ export class FomoProvider extends AFSBaseProvider {
 		return {
 			format: "markdown" as const,
 			content:
-				"FOMO4GOOD private provider: real/practice state and practice session/state/donate/refill actions. No raw ledger, generic writes or caller-supplied chain events. Browser identity is supplied only by the trusted gateway.",
+				"FOMO4GOOD private provider: real/practice state, practice session/state/donate/refill, and gated real intent/status/visit actions. No raw ledger, generic writes or caller-supplied chain events. Browser identity is supplied only by the trusted gateway.",
 		};
 	}
 	@Actions("/practice")
@@ -183,5 +188,71 @@ export class FomoProvider extends AFSBaseProvider {
 			success: true,
 			data: await this.services.practice.refill(args.token),
 		};
+	}
+	requireReal() {
+		if (!this.services.config.acceptReal)
+			throw new Error(
+				"Real donations are not open yet. Try Practice Round with FUSD.",
+			);
+	}
+	@Actions("/real")
+	realActions() {
+		return {
+			data: ["intent", "status", "visit"].map((name) =>
+				this.buildEntry(joinURL("/real/.actions", name), {
+					meta: { kind: "afs:executable" },
+					content: {
+						description: `Real ${name}`,
+						schema: { type: "object", properties: {} },
+					},
+				}),
+			),
+		};
+	}
+	realResult(fn: () => Promise<{ success: true; data: unknown }>) {
+		try {
+			this.requireReal();
+		} catch (e) {
+			return {
+				success: false as const,
+				error: { message: (e as Error).message },
+			};
+		}
+		return fn().catch((e: Error) => ({
+			success: false as const,
+			error: { message: e.message || "Unable to complete request." },
+		}));
+	}
+	@Actions.Exec("/real", "intent", undefined, { effect: "write" })
+	intent(_ctx: RouteContext, args: Record<string, unknown>) {
+		return this.realResult(async () => {
+			const { store, watcher } = this.services;
+			const state = await store.state(Date.now(), { settle: false });
+			if (state.watcher?.stale || watcher?.lastError)
+				throw new Error(
+					"Watcher is catching up. Please try again shortly.",
+				);
+			return {
+				success: true,
+				data: await store.intent(args.input || {}),
+			};
+		});
+	}
+	@Actions.Exec("/real", "status", undefined, {
+		effect: "read",
+		readonly: true,
+	})
+	status(_ctx: RouteContext, args: Record<string, unknown>) {
+		return this.realResult(async () => ({
+			success: true,
+			data: await this.services.store.status(String(args.id || "")),
+		}));
+	}
+	@Actions.Exec("/real", "visit", undefined, { effect: "write" })
+	visit() {
+		return this.realResult(async () => {
+			await this.services.store.update((s: { visits: number }) => s.visits++);
+			return { success: true, data: { ok: true } };
+		});
 	}
 }

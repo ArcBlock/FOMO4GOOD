@@ -9,11 +9,20 @@ export function configuration(env = process.env) {
 		);
 	const preview = mode === "preview";
 	const port = Number(env.PORT || 4931);
+	const host = env.HOST || "127.0.0.1";
+	const loopback = ["127.0.0.1", "localhost", "::1"].includes(host);
+	const wantReal =
+		env.FOMO_ACCEPT_REAL === "1" || env.FOMO_ACCEPT_REAL === "true";
+	if (wantReal && (preview || !loopback))
+		throw new Error(
+			"FOMO_ACCEPT_REAL is only allowed for FOMO_MODE=testnet bound to loopback.",
+		);
 	const config = {
 		mode,
 		preview,
+		acceptReal: Boolean(wantReal && !preview && loopback),
 		port,
-		host: env.HOST || "127.0.0.1",
+		host,
 		origin: env.FOMO_ORIGIN || `http://localhost:${port}`,
 		arcUrl: env.FOMO_ARC_URL || "http://127.0.0.1:4930",
 		spaceRoot: resolve(env.FOMO_SPACE_ROOT || `var/${mode}/spaces`),
@@ -59,5 +68,10 @@ export function configuration(env = process.env) {
 		throw new Error(
 			"Testnet requires recipient, owner DID, start block and finite campaign start/end.",
 		);
+	if (
+		config.acceptReal &&
+		/(?:^|\.)fomo4good\.com$/i.test(new URL(config.origin).hostname)
+	)
+		throw new Error("FOMO_ACCEPT_REAL is not allowed on production");
 	return config;
 }

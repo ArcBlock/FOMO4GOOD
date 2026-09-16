@@ -22,6 +22,12 @@ async function api(path, input, headers = {}) {
 	return r;
 }
 const before = await (await api("/arc/api/fomo/state")).json();
+if (before.mode !== "unavailable" || before.campaign?.accepting !== false) {
+	console.error(
+		`Smoke refuses to run while real collection is open (mode=${before.mode}).`,
+	);
+	process.exit(1);
+}
 assert.equal(
 	before.mode,
 	"unavailable",

@@ -23,7 +23,7 @@ async function body(req) {
 }
 export function createApp(config, store, watcher, practice) {
 	const limits = new Map();
-	const realAvailable = config.mode === "mainnet";
+	const realAvailable = config.acceptReal === true;
 	const server = createServer(async (req, res) => {
 		try {
 			if (!server.ready) return send(res, 503, { error: "Campaign starting." });
@@ -35,11 +35,16 @@ export function createApp(config, store, watcher, practice) {
 				return send(res, 400, { error: "Invalid path." });
 			const url = new URL(req.url, config.origin),
 				path = url.pathname;
+			if (path === "/") {
+				res.writeHead(302, { Location: "/arc/" });
+				res.end();
+				return;
+			}
 			// The eight campaign pages are real ARC pages (`blocklets/fomo4good/pages`);
 			// this service only passes them through so the API stays same-origin.
-			const pageMatch = path.match(/^(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/);
-			const pageParts = pageMatch ? [pageMatch[1], pageMatch[2]].filter(Boolean) : null;
-			const pagePath = pageParts ? `/${pageParts.map((p) => `${p}/`).join("")}` : null;
+			const pageMatch = path.match(
+				/^\/arc(?:\/practice)?(?:\/(?:rules|teams|leaderboard))?\/?$/,
+			);
 			if (!path.startsWith("/arc/api/fomo/") && !path.startsWith("/arc/api/practice/")) {
 				if (
 					!["GET", "HEAD"].includes(req.method) ||
@@ -49,13 +54,12 @@ export function createApp(config, store, watcher, practice) {
 						/^\/aup(?:-core|-app|-ssr|-fallback|-inspect-bridge)?\.[a-z0-9]+\.(?:js|css)$/.test(
 							path,
 						) ||
-						/^\/(?:favicon.ico|logo.svg)$/.test(path)
+						/^\/(?:favicon\.(?:ico|svg)|logo\.svg)$/.test(path)
 					)
 				)
 					return send(res, 404, { error: "Not found." });
 				const upstream = new URL(config.arcUrl);
-				// Pages live under ARC's locale prefix; the trailing slash is their canonical form.
-				upstream.pathname = pagePath ? `/en${pagePath}` : path;
+				upstream.pathname = path;
 				upstream.search = url.search;
 				// node:fetch may discard an overridden Host header. ARC selects the site by Host.
 				const response = await new Promise((resolve, reject) => {
@@ -101,10 +105,16 @@ export function createApp(config, store, watcher, practice) {
 					"x-content-type-options",
 					"referrer-policy",
 					"permissions-policy",
+					"location",
 				]) {
 					const v = response.headers[key];
 					if (v) headers[key] = v;
 				}
+				if (headers.location)
+					headers.location = String(headers.location).replace(
+						/^https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?/i,
+						config.origin,
+					);
 				let content = response.body;
 				if (headers["content-type"]?.includes("text/html")) {
 					content = Buffer.from(
@@ -119,6 +129,10 @@ export function createApp(config, store, watcher, practice) {
 							.replace(
 								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/en\//g,
 								config.origin + "/",
+							)
+							.replace(
+								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?(\/arc\/)/g,
+								config.origin + "$1",
 							)
 							.replace(
 								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/media\//g,
@@ -140,7 +154,7 @@ export function createApp(config, store, watcher, practice) {
 			}
 			if (
 				realAvailable && req.method === "GET" &&
-				/^\/api\/fomo\/intents\/[a-f0-9-]{36}$/.test(path)
+				/^\/arc\/api\/fomo\/intents\/[a-f0-9-]{36}$/.test(path)
 			) {
 				const intent = await store.status(path.split("/").pop());
 				return send(

@@ -16,6 +16,29 @@ const newToken = () =>
 	Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
 		n.toString(16).padStart(2, "0"),
 	).join("");
+const execFailed = (r) => r?.success === false || r?.data?.success === false;
+const execMessage = (r) =>
+	r.error?.message ||
+	r.data?.error?.message ||
+	(typeof r.error === "string" ? r.error : "") ||
+	"Unable to complete request.";
+const execStatus = (r) => {
+	const msg = execMessage(r);
+	if (/not open yet/i.test(msg)) return 409;
+	if (/catching up/i.test(msg)) return 503;
+	if (/not found/i.test(msg)) return 404;
+	return 400;
+};
+const execAction = async (game, path, args) => {
+	try {
+		return await game.exec(path, args);
+	} catch (error) {
+		return {
+			success: false,
+			error: { message: error.message || "Unable to complete request." },
+		};
+	}
+};
 async function input(request) {
 	if (!request.headers.get("content-type")?.startsWith("application/json"))
 		throw new Error("Expected JSON");
@@ -69,6 +92,19 @@ export default {
 						? reply(200, r.data)
 						: reply(503, { error: "Game unavailable" });
 				}
+				if (
+					request.method === "GET" &&
+					/^\/arc\/api\/fomo\/intents\/[a-f0-9-]{36}$/.test(path)
+				) {
+					const r = await execAction(game, "/real/.actions/status", {
+						id: path.split("/").pop(),
+					});
+					if (execFailed(r))
+						return reply(execStatus(r), { error: execMessage(r) });
+					return r.data
+						? reply(200, r.data)
+						: reply(404, { error: "Intent not found." });
+				}
 				if (request.method !== "POST")
 					return reply(404, { error: "Not found" });
 				if (request.headers.get("origin") !== env.FOMO_ORIGIN)
@@ -84,6 +120,20 @@ export default {
 						error: "Too many requests. Try again in a minute.",
 					});
 				const body = await input(request);
+				if (path === "/arc/api/fomo/intents") {
+					const r = await execAction(game, "/real/.actions/intent", {
+						input: body,
+					});
+					if (execFailed(r))
+						return reply(execStatus(r), { error: execMessage(r) });
+					return reply(201, r.data);
+				}
+				if (path === "/arc/api/fomo/visit") {
+					const r = await execAction(game, "/real/.actions/visit", {});
+					if (execFailed(r))
+						return reply(execStatus(r), { error: execMessage(r) });
+					return reply(200, r.data);
+				}
 				if (
 					![
 						"/arc/api/practice/session",
