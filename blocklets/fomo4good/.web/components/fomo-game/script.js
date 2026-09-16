@@ -285,7 +285,15 @@
     "BUILT ON ARC.": "建於 ARC。",
     "PAID ON Arc.": "付款走 Arc。",
     "Confused? Working as intended.": "搞混了？符合預期。",
-    "The campaign service and watcher run alongside ARC.": "活動服務與監看程式和 ARC 一起運行。"
+    "The campaign service and watcher run alongside ARC.": "活動服務與監看程式和 ARC 一起運行。",
+    "TWO ARCS. ONE VERY GOOD EXCUSE.": "兩個 ARC。一個做好事的藉口。",
+    "BUILT ON": "建於",
+    "PAID ON": "付款走",
+    "by ArcBlock": "ArcBlock 出品",
+    "by Circle": "Circle 出品",
+    "Not the same": "不是同一個",
+    "Different Arcs. Same terrible financial return.": "不同的 Arc。一樣慘烈的個人回報。",
+    "Which Arc? Exactly. ↗": "你說哪個 Arc？對，就是這個問題。↗"
   },
   "en-x-slop": {
     "PLAY": "EXECUTE GOOD.EXE",
@@ -332,7 +340,10 @@
     "THE FINE PRINT GOT A PERSONALITY.": "SYSTEM PROMPT, NOW WITH FEELINGS.",
     "CHOOSE YOUR CHAOTIC GOOD": "SELECT YOUR GOODNESS MODEL",
     "Read the rules ↗": "Inspect system prompt ↗",
-    "VIEW SOURCE ↗": "AUDIT THE VIBES ↗"
+    "VIEW SOURCE ↗": "AUDIT THE VIBES ↗",
+    "TWO ARCS. ONE VERY GOOD EXCUSE.": "ENTITY RESOLUTION FAILED. CHARITY SUCCEEDED.",
+    "Different Arcs. Same terrible financial return.": "Two Arcs. The model confidently merged them.",
+    "Which Arc? Exactly. ↗": "Resolve entity confusion ↗"
   }
 };
 
