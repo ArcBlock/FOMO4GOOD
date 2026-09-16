@@ -293,7 +293,17 @@
     "by Circle": "Circle 出品",
     "Not the same": "不是同一個",
     "Different Arcs. Same terrible financial return.": "不同的 Arc。一樣慘烈的個人回報。",
-    "Which Arc? Exactly. ↗": "你說哪個 Arc？對，就是這個問題。↗"
+    "Which Arc? Exactly. ↗": "你說哪個 Arc？對，就是這個問題。↗",
+    "Who coded this? Should I be worried?": "誰寫的程式？我該擔心嗎？",
+    "AI agents. All the way down. Vibe-coded, human-directed. The agents wrote the code; the humans supplied the questionable idea. If you find a bug, congratulations: you have discovered software.": "AI agents，全程上場。Vibe coding，人類指揮。代理寫程式，人類提供可疑的點子。找到 bug？恭喜，你發現了軟體。",
+    "So bugs are normal?": "所以有 bug 很正常？",
+    "Yes. This was vibe-coded by AI agents, not delivered on stone tablets. A bug is not an Easter egg, a feature, or an advanced donation strategy. We fix bugs. We do not ask you to believe harder.": "對。這是 AI agents vibe coding 出來的，不是刻在石板上的神諭。Bug 不是彩蛋、不是功能，也不是進階捐款策略。我們會修 bug，不會要求你加強信仰。",
+    "What do you actually guarantee?": "到底保證什麼？",
+    "Two things you can check: the USDC transfer records on Arc, and the receipts for ArcBlock’s actual charity donations after the campaign. The UI can glitch. The jokes can fail. Neither changes a recorded transfer or turns a missing receipt into a donation. Check the records, not our vibes.": "兩件可以核對的事：Arc 鏈上的 USDC 轉帳紀錄，以及活動結束後 ArcBlock 實際捐款的憑證。介面可以出 bug，笑話可以不好笑；它們都改不了已記錄的轉帳，也不能把不存在的收據變成捐款。看紀錄，別看氣氛。",
+    "When does the money actually reach charity?": "錢到底什麼時候捐出去？",
+    "ArcBlock will complete the campaign’s charity donations after the campaign ends and before December 31, 2026, and publish the donation receipts. A leaderboard allocation is not a payment receipt. “The agent said it sent the money” is not a receipt either.": "ArcBlock 會在活動結束後、2026 年 12 月 31 日前完成本活動的慈善捐款，並公布捐款憑證。排行榜上的分配不等於付款收據。「代理說它已經匯了」也不算收據。",
+    "Allocations are recorded here. ArcBlock will complete charity donations after the campaign ends and before December 31, 2026, and publish receipts.": "此處記錄款項分配。ArcBlock 會在活動結束後、2026 年 12 月 31 日前完成慈善捐款，並公布憑證。",
+    "ArcBlock covers any shortfall below $100 for each charity at the end of the real campaign; that contribution never buys a place on the board. ArcBlock will complete the charity donations through official channels after the campaign ends and before December 31, 2026, and publish receipts. Preview and testnet activity is not real fundraising.": "真實活動結束時，ArcBlock 會為每個慈善機構補足至 100 美元；補款不會取得排行榜名次。ArcBlock 將在活動結束後、2026 年 12 月 31 日前，透過官方管道完成慈善捐款並公布憑證。預覽版與測試網活動不是真實募款。"
   },
   "en-x-slop": {
     "PLAY": "EXECUTE GOOD.EXE",
@@ -343,7 +353,12 @@
     "VIEW SOURCE ↗": "AUDIT THE VIBES ↗",
     "TWO ARCS. ONE VERY GOOD EXCUSE.": "ENTITY RESOLUTION FAILED. CHARITY SUCCEEDED.",
     "Different Arcs. Same terrible financial return.": "Two Arcs. The model confidently merged them.",
-    "Which Arc? Exactly. ↗": "Resolve entity confusion ↗"
+    "Which Arc? Exactly. ↗": "Resolve entity confusion ↗",
+    "Who coded this? Should I be worried?": "Who let the agents cook?",
+    "So bugs are normal?": "Is this a bug or emergent intelligence?",
+    "Yes. This was vibe-coded by AI agents, not delivered on stone tablets. A bug is not an Easter egg, a feature, or an advanced donation strategy. We fix bugs. We do not ask you to believe harder.": "A bug. The model is 99.9% confident it is a bug. This was vibe-coded by AI agents; bugs are normal and still ours to fix. Please do not fine-tune your expectations around a broken button.",
+    "What do you actually guarantee?": "What is your proof-of-not-hallucinating?",
+    "When does the money actually reach charity?": "What is the deadline in human time?"
   }
 };
 

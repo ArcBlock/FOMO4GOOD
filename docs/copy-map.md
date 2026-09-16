@@ -26,3 +26,7 @@
 | Nobody got rich. Could’ve been worse. | campaign 结束状态 |
 
 不把原聊天示例数字当成实际结果，也不提前宣称完成慈善付款。正式付款凭据录入后才展示收据。保底是承诺，社区捐款是链上到账，两者始终分开。
+
+## AI-agent coding FAQ and donation deadline
+
+The user requested four additional FAQs about AI-agent vibe coding, bugs, independently checkable Arc transfer records and ArcBlock donation receipts. ArcBlock commits to completing campaign charity donations after the campaign ends and before December 31, 2026, and publishing receipts. Allocations and agent statements are not proof of payment; preview/testnet activity remains explicitly simulated.
