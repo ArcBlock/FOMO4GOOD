@@ -171,7 +171,7 @@ test("language switch translates FAQs and live state, preserves input and user n
  assert.equal(q('[data-leaderboard] strong').textContent, 'Nothing.');
  for (const summary of w.document.querySelectorAll('.f-faq summary')) assert.match(summary.textContent, /[\u3400-\u9fff]/);
  assert.match(q('[data-nav="teams"]').href, /\/teams\?lang=zh-Hant$/);
- assert.match(q('.f-livebar a').href, /\/\?lang=zh-Hant#play$/);
+ assert.match(q('.f-livebar a').href, /\/\?lang=zh-Hant#donate$/);
  q('[name="team"]').checked = true;
  q('[name="amount"]').value = '23.45';
  q('[name="name"]').value = 'Nothing.';
@@ -192,6 +192,7 @@ test("language switch translates FAQs and live state, preserves input and user n
 
 test('practice uses only its API, preserves real receipts, spends FUSD and offers a real-money link after a round', async context => {
  const state = { ...empty(), mode: 'practice', currency: 'FUSD', wallet: { id: 'practice-player', balance: '1000' } };
+ state.round = { id: 2, endsAt: Date.now() + 600000, amount: '30', team: 'dogs', lastDonor: { address: 'robot', name: '🤖 Tiny Wallet Energy' } };
  state.history = [{ id: 1, team: 'dogs', amount: '45', lastDonor: { address: 'practice-player', name: 'Me' } }];
  const dom = new JSDOM(render({ props: { mode: "practice" } }).html, { url: 'http://fomo4good.localhost/practice?lang=en', runScripts: 'outside-only' });
  context.after(() => dom.window.close());
@@ -217,7 +218,7 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  assert.match(q('[data-balance]').textContent, /1,000.00 FUSD/);
  assert.equal(q('[data-practice-result]').hidden, false);
  assert.match(q('[data-practice-result]').textContent, /YOU WON/);
- assert.match(q('[data-practice-result] a').href, /\/\?lang=en#play$/);
+ assert.match(q('[data-practice-result] a').href, /\/\?lang=en#donate$/);
  assert.match(q('[data-nav="leaderboard"]').href, /\/practice\/leaderboard\?lang=en$/);
  q('[name="team"]').checked = true;
  q('[data-form]').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
@@ -241,6 +242,38 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  assert.equal(w.localStorage.getItem('fomo4good.intent.v2'), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
  assert.match(q('[data-live-pool]').textContent, /FUSD/);
  assert.equal(q('[data-practice-result] a').textContent, 'PLAY FOR REAL — 1 USDC ↗');
+ assert.match(q('.f-legal [data-practice-only]').textContent, /ZERO CHARITY PAYOUT/);
+ assert.match(q('[data-leading]').textContent, /imaginary pool/);
+ assert.equal(new URL(q('.f-team-play').href).searchParams.get('team'),'dogs');
+ assert.equal(new URL(q('.f-team-play').href).hash,'#donate');
+});
+
+test('review-critical copy and participation anchors distinguish real funds from practice', () => {
+ const real=new JSDOM(render({props:{mode:'real'}}).html,{url:'https://fomo4good.com/arc/'}).window.document;
+ const practice=new JSDOM(render({props:{mode:'practice'}}).html,{url:'https://fomo4good.com/arc/practice/'}).window.document;
+ assert.match(real.querySelector('.f-funds-promise').textContent,/100% OF ELIGIBLE ARC USDC WILL BE DONATED/);
+ assert.match(real.querySelector('.f-funds-promise').textContent,/December 31, 2026/);
+ assert.equal(real.querySelector('.f-livebar a').hash,'#donate');
+ assert.ok(real.querySelector('#donate'));
+ assert.match(real.querySelector('.f-arc-pair a:first-child small').textContent,/AGENTIC REALM COMPUTER BY ARCBLOCK/);
+ assert.match(real.querySelector('.f-arc-pair a:last-child small').textContent,/USDC ON ARC BY CIRCLE/);
+ assert.match(practice.querySelector('.f-legal [data-practice-only]').textContent,/ZERO CHARITY PAYOUT/);
+ assert.match(practice.querySelector('.f-legal p[data-practice-only]').textContent,/no charity receives money/);
+});
+
+test('practice rejects an over-balance amount locally with a specific message', async context => {
+ const state={...empty(),mode:'practice',currency:'FUSD',wallet:{id:'small-wallet',balance:'10'}};
+ const dom=new JSDOM(render({props:{mode:'practice'}}).html,{url:'http://fomo4good.localhost/arc/practice/',runScripts:'outside-only'});
+ context.after(()=>dom.window.close());const w=dom.window;w.AbortSignal=globalThis.AbortSignal;let donations=0;
+ w.fetch=async path=>{if(path.endsWith('/donate'))donations++;return {ok:true,json:async()=>structuredClone(path.endsWith('/session')?state.wallet:state)}};
+ w.eval(script);const q=s=>w.document.querySelector(s);
+ await waitFor(()=>q('[name="team"]'));
+ q('[name="amount"]').value='11';q('[name="amount"]').dispatchEvent(new w.Event('input',{bubbles:true}));
+ assert.equal(q('[data-submit]').disabled,true);
+ assert.match(q('[data-amount-feedback]').textContent,/Not enough FUSD/);
+ q('[data-form]').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+ assert.equal(donations,0);
+ assert.match(q('[data-feedback]').textContent,/Not enough FUSD/);
 });
 
 test("pages-only deployment: a 404 campaign API renders the shipped teams, disables play and never reports an outage", async (context) => {
@@ -285,10 +318,12 @@ test('rank invitation uses the Top 10 cutoff minus existing contributions and pr
  assert.equal(w.document.querySelectorAll('[data-leaderboard] .f-board-row').length,10);
  const url=w.document.querySelector('[data-rank-cta]').href;
  assert.equal(new URL(url).searchParams.get('donate'),'8.01');
+ assert.equal(new URL(url).searchParams.get('team'),'dogs');
  const target=open(url,'play');
  await waitFor(()=>target.document.querySelector('[name="team"]'));
  assert.equal(target.document.querySelector('[name="amount"]').value,'8.01');
  assert.ok(target.document.querySelector('[name="team"]:checked'),'A default team removes the dead-end');
+ assert.equal(target.document.querySelector('[name="team"]:checked').value,'dogs');
  assert.equal(target.document.querySelector('[data-submit]').disabled,false);
 });
 
@@ -316,6 +351,7 @@ test('leaderboard scope stays consistent; sound defaults on and an explicit opt-
  assert.match(q('[data-leaderboard]').textContent,/1,020.00/);
  q('[data-ranking]').value='round';q('[data-ranking]').dispatchEvent(new w.Event('change'));
  assert.match(q('[data-board-scope]').textContent,/THIS ROUND/);assert.match(q('[data-podium]').textContent,/Other/);assert.doesNotMatch(q('[data-podium]').textContent,/1,020/);assert.match(q('[data-personal-rank]').textContent,/Not ranked/);
+ assert.match(q('[data-podium]').textContent,/1 donation/);assert.doesNotMatch(q('[data-podium]').textContent,/1 donations/);
  q('[data-sound]').click();assert.equal(w.localStorage.getItem('fomo4good.sound'),'off');
  q('[data-language]').value='zh-Hant';q('[data-language]').dispatchEvent(new w.Event('change'));
  assert.equal(q('[data-sound]').getAttribute('aria-pressed'),'false');assert.match(q('[data-sound]').textContent,/關/);

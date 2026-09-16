@@ -480,6 +480,11 @@ Object.assign(messages["zh-Hant"], {
 	const practiceMode = root.dataset.mode === "practice";
 	const currency = practiceMode ? "FUSD" : "USDC";
 	const practiceCopy = {"MAKE CRYPTO": "PRACTICE", "FUN AGAIN.": "ROUND.", "TWO ARCS. ONE VERY GOOD EXCUSE.": "FAKE USD. REAL FOMO. ZERO CONSEQUENCES.", "The winner gets nothing.": "Same FOMO. Fake money.", "Their charity gets everything.": "Nobody gets hurt.", "USDC": "FUSD", "THE DONATION POOL": "THE IMAGINARY POOL", "COMMUNITY": "PRACTICE NONSENSE", "REAL RAISED": "PRACTICE NONSENSE", "ARCBLOCK GUARANTEE": "REAL CHARITY PAYOUT", "$100": "$0", "PER CHARITY": "EXACTLY NONE.", "HALL OF GOOD": "TOP FUSD DONORS", "HALL OF GOOD.": "TOP FUSD DONORS.", "★ HALL OF GOOD": "★ TOP FUSD DONORS", "Donors, round history, and questionable scientific findings.": "Generosity has never been easier.", "No wallet connection. No signature. Just send the exact amount.": "No wallet. No transfer. Spend imaginary FUSD instantly.", "DO GOOD. RESET CLOCK.": "SPEND FUSD. RESET CLOCK.", "JOIN THE ROUND ↗": "JOIN PRACTICE ↗", "Donation amount in USDC": "Practice amount in FUSD", "01 / CHOOSE YOUR ALLEGIANCE": "01 / PICK A PRACTICE TEAM", "02 / HOW MUCH GOOD?": "02 / HOW MUCH IMAGINARY GOOD?", "The first donor starts the round.": "The first practice play starts the round.", "Every donation resets the clock to 10:00.": "Every FUSD play resets the clock to 10:00.", "FIVE TEAMS. ZERO BAD GUYS.": "FIVE TEAMS. ZERO REAL DOLLARS.", "ArcBlock covers each charity’s shortfall to $100 at campaign end. Top-ups are separate from community donations and leaderboards. Preview/testnet figures are simulations.": "Imaginary allocations. Charities receive exactly none of this.", "The winner gets nothing. Their charity gets everything.": "The winner gets nothing. Their charity also gets nothing. This is practice.", "Paid on Arc.": "Real donations use Arc.", "Pick a charity. Send the exact amount. Reset the clock.": "Pick a practice team. Spend FUSD. Reset the clock.", "Money buys rank, not pixels.": "Imaginary generosity. Real ego.", "↳ RECENT BAD FINANCIAL DECISIONS": "↳ RECENT IMAGINARY GENEROSITY", "PAGE SESSIONS": "PRACTICE PLAYERS", "PAYMENT INTENTS": "FUSD PLAYS", "DONOR ADDRESSES": "ACTIVE PRACTICE PLAYERS", "INTENT → PAID": "FUSD PLAY COMPLETION", "MEDIAN DONATION": "MEDIAN FUSD PLAY", "ROUND {n}": "PRACTICE ROUND {n}", "PREVIEW ALLOCATION": "IMAGINARY ALLOCATION", "TESTNET ALLOCATION": "IMAGINARY ALLOCATION", "SIMULATED": "FUSD", "How deeply is FOMO4GOOD integrated with Arc?": "How deeply is FOMO4GOOD integrated with Arc?", "CONFIRMING THE FINAL CHAIN HISTORY…": "SETTLING THE PRACTICE ROUND…", "Use a donation from 1 to 100,000 USDC, with at most two decimals.": "Use 1 to 100,000 FUSD, with at most two decimals.", "Donation must be between 1 and 100,000 USDC.": "Use 1 to 100,000 FUSD, with at most two decimals.", "Waiting for first donation": "Waiting for first practice play", "WAITING FOR FIRST DONATION": "Waiting for first practice play", "CONNECTION / WATCHER DELAY · Confirmations paused. Reconnecting…": "PRACTICE CONNECTION DELAY · Reconnecting…"};
+	Object.assign(practiceCopy, {
+		"{team} gets the pool.": "{team} wins the imaginary pool.",
+		"IF THE CLOCK HITS ZERO…": "IF THE FAKE CLOCK HITS ZERO…",
+		"Your team choice applies to this donation only. Choosing does not move money. A confirmed donation makes its team lead this round; the final donor’s team receives the entire round pool. Past donations and completed rounds stay unchanged.": "Your team choice applies to this FUSD play only. The final player’s team wins the imaginary pool; no charity receives money. Past plays and completed rounds stay unchanged.",
+	});
 	const supported = ["en", "zh-Hant", "en-x-slop"];
 	const localeKey = "fomo4good.language";
 	let locale = "en";
@@ -493,6 +498,20 @@ Object.assign(messages["zh-Hant"], {
   return String(messages[locale]?.[source] || source || "").replace(/\{(\w+)\}/g, (match, key) => String(values[key] ?? match));
  };
 	Object.assign(messages["zh-Hant"], {"One print per round: +1,000 FUSD. Save it for a future victory.":"每輪可印一次：+1,000 FUSD。存起來，哪輪再當大戶。", "This round's print is used. Your balance carries over; print again next round.":"本輪已印過。餘額可累積，下輪再印一次。", "Already printed this round. Save your balance for the next round.":"本輪已印過，請等下一輪。餘額會保留。", "Practice robots wear 🤖. Together they get only 8 FUSD and four moves per round. Humans get 1,000. Very fair. Obviously.":"演練機器人名字前會有 🤖。每輪全體只有 8 FUSD、最多出手四次；人類有 1,000。公平得非常刻意。", "SOUND OFF":"音效：關", "SOUND ON":"音效：開", "COMPLETED":"已結束","The address is prepared. Arc donations are not open yet. Do not transfer funds yet.":"地址已備妥。Arc 捐款尚未開放，現在請勿轉帳。", "PREPARED ADDRESS · NOT OPEN":"收款地址已備妥 · 尚未開放", "DONATION ADDRESS":"捐款地址", "Prepared donation address":"備用捐款地址", "ROGUE DONORS ↗":"野生捐款榜 ↗", "Direct transfers without a matching game order enter the Rogue Donors board, go to KIDS, and do not reset the clock or change the leader. Only confirmed transfers on the configured Arc network count after collection opens.":"沒有配對遊戲訂單的直接轉帳，會列入野生捐款榜、歸入兒童隊，不重設倒數、不改變領先戰隊。收款開放後，只計入指定 Arc 網路上已確認的轉帳。","Name and URL are remembered on this browser. Edit or clear them anytime.":"名稱與網址會記在這個瀏覽器，可隨時修改或清空。", "Your team choice applies to this donation only. Choosing does not move money. A confirmed donation makes its team lead this round; the final donor’s team receives the entire round pool. Past donations and completed rounds stay unchanged.":"戰隊只套用於這一筆捐款，光點選不會移動金額。捐款確認後，該戰隊成為本輪領先者；最終捐款者的戰隊獲得整輪捐款池。過去捐款與已結束輪次不會改寫。", "Team generosity ranks count donations made for that team, not the round pool it eventually wins.":"戰隊慷慨榜按當時選擇該隊的捐款累計，不等於該隊最後贏得的捐款池。","Just {amount} {currency} more puts you here ↗":"再捐 {amount} {currency}，你就能出現在這裡 ↗", "Give {amount} {currency} to reach #{rank} ↗":"再捐 {amount} {currency}，升上第 {rank} 名 ↗", "You are #1. Defend your very expensive ego ↗":"你已經第一名。繼續守護昂貴的自尊 ↗", "Live estimate; another donation can change the ranking. Click to fill the amount, then choose your team.":"依目前榜單估算，其他人的捐款會改變排名。點一下填好金額，再選戰隊。", "For a new donor address. Ranking updates as donations arrive.":"以新捐款地址估算；排名隨確認捐款更新。", "Entering this board currently needs more than the single-play limit.":"目前上榜所需金額超過單次上限。", "Amount filled from the leaderboard. Choose your team to continue.":"已填入上榜金額，請選擇戰隊再繼續。","THIS ROUND · TOP 10":"本輪慷慨榜 · 前 10 名", "ALL-TIME · TOP 10":"歷史慷慨總榜 · 前 10 名","Only real leaderboards unlock profile links. Your URL is saved in practice.":"只有真榜單才有個人外鏈。你的網址已保存在演練記錄中。", "TEAM ALL-TIME GENEROSITY":"本戰隊歷史慷慨榜", "Profile URLs stay with donation records for historical rankings and future credentials. Practice saves URLs without outbound links.":"個人網址隨捐款記錄保留，供歷史榜及未來憑證使用。演練會保存網址，但不開放外鏈。", "CLOSE":"關閉","Refills unlock below 1 FUSD. You still have {amount} FUSD.": "餘額低於 1 FUSD 即可再印。你還有 {amount} FUSD，可以繼續玩。", "Below 1 FUSD. Your imaginary central bank is ready.": "餘額低於 1 FUSD。你的幻想央行已準備好。", "LIVE COMPETITION / ZERO PERSONAL PROFIT": "即時競爭 / 個人回報永遠為零", "BIG EGOS. GOOD CAUSES.": "自尊要大。善事要做。", "FULL LEADERBOARD ↗": "完整排行榜 ↗", "EXPORT YOUR EGO.": "把你的自尊分享到外面。", "SHARE ↗": "分享 ↗", "COPY BRAG": "複製炫耀文", "SAVE CARD ↓": "下載戰績卡 ↓", "YOU": "你", "YOUR RANK": "你的排名", "Not ranked yet. One good deed away.": "還未上榜。差你一筆善意。", "CURRENT FINAL DONOR": "目前最後捐款者", "Charity round wins": "慈善戰隊勝場", "Copied. Your ego is portable now.": "已複製。你的自尊現在可以隨身攜帶。", "Share cancelled. Your ego stays here.": "已取消分享。自尊先留在這裡。", "Sharing unavailable. Copy the text below.": "暫時無法分享，請複製下方文字。", "Choose a team to play again.": "選擇戰隊，即可再玩一次。", "Not enough FUSD for this amount. Choose a smaller amount.": "FUSD 不足，請選擇較小金額。", "PRACTICE · FAKE MONEY · NO CHARITY PAYOUT": "演練 · 假錢 · 不會產生慈善付款", "{name} is #{rank} with {amount} {currency}. Personal profit: $0. Challenge my questionable generosity.": "{name} 以 {amount} {currency} 排名第 {rank}。個人獲利：$0。來挑戰我的可疑慷慨。", "The pool is {amount} {currency}. The winner gets nothing. Bring your FOMO.": "捐款池已有 {amount} {currency}。贏家一無所獲。帶著你的 FOMO 來。"});
+	Object.assign(messages["zh-Hant"], {
+		"Not enough FUSD for this amount. Choose a smaller amount.": "FUSD 餘額不足，請輸入不超過目前餘額的金額。",
+		"{team} wins the imaginary pool.": "{team} 贏得虛擬獎池，不會產生真實慈善付款。",
+		"PLAY FOR {team} ↗": "支持 {team} ↗",
+		"100% OF ELIGIBLE ARC USDC WILL BE DONATED.": "100% 合資格 ARC USDC 將實際捐出。",
+		"Only USDC on Arc Network is eligible. ArcBlock organizes collection and will donate through official charity channels by December 31, 2026, then publish receipts.": "僅 Arc Network 上的 USDC 符合資格。由 ArcBlock 主辦及代收，並於 2026 年 12 月 31 日前透過慈善機構官方管道完成捐贈及公布收據。",
+		"See allocations and receipts ↗": "查看分配與收據 ↗",
+		"PRACTICE MONEY. REAL EGO. ZERO CHARITY PAYOUT.": "演練假錢。真實自尊。慈善付款為零。",
+		"FUSD activity is permanently recorded in the practice game, but no charity receives money from it.": "FUSD 活動會永久保留在演練遊戲中，但不會向任何慈善機構支付款項。",
+		"IF THE FAKE CLOCK HITS ZERO…": "當虛擬倒數歸零…",
+		"Your team choice applies to this FUSD play only. The final player’s team wins the imaginary pool; no charity receives money. Past plays and completed rounds stay unchanged.": "戰隊只套用於這一筆 FUSD 操作。最後玩家的戰隊贏得虛擬獎池；慈善機構不會收到款項。過去操作與已結束輪次不會改寫。",
+		"100% of eligible USDC received on the configured Arc Network will be donated to the participating charities.": "在設定的 Arc Network 收到的合資格 USDC，100% 將實際捐給參與的慈善機構。",
+		"100% of eligible USDC received on the configured Arc Network will be donated. You can check the USDC transfer records on Arc and the receipts for ArcBlock’s actual charity donations after the campaign.": "在設定的 Arc Network 收到的合資格 USDC，100% 將實際捐出。你可以核對 Arc 上的 USDC 轉帳紀錄，以及活動結束後 ArcBlock 實際慈善捐贈的收據。",
+	});
 	Object.assign(messages["en-x-slop"], {"EXPORT YOUR EGO.":"SYNDICATE YOUR SYNTHETIC EGO.","BIG EGOS. GOOD CAUSES.":"LEADERBOARD ALIGNMENT ACHIEVED."});
 	const fixedText = [];
 	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -704,7 +723,9 @@ Object.assign(messages["zh-Hant"], {
   const value=`${cents/100n}.${String(cents%100n).padStart(2,"0")}`;
   const cta=$("rank-cta");
   cta.textContent=cents>10000000n?t("Entering this board currently needs more than the single-play limit."):position===0?t("You are #1. Defend your very expensive ego ↗"):t(position>0?"Give {amount} {currency} to reach #{rank} ↗":"Just {amount} {currency} more puts you here ↗",{amount:value,currency,rank:position});
-  if(cents>10000000n)cta.removeAttribute("href");else cta.href=`${practiceMode?"/arc/practice/":"/arc/"}?${new URLSearchParams({lang:locale,donate:value})}#play`;
+  const rankParams={lang:locale,donate:value};
+  if(chosenTeam)rankParams.team=chosenTeam;
+  if(cents>10000000n)cta.removeAttribute("href");else cta.href=`${practiceMode?"/arc/practice/":"/arc/"}?${new URLSearchParams(rankParams)}#donate`;
   $("rank-hint").textContent=t(practiceMode?"Live estimate; another donation can change the ranking. Click to fill the amount, then choose your team.":"For a new donor address. Ranking updates as donations arrive.");
 
 	}
@@ -720,7 +741,7 @@ Object.assign(messages["zh-Hant"], {
  function renderCompetition() {
   $("board-scope").textContent=t(root.dataset.view === "play" || board === "round" ? "THIS ROUND · TOP 10" : "ALL-TIME · TOP 10");
   const rows=root.dataset.view === "play" || board === "round" ? state.roundDonors : state.topDonors, me=rows.findIndex(d=>d.address===state.wallet?.id);
-  $("podium").innerHTML=rows.slice(0,3).map((d,i)=>`<article><span>${["🥇","🥈","🥉"][i]} #${i+1}</span><h3>${donor(d)}</h3><strong>${money(d.amount)} <small>${currency}</small></strong><p>${t("{n} donations",{n:d.count})}</p></article>`).join("") || `<p>${t("Not ranked yet. One good deed away.")}</p>`;
+  $("podium").innerHTML=rows.slice(0,3).map((d,i)=>`<article><span>${["🥇","🥈","🥉"][i]} #${i+1}</span><h3>${donor(d)}</h3><strong>${money(d.amount)} <small>${currency}</small></strong><p>${t(d.count===1?"1 donation":"{n} donations",{n:d.count})}</p></article>`).join("") || `<p>${t("Not ranked yet. One good deed away.")}</p>`;
   $("personal-rank").innerHTML=`<div><small>${t("YOUR RANK")}</small><strong>${me<0?t("Not ranked yet. One good deed away."):`#${me+1} · ${money(rows[me].amount)} ${currency}`}</strong></div><div><small>${t("CURRENT FINAL DONOR")}</small><strong>${state.round?esc(state.round.lastDonor.name || short(state.round.lastDonor.address)):"—"}</strong></div>`;
   $("team-ranks").innerHTML=[...state.teams].sort((a,b)=>b.wins-a.wins || Number(b.allocated)-Number(a.allocated)).map(d=>`<div>${d.emoji} <b>${esc(t(d.team))}</b><span>${t("{n} round wins · allocated",{n:d.wins})}</span><strong>${money(d.allocated)} ${currency}</strong></div>`).join("");
   $("full-board").href=`${practiceMode?"/arc/practice":"/arc"}/leaderboard?lang=${locale}`;
@@ -799,7 +820,10 @@ Object.assign(messages["zh-Hant"], {
   profileForm.elements[field].addEventListener("change",saveProfile);
  }
  profileForm.addEventListener("reset",()=>queueMicrotask(restoreProfile));
+	const teamKey="fomo4good.team.v1";
 	let chosenTeam = "";
+	try { chosenTeam = new URL(location.href).searchParams.get("team") || localStorage.getItem(teamKey) || ""; } catch {}
+	const rememberTeam = value => { chosenTeam=value || chosenTeam; try { if(chosenTeam)localStorage.setItem(teamKey,chosenTeam); } catch {} };
 	root.addEventListener("click", (event) => { if (event.target.closest("[data-practice-profile]")) { $("share-feedback").textContent = t("Only real leaderboards unlock profile links. Your URL is saved in practice."); $("profile-message").textContent = t("Only real leaderboards unlock profile links. Your URL is saved in practice."); $("profile-dialog").showModal(); } });
 	$("profile-close").addEventListener("click",()=>$("profile-dialog").close());
 	function tick() {
@@ -832,6 +856,7 @@ Object.assign(messages["zh-Hant"], {
 		$("live-status").textContent = stale ? t("Connection delayed") : state.campaign.ended ? t("Campaign ended") : !r ? t("Waiting for first donation") : remaining === 0 ? t("Confirming result…") : t("{team} leads", { team: t(team(r.team)?.team || t("Charity")) });
 
 		const insufficient = practiceMode && state.wallet && Number($("form").elements.amount.value) > Number(state.wallet.balance);
+		$("amount-feedback").textContent = insufficient ? t("Not enough FUSD for this amount. Choose a smaller amount.") : "";
 		$("submit").disabled = insufficient ||
 			busy ||
 			stale ||
@@ -854,6 +879,7 @@ Object.assign(messages["zh-Hant"], {
 		}
 	}
 	function render() {
+		root.dataset.hydrated="true";
 		$("notice").classList.remove("error");
 		$("notice").textContent =
 			practiceMode ? t(offline ? "PRACTICE ROUND IS NOT OPEN YET." : "PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO") : state.mode === "unavailable" ? t("REAL DONATIONS ARE NOT OPEN YET.") : state.mode === "preview"
@@ -888,14 +914,16 @@ Object.assign(messages["zh-Hant"], {
 				.join("");
 		// Give first-time visitors an obvious path forward. Their later choice
 		// remains sticky across polling, form resets, and language changes.
-		if (!chosenTeam && state.teams.length) chosenTeam = state.teams[0].id;
+		if (!state.teams.some(item=>item.id===chosenTeam)) chosenTeam = state.teams[0]?.id || "";
+		rememberTeam(chosenTeam);
 		if (chosenTeam) {
 			const selectedChoice = $("choices").querySelector(
 				`input[value="${chosenTeam}"]`,
 			);
 			if (selectedChoice) selectedChoice.checked = true;
 		}
-		if(root.dataset.view === "play") { board="round"; $("ranking").value="round"; $("ranking").disabled=true; }
+		if(root.dataset.view === "play") { board="round"; $("ranking").value="round"; $("ranking").hidden=true; $("home-ranking").hidden=false; }
+		for(const option of $("ranking").options)option.textContent=t(option.value==="all"?"ALL TIME":"THIS ROUND");
 		renderBoard();
 		renderCompetition();
 		$("activity").innerHTML = state.recent.length
@@ -909,7 +937,7 @@ Object.assign(messages["zh-Hant"], {
 		$("teams").innerHTML = state.teams
 			.map(
 				(t) =>
-					`<article class="f-team-card"><span class="emoji" aria-hidden="true">${t.emoji}</span><h3>${esc(translateTeam(t.team))}</h3><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.name)} ↗</a><p>${esc(translateTeam(t.tagline))}</p><strong>${money(t.allocated)} ${currency}</strong><small>${translateTeam("{n} round wins · allocated", { n: t.wins })}</small><small>${practiceMode ? translateTeam("Imaginary allocations. Charities receive exactly none of this.") : translateTeam("ArcBlock shortfall: ${amount}", { amount: money(t.topUp) })}</small><h4>${translateTeam("TEAM ALL-TIME GENEROSITY")}</h4><div class="f-team-donors">${t.topDonors?.length ? boardRows(t.topDonors.slice(0,3)) : translateTeam("Not ranked yet. One good deed away.")}</div></article>`,
+					`<article class="f-team-card"><span class="emoji" aria-hidden="true">${t.emoji}</span><h3>${esc(translateTeam(t.team))}</h3><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.name)} ↗</a><p>${esc(translateTeam(t.tagline))}</p><strong>${money(t.allocated)} ${currency}</strong><small>${translateTeam("{n} round wins · allocated", { n: t.wins })}</small><small>${practiceMode ? translateTeam("Imaginary allocations. Charities receive exactly none of this.") : translateTeam("ArcBlock shortfall: ${amount}", { amount: money(t.topUp) })}</small><a class="f-team-play" href="${practiceMode?"/arc/practice/":"/arc/"}?${new URLSearchParams({lang:locale,team:t.id})}#donate">${translateTeam("PLAY FOR {team} ↗",{team:translateTeam(t.team)})}</a><h4>${translateTeam("TEAM ALL-TIME GENEROSITY")}</h4><div class="f-team-donors">${t.topDonors?.length ? boardRows(t.topDonors.slice(0,3)) : translateTeam("Not ranked yet. One good deed away.")}</div></article>`,
 			)
 			.join("");
 		$("rogues").innerHTML = state.rogueDonors.length
@@ -934,7 +962,7 @@ Object.assign(messages["zh-Hant"], {
    $("practice-history").innerHTML = $("history").innerHTML;
    const last = state.history[0];
    $("practice-result").hidden = !last;
-   if (last) $("practice-result").innerHTML = `<p class="f-eyebrow">${t("ROUND {n}", { n: String(last.id).padStart(3,"0") })} · ${t("COMPLETED")}</p><h2>${last.lastDonor.address === state.wallet?.id ? t("YOU WON!") : esc(t("{team} WIN!", { team: t(team(last.team)?.team) }))}</h2><p>${t("{amount} FUSD of completely imaginary money. The charity receives exactly none of this.", { amount: money(last.amount) })}</p><p>${t("Want to try with $1 that actually exists?")}</p><a href="/arc/?lang=${locale}#play">${t("PLAY FOR REAL — 1 USDC ↗")}</a>`;
+   if (last) $("practice-result").innerHTML = `<p class="f-eyebrow">${t("ROUND {n}", { n: String(last.id).padStart(3,"0") })} · ${t("COMPLETED")}</p><h2>${last.lastDonor.address === state.wallet?.id ? t("YOU WON!") : esc(t("{team} WIN!", { team: t(team(last.team)?.team) }))}</h2><p>${t("{amount} FUSD of completely imaginary money. The charity receives exactly none of this.", { amount: money(last.amount) })}</p><p>${t("Want to try with $1 that actually exists?")}</p><a href="/arc/?lang=${locale}#donate">${t("PLAY FOR REAL — 1 USDC ↗")}</a>`;
   }
 		const m = state.metrics;
 		$("research").innerHTML =
@@ -1053,8 +1081,15 @@ let practiceAttempt = null;
 	$("form").addEventListener("submit", async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		chosenTeam = $("form").querySelector('input[name="team"]:checked')?.value || chosenTeam;
+		rememberTeam($("form").querySelector('input[name="team"]:checked')?.value);
 		if (busy) return;
+		if (practiceMode && state?.wallet && Number($("form").elements.amount.value) > Number(state.wallet.balance)) {
+			const message=t("Not enough FUSD for this amount. Choose a smaller amount.");
+			$("amount-feedback").textContent=message;
+			feedback(message);
+			$("form").elements.amount.focus();
+			return;
+		}
 		busy = true;
 		tick();
 		feedback(t("Generating your very specific good deed…"));
@@ -1090,7 +1125,7 @@ let practiceAttempt = null;
 			tick();
 		}
 	});
-	$("choices").addEventListener("change", (event) => { chosenTeam = event.target.value; tick(); });
+	$("choices").addEventListener("change", (event) => { rememberTeam(event.target.value); tick(); });
 	root.querySelectorAll("[data-amount]").forEach((button) =>
 		button.addEventListener("click", () => {
 			$("form").elements.amount.value = button.dataset.amount;
@@ -1099,7 +1134,7 @@ let practiceAttempt = null;
 				.forEach((b) => b.classList.toggle("selected", b === button));
 		}),
 	);
-	$("form").elements.amount.addEventListener("input", () =>
+	$("form").elements.amount.addEventListener("input", () => {
 		root
 			.querySelectorAll("[data-amount]")
 			.forEach((b) =>
@@ -1107,8 +1142,9 @@ let practiceAttempt = null;
 					"selected",
 					b.dataset.amount === $("form").elements.amount.value,
 				),
-			),
-	);
+			);
+		tick();
+	});
 	$("ranking").addEventListener("change", (e) => {
 		board = e.target.value;
 		renderBoard();
