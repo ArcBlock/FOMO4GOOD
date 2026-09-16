@@ -153,3 +153,7 @@ var/
 artifacts/
 
 .wrangler/
+
+# Generated deployment configurations
+worker/.deploy-*.json
+arc-runtime/

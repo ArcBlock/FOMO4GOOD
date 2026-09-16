@@ -75,3 +75,15 @@ ARC 已有 cost、Slack、X 的独立 Worker／DO 实践。本项目沿用其 Se
 页面使用最新 main 的原生 ARC 路由、AUP props 与集合绑定；发布流程保持现有 GitHub Actions。
 匿名 Cookie 是 FUSD 的游戏会话身份，不是一套新的通用 IAM；需要真实用户身份时复用 ARC 认证。
 不要从这层复制出另一套 IAM、存储、RPC 或页面框架。通用缺口补在 ARC，游戏只消费。
+
+## GitHub Actions 部署入口
+
+`Deploy Game Workers` 手动选择 staging 或 production，并传入已合并 ARC 的完整 commit SHA。
+它使用既有组织／环境 secrets：`GIT_HUB_TOKEN`（只需读取私有 ARC 源码）、
+`CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID`。owner DID 由输入或环境变量
+`FOMO_OWNER_DID` 指定；不使用本地演练占位身份。凭据／身份缺失时在创建任何资源前失败。
+
+流水线复用 Wrangler 建立该环境专属 R2/D1、应用 ARC 官方迁移，再依次部署私有 provider
+和 `/api/*` gateway。仅开启 FUSD Practice，staging 与 production 资源完全分离。
+私有 ARC 源码、构建日志与 bundle 不上传到公共 Actions artifact 或仓库。
+已有两个 Blocklet 发布工作流继续负责页面；Worker 发布不修改站点 DNS 或全站路由。

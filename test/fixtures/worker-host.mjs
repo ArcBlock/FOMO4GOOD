@@ -11,6 +11,10 @@ export default {
 			env.FOMO_PROVIDER,
 			"test-host",
 		);
-		return Response.json(await proxy[method](path, args));
+		try {
+			return Response.json(await proxy[method](path, args));
+		} catch (error) {
+			return Response.json({ success: false, transportRejected: true, code: error.code }, { status: 400 });
+		}
 	},
 };

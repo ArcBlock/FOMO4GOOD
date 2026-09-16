@@ -102,7 +102,8 @@ try {
 		method: "POST",
 		body: JSON.stringify({ path: "/campaign/ledger.json" }),
 	});
-	assert.equal((await denied.json()).success, false);
+	assert.equal(denied.status, 400);
+	assert.equal((await denied.json()).transportRejected, true);
 	const edge = await mf.getWorker("gateway");
 	const post = (path, body, cookie = "", origin = "https://game.test") =>
 		edge.fetch("https://game.test" + path, {
