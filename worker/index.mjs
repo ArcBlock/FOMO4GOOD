@@ -86,8 +86,16 @@ export class FomoCampaign {
 			maxBodySize: 8192,
 		});
 		// DO storage is only the runtime alarm; balances and cursors are in DID Space.
-		if (watcher && (await this.ctx.storage.getAlarm()) === null)
-			await this.ctx.storage.setAlarm(Date.now() + 2000);
+		if (watcher) {
+			try {
+				await watcher.tick();
+			} catch (e) {
+				watcher.lastError = e.message;
+				console.error("Watcher paused:", e.message);
+			}
+			if ((await this.ctx.storage.getAlarm()) === null)
+				await this.ctx.storage.setAlarm(Date.now() + 2000);
+		}
 	}
 	serialize(fn) {
 		const next = this.queue.then(fn);
@@ -95,7 +103,7 @@ export class FomoCampaign {
 		return next;
 	}
 	async fetch(request) {
-		return this.serialize(async () => {
+		const response = await this.serialize(async () => {
 			try {
 				await this.init();
 				// ARC owns parsing, dispatch, options, body limits and error serialization.
@@ -131,6 +139,16 @@ export class FomoCampaign {
 				);
 			}
 		});
+		if (this.watcher)
+			this.ctx.waitUntil(
+				this.serialize(() =>
+					this.watcher.tick().catch((e) => {
+						this.watcher.lastError = e.message;
+						console.error("Watcher paused:", e.message);
+					}),
+				),
+			);
+		return response;
 	}
 	async alarm() {
 		return this.serialize(async () => {
@@ -139,6 +157,9 @@ export class FomoCampaign {
 				await this.watcher?.tick();
 				await this.practice.agentTick();
 				await this.practice.state();
+			} catch (e) {
+				if (this.watcher) this.watcher.lastError = e.message;
+				console.error("Watcher paused:", e.message);
 			} finally {
 				const { state } = await this.practice.read();
 				if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);

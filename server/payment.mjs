@@ -69,6 +69,9 @@ export class Watcher {
 				: this.config.startBlock;
 			if (start > head) {
 				this.lastError = null;
+				await this.store.update((s) => {
+					s.chainTime = Number(BigInt(latest.timestamp)) * 1000;
+				});
 				return;
 			}
 			const end = Math.min(head, start + 499);
