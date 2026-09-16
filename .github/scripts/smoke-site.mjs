@@ -52,6 +52,15 @@ for (const asset of assets) {
 		assert.equal(r.status, 200);
 	});
 }
+await check("home redirects to /arc/", async () => {
+	const r = await get("/");
+	assert.ok([301, 302, 307, 308].includes(r.status), `home status ${r.status}`);
+	const loc = r.headers.get("location") || "";
+	assert.ok(
+		/\/arc\/?$/.test(new URL(loc, base).pathname),
+		`home location ${loc}`,
+	);
+});
 await check("/teams redirects to its canonical slash form", async () => {
 	const r = await get("/arc/teams");
 	assert.equal(r.status, 308);

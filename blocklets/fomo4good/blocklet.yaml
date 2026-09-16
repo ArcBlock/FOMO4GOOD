@@ -21,9 +21,11 @@ surfaces: [/arc]
 # target host first-come; a published copy also resolves by its id
 # (`fomo4good.<domain root>`, e.g. fomo4good.afsd.io on staging).
 # fomo4good.localhost is the local `npm run dev` host.
+# fomo4good.afsd.io is the staging id-based host; listing it applies the
+# site bindings (including `/` → `/arc/`) there. It is not the SEO host.
 sites:
   - name: fomo4good
-    domains: [fomo4good.com, fomo4good.localhost]
+    domains: [fomo4good.com, fomo4good.localhost, fomo4good.afsd.io]
     bindings:
       - id: home
         path: "/"
