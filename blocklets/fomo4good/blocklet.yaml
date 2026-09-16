@@ -14,7 +14,7 @@ repository:
   directory: blocklets/fomo4good
 keywords: [charity, donations, usdc]
 tags: [charity]
-surfaces: [/]
+surfaces: [/arc]
 # domains[0] is the SEO host: pre-render bakes it into canonical / og:url /
 # sitemap in EVERY environment (staging included — same as aside), so it is
 # the production domain. `arc deploy --server` registers every entry with the
@@ -24,6 +24,31 @@ surfaces: [/]
 sites:
   - name: fomo4good
     domains: [fomo4good.com, fomo4good.localhost]
+    bindings:
+      - id: home
+        path: "/"
+        redirect: "/arc/"
+      - id: legacy-practice
+        path: "/practice"
+        redirect: "/arc/practice/"
+      - id: legacy-practice-teams
+        path: "/practice/teams"
+        redirect: "/arc/practice/teams/"
+      - id: legacy-practice-rules
+        path: "/practice/rules"
+        redirect: "/arc/practice/rules/"
+      - id: legacy-practice-leaderboard
+        path: "/practice/leaderboard"
+        redirect: "/arc/practice/leaderboard/"
+      - id: legacy-teams
+        path: "/teams"
+        redirect: "/arc/teams/"
+      - id: legacy-rules
+        path: "/rules"
+        redirect: "/arc/rules/"
+      - id: legacy-leaderboard
+        path: "/leaderboard"
+        redirect: "/arc/leaderboard/"
 
 collections:
   # Charity teams — page data bound through `pages/*/sources/teams`. Faces
@@ -45,6 +70,16 @@ collections:
     type: local:practice
     scope: /packages
     indexable: ["content/practice/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: false
+      sitemap: false
+      jsonld: false
+  arc:
+    type: local:arc
+    scope: /packages
+    indexable: ["content/arc/**/content.md"]
     readRole: guest
     access: public
     faces:

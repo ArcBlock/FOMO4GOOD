@@ -34,8 +34,8 @@
 
 | 名字 | 負責什麼 |
 | --- | --- |
-| **[ARC by ArcBlock](https://www.arcblock.io/en/arc/)** | Blocklet/AUP 介面與 DID Space 儲存。 |
-| **[Arc by Circle](https://arc.io/)** | 真實活動的 USDC 支付網路。 |
+| **[ARC 平台](https://www.arcblock.io/en/arc/)** | Blocklet/AUP 介面與 DID Space 儲存。 |
+| **[Arc Network](https://arc.io/)** | 真實活動設定使用的 USDC 支付網路。 |
 | **FOMO4GOOD** | 把命名問題變成大家的問題。 |
 
 **[搞混了？符合預期。](https://www.arcblock.io/en/which-arc/)**
@@ -65,7 +65,7 @@
 
 **一樣 FOMO。錢是假的。沒有人受傷。**
 
-永久演練入口是 `/practice`。每個瀏覽器身分起手 **1,000 FUSD**。選隊、花假錢、重設同樣的十分鐘倒數。餘額不到 1 FUSD，就能免費再印 1,000。終於有一套貨幣政策，一個按鈕就裝得下。
+永久演練入口是 `/arc/practice`。每個瀏覽器身分起手 **1,000 FUSD**。選隊、花假錢、重設同樣的十分鐘倒數。餘額不到 1 FUSD，就能免費再印 1,000。終於有一套貨幣政策，一個按鈕就裝得下。
 
 | FUSD — Fake United States Dollar | 完全沒人審計 |
 | --- | --- |
@@ -95,7 +95,7 @@ AI agents 全程上場。人類負責指揮，並提供可疑點子。找到 bug
 奇怪的小數用來配對真實付款要求；不到一美分的零頭也會捐出。老派嗎？是。有效嗎？也是。請保密，並在到期前只轉入一次精確金額。FUSD 演練不需要這套儀式。
 
 **我直接轉了 5,000，怎麼沒贏？**<br>
-因為你捐了款，沒玩遊戲。監看的 Circle Arc 網路上，直接、逾期或未配對的 USDC 會成為 KIDS 的野生捐款，只列在獨立的地址榜單，不重設倒數。
+因為你捐了款，沒玩遊戲。監看的 Arc Network 上，直接、逾期或未配對的 USDC 會成為 KIDS 的野生捐款，只列在獨立的地址榜單，不重設倒數。
 
 **可以從別的鏈轉嗎？**<br>
 其他網路或代幣不屬於本活動及保底範圍，不承諾找回、退款或捐出。「可是它也叫 Arc」不是跨鏈協議。
@@ -119,10 +119,10 @@ npm run dev
 
 | 本地頁面 | 用途 |
 | --- | --- |
-| `http://fomo4good.localhost:4930/` | 真實活動入口，目前未開放收款。 |
-| `http://fomo4good.localhost:4930/practice/` | 永久 FUSD 演練。 |
-| `/teams`, `/leaderboard`, `/rules` | 戰隊、紀錄、玩法與 FAQ。 |
-| `/practice/teams`, `/practice/leaderboard`, `/practice/rules` | 上述內容的幻想版本。 |
+| `http://fomo4good.localhost:4930/arc/` | 真實活動入口，目前未開放收款。 |
+| `http://fomo4good.localhost:4930/arc/practice/` | 永久 FUSD 演練。 |
+| `/arc/teams`, `/arc/leaderboard`, `/arc/rules` | 戰隊、紀錄、玩法與 FAQ。 |
+| `/arc/practice/teams`, `/arc/practice/leaderboard`, `/arc/practice/rules` | 上述內容的幻想版本。 |
 
 每頁都有即時倒數與參與入口。支援英文、**繁體中文**與 **🤖 AI Slop**，語言會跨頁保留。中文故意只有繁體：字可以繁，付款別繁。切換語言不會幫你把 FUSD 翻譯成真錢。
 
@@ -173,6 +173,6 @@ npm run smoke   # 需先啟動本地應用；新增明確標示的 FUSD 演練�
 
 程式碼採 [MIT 授權](LICENSE)。提供的發表主視覺另有權利歸屬，不自動納入程式碼授權。VT323 隨附 [OFL 授權](blocklets/fomo4good/content/media/VT323-LICENSE.txt)。Git Oops 是本專案的原創惡搞吉祥物，不是 GitHub 官方標誌。
 
-ArcBlock 的獨立實驗，與 Circle、列出的慈善機構或 FOMO3D 作者無從屬關係。捐款不是投資，沒有財務回報。演練版提供同等回報，手續顯著更少。
+FOMO4GOOD 是由 ArcBlock 主辦的獨立實驗。提及 Circle、Arc Network 與列出的慈善機構，只是在說明基礎設施、資產或預定捐款對象；不構成夥伴關係、贊助、背書、代理或聯合推廣。相關名稱與標誌屬各自權利人。本專案也與 FOMO3D 作者無關。捐款不是投資，沒有財務回報。演練版提供同等回報，手續顯著更少。
 
 [Cloudflare 部署](docs/cloudflare.md) — 部署步驟與目前驗證範圍。

@@ -28,7 +28,7 @@
 	],
 	"routes": [
 		{
-			"pattern": "REPLACE_WITH_PUBLIC_HOST/api/*",
+			"pattern": "REPLACE_WITH_PUBLIC_HOST/arc/api/*",
 			"zone_name": "REPLACE_WITH_ZONE"
 		}
 	]

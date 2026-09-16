@@ -22,13 +22,16 @@ test('practice persists separately, spends atomically, deduplicates retries and 
  assert.equal((await practice.session(token)).balance, '1000');
  assert.equal((await practice.session(token)).grants, 1);
  assert.equal((await practice.session(other)).balance, '1000');
- const input = { amount: '1000', team: 'dogs', name: 'Practice human', requestId: randomUUID() };
+ const input = { amount: '1000', team: 'dogs', name: 'Practice human', url: 'https://example.com/my-profile', requestId: randomUUID() };
  const results = await Promise.all([practice.donate(token, input, 1000), practice.donate(token, input, 1000)]);
  assert.equal(results[0].paymentId, results[1].paymentId);
  assert.equal(results[0].wallet.balance, '0');
  await assert.rejects(practice.donate(token, { ...input, amount: '1', requestId: randomUUID() }, 1500), /Not enough/);
  await assert.rejects(practice.donate(token, { ...input, team: 'kids' }, 1500), /different details/);
  const after = await practice.state(2000, token);
+ assert.equal(after.teams.find(t => t.id === 'dogs').topDonors[0].amount, '1000');
+ assert.equal(after.teams.find(t => t.id === 'kids').topDonors.length, 0);
+ assert.equal(after.teams.find(t => t.id === 'dogs').topDonors[0].url, input.url);
  assert.equal(after.community, '1000'); assert.equal(after.mode, 'practice'); assert.equal(after.currency, 'FUSD');
  assert.equal(after.round.endsAt, 601000); assert.equal(after.wallet.balance, '0');
  assert.equal(after.payment.recipient, ''); assert.equal(after.receipts.length, 0);
@@ -41,9 +44,60 @@ test('practice persists separately, spends atomically, deduplicates retries and 
  assert.equal((await practice.state(602000)).round, null);
  const restored = new PracticeStore(practiceSpace.afs, pc); await restored.init();
  assert.equal((await restored.state(602000, token)).history[0].amount, '1000');
+ assert.equal((await restored.state(602000, token)).teams.find(t => t.id === 'dogs').topDonors[0].url, input.url);
  assert.equal((await restored.refill(token)).balance, '1000');
- await assert.rejects(restored.refill(token), /remaining/);
+ await assert.rejects(restored.refill(token), /Already printed/);
  assert.deepEqual((await real.read()).state, before);
  assert.equal(unavailableRealState(config).community, '0');
  assert.equal(unavailableRealState(config).campaign.accepting, false);
+});
+
+test('switching teams affects only the new donation and live leader, never past attribution or closed rounds', async t => {
+ const root=await mkdtemp(join(tmpdir(),'fomo-teams-'));
+ const config=configuration({FOMO_MODE:'preview',FOMO_SPACE_ROOT:join(root,'real')});
+ const pc=practiceConfiguration(config,{FOMO_PRACTICE_SPACE_ROOT:join(root,'practice')});
+ const space=await openSpace(pc);t.after(async()=>{await space.close();await rm(root,{recursive:true,force:true});});
+ const store=new PracticeStore(space.afs,pc);await store.init();const token='c'.repeat(64);await store.session(token);
+ const play=(team,amount,now)=>store.donate(token,{team,amount,requestId:randomUUID(),name:'Team hopper'},now);
+ await play('dogs','5',1000);await play('trees','10',2000);
+ const live=await store.state(3000,token);
+ assert.equal(live.round.team,'trees');assert.equal(live.round.amount,'15');
+ assert.equal(live.teams.find(t=>t.id==='dogs').topDonors[0].amount,'5');
+ assert.equal(live.teams.find(t=>t.id==='trees').topDonors[0].amount,'10');
+ await store.state(602001,token);
+ await play('water','1',603000);
+ const after=await store.state(604000,token);
+ assert.equal(after.history[0].team,'trees');assert.equal(after.history[0].amount,'15');
+ assert.equal(after.teams.find(t=>t.id==='trees').allocated,'15');
+ assert.equal(after.round.team,'water');assert.equal(after.round.amount,'1');
+ assert.equal(after.teams.find(t=>t.id==='dogs').topDonors[0].amount,'5');
+});
+
+test('FUSD balance conserves fractional leftovers across refills and reconciles pools, rankings and history', async t => {
+ const root=await mkdtemp(join(tmpdir(),'fomo-reconcile-'));const config=configuration({FOMO_MODE:'preview',FOMO_SPACE_ROOT:join(root,'real')});const pc=practiceConfiguration(config,{FOMO_PRACTICE_SPACE_ROOT:join(root,'practice')});const space=await openSpace(pc);t.after(async()=>{await space.close();await rm(root,{recursive:true,force:true});});
+ const store=new PracticeStore(space.afs,pc);await store.init();const token='d'.repeat(64);await store.session(token);
+ const play=(team,amount,now)=>store.donate(token,{team,amount,requestId:randomUUID()},now);
+ await play('dogs','999.50',1000);assert.equal((await store.refill(token)).balance,'1000.5');
+ await store.state(601001,token);await play('trees','1.25',602000);
+ const s=await store.state(603000,token);
+ assert.equal(s.wallet.balance,'999.25');assert.equal(s.wallet.allTimeDonated,'1000.75');assert.equal(s.community,'1000.75');assert.equal(s.topDonors[0].amount,s.community);
+ assert.equal(s.round.amount,'1.25');assert.equal(s.roundDonors[0].amount,'1.25');assert.equal(s.wallet.roundDonated,'1.25');
+ assert.equal(s.history[0].amount,'999.5');assert.equal(s.teams.find(t=>t.id==='dogs').allocated,'999.5');
+ assert.equal(Number(s.community),s.teams.reduce((n,t)=>n+Number(t.allocated),0)+Number(s.round.amount));
+ assert.equal(Number(s.wallet.balance)+Number(s.wallet.allTimeDonated),s.wallet.grants*1000);
+});
+
+test('one print per round is atomic, accumulates without spending down, and agents have a hard shared budget', async t => {
+ const root=await mkdtemp(join(tmpdir(),'fomo-agents-'));const config=configuration({FOMO_MODE:'preview',FOMO_SPACE_ROOT:join(root,'real')});const pc=practiceConfiguration(config,{FOMO_PRACTICE_SPACE_ROOT:join(root,'practice')});const space=await openSpace(pc);t.after(async()=>{await space.close();await rm(root,{recursive:true,force:true});});
+ const store=new PracticeStore(space.afs,pc);await store.init();const token='e'.repeat(64);await store.session(token,0);
+ await assert.rejects(store.refill(token,1),/Already printed/);
+ await store.donate(token,{team:'dogs',amount:'1',requestId:randomUUID()},1000);
+ for(let i=0;i<12;i++)await store.agentTick(40000+i*90000,()=>0.99);
+ const ledger=(await store.read()).state;const bots=ledger.payments.filter(p=>p.from.startsWith('practice-agent-'));
+ assert.equal(bots.length,4);assert.equal(bots.reduce((n,p)=>n+Number(p.amount),0),8);assert.ok(bots.every(p=>p.name.startsWith('🤖 ')));
+ assert.equal(ledger.round,null); // no bots endlessly restart expired rounds
+ const claims=await Promise.allSettled([store.refill(token,1500000),store.refill(token,1500000)]);
+ assert.equal(claims.filter(x=>x.status==='fulfilled').length,1);
+ const state=await store.state(1500000,token);assert.equal(state.wallet.balance,'1999');assert.equal(state.wallet.canRefill,false);
+ assert.equal(state.community,'9');assert.equal(state.teams.reduce((n,x)=>n+Number(x.allocated),0),9);
 });

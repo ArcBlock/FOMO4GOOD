@@ -102,10 +102,17 @@ export class FomoCampaign {
 				const response = await this.handleAfs(request);
 				// Practice expiry must not depend on a browser staying open.
 				const { state } = await this.practice.read();
+                // Recover delayed local/runtime alarms without making provider reads mutate.
+                // Queue background settlement after this serialized request finishes.
+                const agents = state.practiceAgents;
+                const agentsDue = state.round && agents && agents.nextAt <= Date.now() && Date.now() - agents.lastHumanAt <= 1800000 && (agents.roundId !== state.round.id || (agents.plays < 4 && agents.spent < 8));
+                if (state.round && (state.round.endsAt <= Date.now() || agentsDue))
+                    this.ctx.waitUntil(this.alarm());
 				if (state.round) {
-					const next = this.watcher
+					const agentAt = await this.practice.nextAgentAt();
+                    const next = Math.min(agentAt || Infinity, this.watcher
 						? Math.min(Date.now() + 2000, state.round.endsAt)
-						: state.round.endsAt;
+						: state.round.endsAt);
 					const current = await this.ctx.storage.getAlarm();
 					if (current === null || next < current)
 						await this.ctx.storage.setAlarm(next);
@@ -130,12 +137,13 @@ export class FomoCampaign {
 			await this.init();
 			try {
 				await this.watcher?.tick();
+				await this.practice.agentTick();
 				await this.practice.state();
 			} finally {
 				const { state } = await this.practice.read();
 				if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);
 				else if (state.round)
-					await this.ctx.storage.setAlarm(state.round.endsAt);
+					await this.ctx.storage.setAlarm(Math.min(state.round.endsAt, (await this.practice.nextAgentAt()) || Infinity));
 			}
 		});
 	}

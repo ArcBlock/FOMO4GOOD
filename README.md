@@ -33,8 +33,8 @@ The first matched donation starts a round. An empty pool does not award itself a
 
 |  | What it does |
 | --- | --- |
-| **[ARC by ArcBlock](https://www.arcblock.io/en/arc/)** | Blocklet/AUP interface and DID Space storage. |
-| **[Arc by Circle](https://arc.io/)** | The USDC payment network for the real campaign. |
+| **[ARC platform](https://www.arcblock.io/en/arc/)** | Blocklet/AUP interface and DID Space storage. |
+| **[Arc Network](https://arc.io/)** | The configured USDC payment network for the real campaign. |
 | **FOMO4GOOD** | Makes this naming situation everybody’s problem. |
 
 **[Confused? Working as intended.](https://www.arcblock.io/en/which-arc/)**
@@ -64,7 +64,7 @@ The first matched donation starts a round. An empty pool does not award itself a
 
 **Same FOMO. Fake money. Nobody gets hurt.**
 
-Permanent Practice lives at `/practice`. A browser identity starts with **1,000 FUSD**. Pick a team, spend imaginary money, reset the same ten-minute clock. Below 1 FUSD, print another 1,000 for free. Finally, a monetary policy that fits in one button.
+Permanent Practice lives at `/arc/practice`. A browser identity starts with **1,000 FUSD**. Pick a team, spend imaginary money, reset the same ten-minute clock. Below 1 FUSD, print another 1,000 for free. Finally, a monetary policy that fits in one button.
 
 | FUSD — Fake United States Dollar | Audited by absolutely nobody |
 | --- | --- |
@@ -94,7 +94,7 @@ No. We fix bugs. We do not ask you to believe harder. Tests pass; omniscience re
 The weird decimals identify a real payment intent. The extra fraction is less than a cent and is donated too. Old-school? Yes. Effective? Also yes. Keep the amount private; send exactly once before it expires. Practice FUSD does not need this ritual.
 
 **I sent 5,000 directly. Why didn’t I win?**<br>
-Because you donated. You didn’t play. Direct, expired or unmatched USDC on the watched Circle Arc network becomes a Rogue Donation for KIDS, on its own address-only board. It does not reset the clock.
+Because you donated. You didn’t play. Direct, expired or unmatched USDC on the watched Arc Network becomes a Rogue Donation for KIDS, on its own address-only board. It does not reset the clock.
 
 **Can I send from another chain?**<br>
 Other networks and tokens are outside this campaign and its guarantee. Recovery, refund and donation are not promised. “But it also says Arc” is not a bridging protocol.
@@ -118,10 +118,10 @@ npm run dev
 
 | Local page | Purpose |
 | --- | --- |
-| `http://fomo4good.localhost:4930/` | Real campaign entry; collection currently closed. |
-| `http://fomo4good.localhost:4930/practice/` | Permanent FUSD Practice Round. |
-| `/teams`, `/leaderboard`, `/rules` | Teams, records, rules and FAQ. |
-| `/practice/teams`, `/practice/leaderboard`, `/practice/rules` | Their very imaginary counterparts. |
+| `http://fomo4good.localhost:4930/arc/` | Real campaign entry; collection currently closed. |
+| `http://fomo4good.localhost:4930/arc/practice/` | Permanent FUSD Practice Round. |
+| `/arc/teams`, `/arc/leaderboard`, `/arc/rules` | Teams, records, rules and FAQ. |
+| `/arc/practice/teams`, `/arc/practice/leaderboard`, `/arc/practice/rules` | Their very imaginary counterparts. |
 
 Every page keeps a live countdown and participation link. Languages: **English**, **Traditional Chinese** (deliberately), and **🤖 AI Slop**. Your language choice follows you between pages. Translating FUSD does not turn it into real money.
 
@@ -172,6 +172,6 @@ npm run smoke   # Running local app required; creates one explicitly named FUSD-
 
 Code is [MIT licensed](LICENSE). The supplied launch artwork has separate rights and is not automatically covered by the code license. VT323 ships with its [OFL license](blocklets/fomo4good/content/media/VT323-LICENSE.txt). Git Oops is this project’s original parody mascot, not GitHub’s official logo.
 
-Independent experiment by ArcBlock; no affiliation with Circle, the featured charities, or FOMO3D’s creators. Donations are not investments and offer no financial return. Practice offers the same return with significantly less paperwork.
+FOMO4GOOD is an independent experiment organized by ArcBlock. References to Circle, Arc Network and the featured charities describe infrastructure, assets or intended donation recipients only. They do not create a partnership, sponsorship, endorsement, agency relationship or joint promotion. Their names and marks belong to their respective owners. FOMO4GOOD is also unaffiliated with FOMO3D’s creators. Donations are not investments and offer no financial return. Practice offers the same return with significantly less paperwork.
 
 [Cloudflare deployment](docs/cloudflare.md) — Worker topology, setup and current verification boundaries.

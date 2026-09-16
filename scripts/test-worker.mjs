@@ -59,6 +59,7 @@ try {
 		});
 		const result = await response.json();
 		assert.equal(response.status, 200, JSON.stringify(result));
+		assert.notEqual(result.success, false, JSON.stringify(result));
 		return result;
 	};
 	const token = "a".repeat(64),
@@ -117,10 +118,10 @@ try {
 			body: JSON.stringify(body),
 		});
 	assert.equal(
-		(await post("/api/practice/session", {}, "", "https://evil.test")).status,
+		(await post("/arc/api/practice/session", {}, "", "https://evil.test")).status,
 		403,
 	);
-	const session = await post("/api/practice/session", {});
+	const session = await post("/arc/api/practice/session", {});
 	assert.equal(session.status, 200);
 	const cookie = session.headers.get("set-cookie").split(";")[0];
 	assert.ok(session.headers.get("set-cookie").includes("HttpOnly"));
@@ -130,14 +131,14 @@ try {
 		requestId: crypto.randomUUID(),
 		token: "b".repeat(64),
 	};
-	const donated = await post("/api/practice/donate", gatewayInput, cookie);
+	const donated = await post("/arc/api/practice/donate", gatewayInput, cookie);
 	assert.equal((await donated.json()).wallet.balance, "995");
-	const state = await edge.fetch("https://game.test/api/practice/state", {
+	const state = await edge.fetch("https://game.test/arc/api/practice/state", {
 		headers: { Cookie: cookie },
 	});
 	assert.equal((await state.json()).wallet.balance, "995");
 	assert.equal(
-		(await post("/api/fomo/intents", { amount: "1", team: "dogs" }, cookie))
+		(await post("/arc/api/fomo/intents", { amount: "1", team: "dogs" }, cookie))
 			.status,
 		409,
 	);
@@ -145,6 +146,38 @@ try {
 	// Pages belong to ARC's native site, never to the API gateway.
 	for (const path of ["/", "/rules/", "/practice/rules/", "/arc/practice/rules", "/en/practice/rules/"])
 		assert.equal((await edge.fetch(`https://game.test${path}`)).status, 404);
+
+
+	// Multiple cookie identities share a campaign deadline, never a wallet.
+	const readPlayer = async (identity) => (await edge.fetch("https://game.test/arc/api/practice/state", { headers: { Cookie: identity } })).json();
+	const beforeJoin = await readPlayer(cookie);
+	const secondSession = await post("/arc/api/practice/session", {});
+	const secondCookie = secondSession.headers.get("set-cookie").split(";")[0];
+	const playerB = await secondSession.json();
+	assert.equal(playerB.balance, "1000");
+	assert.notEqual(secondCookie, cookie);
+	assert.equal((await readPlayer(secondCookie)).round.endsAt, beforeJoin.round.endsAt);
+	await new Promise(resolve => setTimeout(resolve, 30));
+	const secondInput = { amount: "2", team: "trees", name: "Second player", requestId: crypto.randomUUID() };
+	assert.equal((await post("/arc/api/practice/donate", secondInput, secondCookie)).status, 200);
+	const reset = await readPlayer(cookie);
+	assert.ok(reset.round.endsAt > beforeJoin.round.endsAt);
+	assert.ok(reset.round.endsAt - reset.now <= 600000 && reset.round.endsAt - reset.now > 590000);
+	assert.equal(reset.round.team, "trees");
+	assert.equal(reset.wallet.balance, "995");
+	assert.equal((await readPlayer(secondCookie)).wallet.balance, "998");
+	assert.equal((await post("/arc/api/practice/donate", secondInput, secondCookie)).status, 200);
+	assert.equal((await readPlayer(cookie)).round.endsAt, reset.round.endsAt);
+	await Promise.all([
+		post("/arc/api/practice/donate", { amount: "3", team: "water", requestId: crypto.randomUUID() }, cookie),
+		post("/arc/api/practice/donate", { amount: "4", team: "internet", requestId: crypto.randomUUID() }, secondCookie),
+	]);
+	const finalA = await readPlayer(cookie), finalB = await readPlayer(secondCookie);
+	assert.equal(finalA.round.endsAt, finalB.round.endsAt);
+	assert.equal(finalA.wallet.balance, "992");
+	assert.equal(finalB.wallet.balance, "994");
+	assert.equal(Number(finalA.community) - Number(beforeJoin.community), 9);
+	console.log("Multiple sessions: shared reset deadline, isolated balances, idempotent retries and concurrent donations passed.");
 
 	console.log(
 		"Gateway: service binding, origin/cookie identity, real-payment closure and API-only routing passed.",

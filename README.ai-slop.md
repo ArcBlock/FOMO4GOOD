@@ -37,7 +37,7 @@ The first matched donation starts a round. No donations, no round. We considered
 | Entity | Actual job | Unnecessary AI description |
 | --- | --- | --- |
 | **[ARC by ArcBlock](https://www.arcblock.io/en/arc/)** | Blocklet/AUP interface and DID Space storage. | The capitalization layer. |
-| **[Arc by Circle](https://arc.io/)** | USDC payment network for the real campaign. | The money transportation vertical. |
+| **[Arc Network](https://arc.io/)** | Configured USDC payment network for the real campaign. | The money transportation vertical. |
 | **FOMO4GOOD** | A charity countdown game. | A naming ambiguity monetization initiative. Except the money goes to charity. |
 
 **Built on ARC. Paid on Arc. [Confused? Working as intended.](https://www.arcblock.io/en/which-arc/)**
@@ -65,7 +65,7 @@ The first matched donation starts a round. No donations, no round. We considered
 
 ### PRACTICE ROUND — Fake USD. Real FOMO. Zero cash value.
 
-Permanent practice lives at `/practice`. Each browser identity receives **1,000 FUSD**. Pick a team, donate points, reset the same ten-minute clock. When your balance falls below 1 FUSD, refill another 1,000 for free.
+Permanent practice lives at `/arc/practice`. Each browser identity receives **1,000 FUSD**. Pick a team, donate points, reset the same ten-minute clock. When your balance falls below 1 FUSD, refill another 1,000 for free.
 
 The money printer has one button. The central bank has one employee. The employee is also the button.
 
@@ -97,7 +97,7 @@ Bugs are normal software failures, not an artistic exemption. We fix them. Tests
 The odd decimals identify your real payment intent. The extra fraction is less than a cent and is donated too. Keep the amount private and send the exact amount once before expiry. Practice does not need this ritual. The decimal places are doing more useful work than this paragraph.
 
 **I sent 5,000 directly. Why am I not the winner?**<br>
-You donated without playing. Direct, expired or unmatched USDC on the watched Circle Arc network becomes a Rogue Donation for KIDS, listed on a separate address-only board. It does not reset the timer. Your generosity has bypassed the gamification department.
+You donated without playing. Direct, expired or unmatched USDC on the watched Arc Network becomes a Rogue Donation for KIDS, listed on a separate address-only board. It does not reset the timer. Your generosity has bypassed the gamification department.
 
 **Can I send another token or use another chain?**<br>
 Other networks and tokens are outside the campaign and its guarantee. Recovery, refund and donation are not promised. “They both have a logo” is not a bridging protocol.
@@ -121,10 +121,10 @@ npm run dev
 
 | Local page | What manifests |
 | --- | --- |
-| `http://fomo4good.localhost:4930/` | Real campaign entry. Real collection currently closed. |
-| `http://fomo4good.localhost:4930/practice/` | Permanent FUSD Practice Round. Imaginary generosity is available now. |
-| `/teams`, `/leaderboard`, `/rules` | Teams, records, rules and FAQ. |
-| `/practice/teams`, `/practice/leaderboard`, `/practice/rules` | Independent practice versions. Same ego, separate data. |
+| `http://fomo4good.localhost:4930/arc/` | Real campaign entry. Real collection currently closed. |
+| `http://fomo4good.localhost:4930/arc/practice/` | Permanent FUSD Practice Round. Imaginary generosity is available now. |
+| `/arc/teams`, `/arc/leaderboard`, `/arc/rules` | Teams, records, rules and FAQ. |
+| `/arc/practice/teams`, `/arc/practice/leaderboard`, `/arc/practice/rules` | Independent practice versions. Same ego, separate data. |
 
 Every page keeps the live countdown and participation link. The UI supports **English**, **Traditional Chinese** (deliberately), and **AI Slop**. Language persists between pages. We spent a language slot on this. A human authorized it.
 
@@ -175,6 +175,6 @@ npm run smoke   # Requires the running local app; creates an explicitly named FU
 
 Code is [MIT licensed](LICENSE). The supplied launch artwork has separate rights and is not automatically covered by the code license. VT323 includes its [OFL license](blocklets/fomo4good/content/media/VT323-LICENSE.txt). Git Oops is this project's original parody mascot, not GitHub's official logo.
 
-Independent experiment by ArcBlock; no affiliation with Circle, the featured charities, or FOMO3D's creators. Donations are not investments and offer no financial return. Practice offers the same return with dramatically improved liquidity: there is nothing to withdraw.
+FOMO4GOOD is an independent experiment organized by ArcBlock. Mentions of Circle, Arc Network and the featured charities describe infrastructure, assets or intended donation recipients only. They do not create a partnership, sponsorship, endorsement, agency relationship or joint promotion. Their names and marks belong to their respective owners. FOMO4GOOD is also unaffiliated with FOMO3D's creators. Donations are not investments and offer no financial return. Practice offers the same return with dramatically improved liquidity: there is nothing to withdraw.
 
 [Put the nonsense in the cloud](docs/cloudflare.md) — Worker topology, setup and current verification boundaries.

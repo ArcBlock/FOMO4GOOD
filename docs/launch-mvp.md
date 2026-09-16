@@ -9,7 +9,7 @@
 - 5 队：KIDS / Save the Children；DOGS / Best Friends Animal Society；TREES / Rainforest Trust；WATER / charity: water；INTERNET / EFF。
 - 1 / 5 / 10 / 100 / 自定义金额；可选名字、URL。无钱包连接、签名、DID 登录、智能合约或自动慈善转账。
 - 生成六位精度的怪小数金额，额外小数少于一美分也计入捐款。intent 10 分钟有效，同一 campaign 内精确金额永不复用；过期或重复到账进入 Rogue。
-- 单收款钱包 watcher。只监控配置的 Circle Arc USDC。确认时间按链上时间，链上排序按 block / transaction / log；RPC 恢复时按游标补齐，再关回合。
+- 单收款钱包 watcher。只监控配置的 Arc Network USDC。确认时间按链上时间，链上排序按 block / transaction / log；RPC 恢复时按游标补齐，再关回合。
 - Rogue Donors 独立地址榜、不重置倒计时、不选队。本实现采用原讨论中的固定默认机构方案：KIDS。该规则在发送前的页面说明中公开。
 - 其他链/其他币不进入账本和保底，无恢复承诺。
 - 社区金额和 ArcBlock 对每家机构的 $100 保底分账；补差不入排行榜。campaign 有固定开始/结束时间，到结束强制关闭正在进行的回合。

@@ -38,7 +38,7 @@ gateway.name = `${prefix}-gateway`;
 gateway.account_id = provider.account_id;
 gateway.vars.FOMO_ORIGIN = origin;
 gateway.services[0].service = provider.name;
-gateway.routes = [{ pattern: `${host}/api/*`, zone_name: target === 'staging' ? 'afsd.io' : 'fomo4good.com' }];
+gateway.routes = [{ pattern: `${host}/arc/api/*`, zone_name: target === 'staging' ? 'afsd.io' : 'fomo4good.com' }];
 gateway.ratelimits[0].namespace_id = target === 'staging' ? '49311' : '49312';
 // Configs live beside their templates so relative bundle/migration paths stay correct.
 const providerPath = 'worker/.deploy-provider.json', gatewayPath = 'worker/.deploy-gateway.json';

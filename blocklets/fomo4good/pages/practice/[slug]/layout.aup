@@ -1,5 +1,0 @@
-page practice-view {
-  web-page root {
-    section game component=fomo-game view=$meta.view mode=practice teams=$source.teams
-  }
-}

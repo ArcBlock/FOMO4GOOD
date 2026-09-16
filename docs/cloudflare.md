@@ -14,7 +14,7 @@
 
 目前 Worker 仅允许 `practice` 或 `testnet`。**真钱收款仍关闭**；不能通过设置 `mainnet` 绕过验收。新云端 scope 不会自动导入本地账本。
 
-已合入原生 ARC 页面与集合绑定，Worker 不再改写页面 HTML。本轮保留整账本 CAS；账本集合化、公开状态快照／订阅是后续独立改动；`batchWrite` 不是多记录事务，不能直接用来拆开扣余额和回合更新。EVM provider 不推断各链终局性；Circle Arc 的原生 USDC emitter 解码留在支付适配层。
+已合入原生 ARC 页面与集合绑定，Worker 不再改写页面 HTML。本轮保留整账本 CAS；账本集合化、公开状态快照／订阅是后续独立改动；`batchWrite` 不是多记录事务，不能直接用来拆开扣余额和回合更新。EVM provider 不推断各链终局性；Arc Network 的原生 USDC emitter 解码留在支付适配层。
 
 ## 构建和验证
 
@@ -43,7 +43,7 @@ npm run test:worker
 3. 部署私有 provider Worker。保持 `workers_dev: false`、`preview_urls: false`，不给它配置公共 route。Service Binding 的调用权是其可信边界；不要把 `/afs/*` 直接转发给互联网。
 4. 在 `worker/gateway.wrangler.jsonc` 中设置 `FOMO_ORIGIN`、`FOMO_PROVIDER.service` 和实际 Cloudflare zone；route 只能是对应站点域名的 `/api/*`。不要绑定 `/*`，也不要用这个 Worker 接管 ARC 的页面域名。
 5. 设置原生 rate-limit namespace，部署公共 gateway。gateway 缺少 rate-limit binding 时拒绝写请求。
-6. 在实际域名验证三种语言、原生首页、rules、teams、leaderboard 及其 `/practice` 内页、Cookie、FUSD、两个池的隔离，以及关闭浏览器后回合能结算。再测试重启、RPC 暂时失败和重试去重。公网部署前不能以本地 Miniflare 通过代替验收。
+6. 在实际域名验证三种语言、`/arc/` 首页、rules、teams、leaderboard 及其 `/arc/practice` 内页、Cookie、FUSD、两个池的隔离，以及关闭浏览器后回合能结算。再测试重启、RPC 暂时失败和重试去重。公网部署前不能以本地 Miniflare 通过代替验收。
 
 示例命令（使用已配置的 Wrangler 身份与完成填值的配置）：
 
