@@ -58,12 +58,13 @@ export class FomoProvider extends AFSBaseProvider {
 	}
 	@Read("/real")
 	async real() {
-		const { config, store, unavailableRealState } = this.services;
-		return this.buildEntry("/real", {
-			content: config.acceptReal
-				? await store.state()
-				: unavailableRealState(config),
-		});
+		const { config, store, unavailableRealState, watcher } = this.services;
+		const content = config.acceptReal
+			? await store.state()
+			: unavailableRealState(config);
+		if (config.acceptReal && content.watcher && watcher?.lastError)
+			content.watcher = { ...content.watcher, error: watcher.lastError };
+		return this.buildEntry("/real", { content });
 	}
 	@Read("/practice")
 	async practice() {

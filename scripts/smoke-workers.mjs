@@ -14,7 +14,10 @@ for (let tries = 0; ; tries++) {
   } else if (realResponse.status !== 404 || tries >= 18) {
     assert.equal(realResponse.status, 200);
   }
-  assert.ok(tries < 18, `Timed out waiting for ${origin}/arc/api/fomo/state`);
+  assert.ok(
+    tries < 18,
+    `Timed out waiting for ${origin}/arc/api/fomo/state ${JSON.stringify(real?.watcher || real?.mode || realResponse.status)}`,
+  );
   await new Promise(r => setTimeout(r, 5000));
 }
 assert.ok(real);

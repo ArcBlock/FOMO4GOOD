@@ -1,6 +1,6 @@
 {
 	"recipient": "0xEd738956C3F0afc89044A99C8fB8EEDA352db353",
-	"rpcUrl": "https://rpc.testnet.arc.io",
+	"rpcUrl": "https://rpc.blockdaemon.testnet.arc.network",
 	"startBlock": 62384142,
 	"startsAt": "2026-09-16T00:00:00.000Z",
 	"endsAt": "2026-10-16T00:00:00.000Z",
