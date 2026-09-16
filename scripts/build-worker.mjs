@@ -6,6 +6,7 @@ const require = createRequire(
 );
 const { build } = require("esbuild");
 const aliases = {
+	"@aigne/afs-http": resolve(arcHome, "providers/basic/http/dist/index.mjs"),
 	"@aigne/afs-session": resolve(arcHome, "packages/session/dist/index.mjs"),
 	"@aigne/afs": resolve(arcHome, "packages/core/dist/index.mjs"),
 	"@aigne/afs-evm": resolve(arcHome, "providers/runtime/evm/dist/index.mjs"),
@@ -47,7 +48,7 @@ await build({
 				build.onResolve(
 					{
 						filter:
-							/^(@aigne\/afs(?:-session|-evm|-did-space\/cloudflare)?|ufo)$/,
+							/^(@aigne\/afs(?:-http|-session|-evm|-did-space\/cloudflare)?|ufo)$/,
 					},
 					(args) => (aliases[args.path] ? { path: aliases[args.path] } : null),
 				);

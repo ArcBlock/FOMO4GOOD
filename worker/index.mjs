@@ -1,3 +1,4 @@
+import { createAFSHttpHandler } from "@aigne/afs-http";
 import { AFS } from "@aigne/afs";
 import { AFSEVM } from "@aigne/afs-evm";
 import { CloudflareDIDSpace } from "@aigne/afs-did-space/cloudflare";
@@ -79,6 +80,11 @@ export class FomoCampaign {
 			watcher,
 			unavailableRealState,
 		});
+		this.handleAfs = createAFSHttpHandler({
+			module: this.provider,
+			protocol: "service-binding",
+			maxBodySize: 8192,
+		});
 		// DO storage is only the runtime alarm; balances and cursors are in DID Space.
 		if (watcher && (await this.ctx.storage.getAlarm()) === null)
 			await this.ctx.storage.setAlarm(Date.now() + 2000);
@@ -92,25 +98,8 @@ export class FomoCampaign {
 		return this.serialize(async () => {
 			try {
 				await this.init();
-				if (request.method !== "POST")
-					return new Response("Not found", { status: 404 });
-				const op = new URL(request.url).pathname;
-				if (
-					![
-						"/afs/read",
-						"/afs/list",
-						"/afs/stat",
-						"/afs/explain",
-						"/afs/exec",
-					].includes(op)
-				)
-					return new Response("Not found", { status: 404 });
-				const raw = await request.text();
-				if (raw.length > 8192)
-					return new Response("Too large", { status: 413 });
-				const input = JSON.parse(raw);
-				const method = op.slice(5);
-				const result = await this.provider[method](input.path, input.args);
+				// ARC owns parsing, dispatch, options, body limits and error serialization.
+				const response = await this.handleAfs(request);
 				// Practice expiry must not depend on a browser staying open.
 				const { state } = await this.practice.read();
 				if (state.round) {
@@ -121,7 +110,7 @@ export class FomoCampaign {
 					if (current === null || next < current)
 						await this.ctx.storage.setAlarm(next);
 				}
-				return Response.json(result);
+				return response;
 			} catch (e) {
 				return Response.json(
 					{

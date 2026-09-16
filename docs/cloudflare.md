@@ -3,7 +3,7 @@
 ## 边界
 
 - **ARC 通用 EVM provider**：位于兄弟 `arc` 仓库的 `providers/runtime/evm`，包名 `@aigne/afs-evm`。Node 与 Cloudflare 内置工厂均可配置 `evm` mount；不自动选择第三方 RPC。提供只读 RPC 白名单、chain ID 校验、精确原始数量、有限日志范围。OCAP 主网／测试网默认挂载不变。
-- **FOMO provider**：本仓 `providers/fomo4good/provider.ts`，负责公开状态与受控 Practice actions。使用 ARC `AFSBaseProvider`，独立部署为私有 Worker，通过现有 `ServiceBindingProxy` 消费。不提供任意账本写入、伪造链上事件或付款签名接口。
+- **FOMO provider**：本仓 `providers/fomo4good/provider.ts`，负责公开状态与受控 Practice actions。使用 ARC `AFSBaseProvider`，独立部署为私有 Worker，通过现有 `ServiceBindingProxy` 消费。服务端复用 ARC `createAFSHttpHandler({ protocol: "service-binding" })`，不在游戏内实现 AFS 协议。不提供任意账本写入、伪造链上事件或付款签名接口。
 - **公共网关**：`worker/gateway.mjs`，维持现有 `/arc` 和 `/api` URL、Origin 检查、HttpOnly Cookie 及原生 CF rate limit。页面经 `ARC_SITE` Service Binding 交给承载本 Blocklet 的 ARC Worker；业务经 `FOMO_PROVIDER` Service Binding 交给私有 Worker。
 - **游戏执行**：每个 campaign 固定一个 Durable Object，串行初始化及业务请求。alarms 负责离线结算 Practice 回合及推进测试网 watcher；重复执行由持久化游标、交易 ID、请求 ID 与 CAS 去重。alarm 可能延迟，判定使用原定回合时间和链上事件时间，不使用 alarm 到达时间。测试网 watcher 每两秒重新排期，有运行成本，停用时切回 practice 配置。
 - **业务存储**：只调用官方 `CloudflareDIDSpace`，其云端后端是 R2 + D1。应用没有自建 SQL 表，也不把余额／账本／游标放进 DO storage；DO storage 只保存运行时 alarm。真实与 Practice 使用不同 instance DID。
@@ -56,3 +56,21 @@ wrangler deploy --config worker/gateway.wrangler.jsonc
 本地实时预览仍可用 `npm run dev`，不依赖已发布的 Cloudflare Worker。它在测试网模式下也改经 ARC EVM provider 读取链。
 
 参考：[Ethereum JSON-RPC](https://ethereum.org/developers/docs/apis/json-rpc/)、[Cloudflare alarms](https://developers.cloudflare.com/durable-objects/api/alarms/)。
+
+## 可复用的外部 provider 模式
+
+ARC 已有 cost、Slack、X 的独立 Worker／DO 实践。本项目沿用其 Service Binding 连接方式，
+不是创建另一套插件协议。职责边界：
+
+| 能力 | 所属层 |
+|---|---|
+| AFS 路由、actions、metadata、错误和参数协议 | ARC `AFSBaseProvider` + HTTP handler |
+| Worker 间调用 | ARC `ServiceBindingProxy` |
+| 持久化、CAS、R2／D1 适配与迁移 | ARC DID Space SDK |
+| Ethereum／EVM 只读访问 | ARC EVM provider |
+| 回合、FUSD、捐赠归属、去重、链事件解释 | FOMO provider |
+| 单活动串行执行、秒级唤醒 | Cloudflare DO／alarm 的薄部署适配 |
+
+公共 gateway 的旧 URL、匿名 Cookie 和 HTML 改写是当前站点兼容层，不是外部 provider 标准。
+未来接入应优先复用 ARC 的认证、站点路由与 AUP 数据绑定；此版本没有宣称已完成这些迁移。
+不要从这层复制出另一套 IAM、存储、RPC 或页面框架。通用缺口补在 ARC，游戏只消费。
