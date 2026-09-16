@@ -1709,3 +1709,27 @@ body {
 	font: 700 10px/1 system-ui, sans-serif;
 	text-decoration: none;
 }
+
+/* Live-review pass: keep the joke, shorten the path to actually playing. */
+.fomo:not([data-hydrated]) .f-game-grid { opacity: .62; }
+.f-funds-promise { padding: 22px 32px; border-bottom: 1px solid #4f6f68; background: #132522; }
+.f-funds-promise strong { display: block; color: var(--mint); font-size: 18px; }
+.f-funds-promise p { margin: 10px 0; color: var(--muted); line-height: 1.55; }
+.f-funds-promise a { color: var(--mint); text-decoration: underline; text-underline-offset: 4px; }
+.f-amount-feedback { min-height: 1.5em; margin: -14px 0 20px; color: #ffe374; font-weight: 700; }
+.f-team-card .f-team-play { display: inline-flex; margin: 18px 0 4px; padding: 11px 14px; border: 1px solid var(--mint); background: var(--mint); color: #151827; font-weight: 800; text-decoration: none; }
+.f-team-card .f-team-play:hover { color: #151827; transform: translateY(-1px); }
+.f-arc-pair small { white-space: normal; line-height: 1.25; max-width: 190px; }
+#donate, #round-history, #serious { scroll-margin-top: 120px; }
+.fomo[data-mode="practice"] .f-legal [data-practice-only] { color: #f2c5ff; }
+@media (max-width: 800px) {
+	.f-livebar [data-live-status] { display: inline; flex: 1 1 100%; order: 4; color: var(--mint); }
+}
+@media (max-width: 650px) {
+	.f-intro { padding: 18px 0 24px; }
+	.f-intro h1 { margin-bottom: 10px; }
+	.f-mascot { height: 210px; }
+	.f-game-grid .f-donate { order: -1; }
+	.f-funds-promise { padding: 20px 18px; }
+	.f-livebar a { margin-left: 0; }
+}
