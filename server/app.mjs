@@ -35,23 +35,18 @@ export function createApp(config, store, watcher, practice) {
 				return send(res, 400, { error: "Invalid path." });
 			const url = new URL(req.url, config.origin),
 				path = url.pathname;
-			const pageMatch = path.match(/^\/arc(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/);
-			const pageView = pageMatch ? (pageMatch[2] || "play") : null;
-			const pageMode = pageMatch?.[1] ? "practice" : "real";
-			const pageBase = pageMode === "practice" ? "/arc/practice" : "/arc";
-			const pagePath = pageView === "play" ? pageBase : `${pageBase}/${pageView}`;
-			if (path === "/") {
-				res.writeHead(302, { Location: "/arc" });
-				res.end();
-				return;
-			}
+			// The eight campaign pages are real ARC pages (`blocklets/fomo4good/pages`);
+			// this service only passes them through so the API stays same-origin.
+			const pageMatch = path.match(/^(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/);
+			const pageParts = pageMatch ? [pageMatch[1], pageMatch[2]].filter(Boolean) : null;
+			const pagePath = pageParts ? `/${pageParts.map((p) => `${p}/`).join("")}` : null;
 			if (!path.startsWith("/api/fomo/") && !path.startsWith("/api/practice/")) {
 				if (
 					!["GET", "HEAD"].includes(req.method) ||
 					!(
 						!!pageMatch ||
 						/^\/(?:_arc\/assets\/|media\/)/.test(path) ||
-						/^\/aup(?:-core|-app|-ssr|-inspect-bridge)?\.[a-z0-9]+\.(?:js|css)$/.test(
+						/^\/aup(?:-core|-app|-ssr|-fallback|-inspect-bridge)?\.[a-z0-9]+\.(?:js|css)$/.test(
 							path,
 						) ||
 						/^\/(?:favicon.ico|logo.svg)$/.test(path)
@@ -59,7 +54,8 @@ export function createApp(config, store, watcher, practice) {
 				)
 					return send(res, 404, { error: "Not found." });
 				const upstream = new URL(config.arcUrl);
-				upstream.pathname = !!pageMatch ? "/en/" : path;
+				// Pages live under ARC's locale prefix; the trailing slash is their canonical form.
+				upstream.pathname = pagePath ? `/en${pagePath}` : path;
 				upstream.search = url.search;
 				// node:fetch may discard an overridden Host header. ARC selects the site by Host.
 				const response = await new Promise((resolve, reject) => {
@@ -114,19 +110,18 @@ export function createApp(config, store, watcher, practice) {
 					content = Buffer.from(
 						content
 							.toString()
-							.replace(/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-view=)"play"/, `$1"${pageView}"`)
-							.replace(/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-mode=)"real"/, `$1"${pageMode}"`)
-							.replace(`data-nav="${pageView}"`, `data-nav="${pageView}" aria-current="page"`)
 							.replace(
 								/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
 								"",
 							)
+							// Absolute self-links (canonical, og:url) name the SEO host baked at
+							// pre-render (sites.domains[0]) or the dev host; this origin serves them.
 							.replace(
-								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/en\//g,
-								config.origin + pagePath,
+								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/en\//g,
+								config.origin + "/",
 							)
 							.replace(
-								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/media\//g,
+								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/media\//g,
 								config.origin + "/media/",
 							),
 					);

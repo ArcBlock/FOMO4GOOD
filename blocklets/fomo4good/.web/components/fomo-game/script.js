@@ -310,6 +310,8 @@
     "Worth approximately $0.00.": "價值約為 $0.00。",
     "PRINT ANOTHER 1,000 FUSD": "再印 1,000 FUSD",
     "REAL DONATIONS ARE NOT OPEN YET.": "真實捐款尚未開放。",
+    "PRACTICE ROUND IS NOT OPEN YET.": "演練回合尚未開放。",
+    "The campaign service is not connected. Pages only, for now.": "活動服務尚未連線。目前只有頁面。",
     "No receiving address is active. Practice is open; real giving comes next.": "目前沒有啟用的收款地址。先來演練，真實捐款稍後開放。",
     "TRY PRACTICE ROUND ↗": "進入演練回合 ↗",
     "PRACTICE ROUND": "演練回合",
@@ -453,7 +455,7 @@
 	if (!root || root.dataset.ready) return;
 	const legacyPage = { "#rules": "rules", "#faq": "rules", "#teams": "teams", "#donors": "leaderboard" }[location.hash];
 	if (root.dataset.view === "play" && legacyPage) {
-		location.replace(`/arc${root.dataset.mode === "practice" ? "/practice" : ""}/${legacyPage}${location.search}${location.hash}`);
+		location.replace(`${root.dataset.mode === "practice" ? "/practice" : ""}/${legacyPage}${location.search}${location.hash}`);
 		return;
 	}
 
@@ -492,9 +494,11 @@
 		for (const [node, source, original] of fixedText) if (node.isConnected) node.textContent = original.replace(source, t(source));
 		for (const [node, attribute, source] of fixedAttributes) node.setAttribute(attribute, t(source));
 		root.querySelector("[data-language]").value = locale;
-		for (const link of root.querySelectorAll('a[href^="/arc"]')) {
+		// Campaign links are root-relative; in practice mode they point at the
+		// practice twin of the same page unless they deliberately switch world.
+		for (const link of root.querySelectorAll('a[href^="/"]:not([href^="//"])')) {
 			const url = new URL(link.getAttribute("href"), location.origin);
-			if (practiceMode && !link.hasAttribute("data-world") && !url.pathname.startsWith("/arc/practice")) url.pathname = url.pathname.replace(/^\/arc/, "/arc/practice");
+			if (practiceMode && !link.hasAttribute("data-world") && !/^\/practice(\/|$)/.test(url.pathname)) url.pathname = `/practice${url.pathname === "/" ? "" : url.pathname}`;
 			url.searchParams.set("lang", locale);
 			link.setAttribute("href", url.pathname + url.search + url.hash);
 		}
@@ -526,7 +530,36 @@
 		syncing = false,
 		lastSync = 0,
 		offset = 0,
-		board = "all";
+		board = "all",
+		// True once the campaign API answered 404: the Blocklet is serving pages
+		// on its own (no campaign service yet), so render a static campaign from
+		// the teams the page shipped and stop treating silence as an outage.
+		offline = false,
+		lastProbe = 0;
+	let embeddedTeams = [];
+	try {
+		embeddedTeams = JSON.parse(root.querySelector("[data-team-records]")?.textContent || "[]");
+	} catch {}
+	const offlineState = () => ({
+		now: Date.now(),
+		mode: "unavailable",
+		currency,
+		round: null,
+		teams: embeddedTeams.map((t) => ({ ...t, allocated: "0", topUp: practiceMode ? "0" : "100", wins: 0 })),
+		community: "0",
+		rogueTotal: "0",
+		topDonors: [],
+		roundDonors: [],
+		rogueDonors: [],
+		recent: [],
+		history: [],
+		receipts: [],
+		wallet: null,
+		watcher: { block: null, chainTime: 0, stale: false },
+		campaign: { startsAt: 0, endsAt: 0, ended: false, accepting: false, permanent: practiceMode },
+		metrics: { visits: 0, intents: 0, paidIntents: 0, donors: 0, repeatDonors: 0, rogueTransfers: 0, rogueDonors: 0, intentConversion: 0, median: "0", lastMinuteMoves: 0 },
+		payment: { recipient: "", networkName: practiceMode ? "OFFCHAIN PRACTICE" : "REAL DONATIONS NOT OPEN", chainId: null, explorer: "" },
+	});
 	const key = "fomo4good.intent.v2";
 	try {
 		const id = localStorage.getItem(key);
@@ -550,6 +583,11 @@
 				: { cache: "no-store" }),
 			signal: AbortSignal.timeout(12000),
 		});
+		if (response.status === 404 || response.status === 405) {
+			const error = new Error(t("The campaign service is not connected. Pages only, for now."));
+			error.offline = true;
+			throw error;
+		}
 		const data = await response.json();
 		if (!response.ok) throw new Error(t(data.error || "Please try again."));
 		return data;
@@ -600,7 +638,7 @@
 						: remaining <= 60
 							? t("ONE MINUTE. NO PRESSURE.")
 							: t("TIME UNTIL SOMEONE GETS NOTHING");
-		const stale = Date.now() - lastSync > 15000 || state.watcher.stale;
+		const stale = !offline && (Date.now() - lastSync > 15000 || state.watcher.stale);
 		$("live-round").textContent = $("round-label").textContent;
 		$("live-timer").textContent = $("timer").textContent;
 		$("live-pool").textContent = `${money(r?.amount || "0")} ${currency}`;
@@ -629,7 +667,7 @@
 	function render() {
 		$("notice").classList.remove("error");
 		$("notice").textContent =
-			practiceMode ? t("PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO") : state.mode === "unavailable" ? t("REAL DONATIONS ARE NOT OPEN YET.") : state.mode === "preview"
+			practiceMode ? t(offline ? "PRACTICE ROUND IS NOT OPEN YET." : "PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO") : state.mode === "unavailable" ? t("REAL DONATIONS ARE NOT OPEN YET.") : state.mode === "preview"
 				? t("LOCAL PREVIEW · SIMULATED USDC · NO REAL DONATIONS")
 				: t("CIRCLE ARC TESTNET · TEST USDC ONLY · NO REAL DONATIONS");
 		$("sim-label").textContent =
@@ -687,12 +725,13 @@
   $("unavailable").hidden = practiceMode || state.campaign.accepting !== false;
   if (!practiceMode && state.campaign.accepting === false) { $("form").hidden = true; $("payment").hidden = true; pending = null; }
   if (practiceMode) {
-   $("balance").textContent = `${money(state.wallet?.balance)} FUSD`;
+   $("balance").textContent = `${state.wallet ? money(state.wallet.balance) : "—"} FUSD`;
    $("refill").disabled = busy || !state.wallet || Number(state.wallet.balance) >= 1;
+   if (offline) $("wallet-feedback").textContent = t("The campaign service is not connected. Pages only, for now.");
    $("practice-history").innerHTML = $("history").innerHTML;
    const last = state.history[0];
    $("practice-result").hidden = !last;
-   if (last) $("practice-result").innerHTML = `<h2>${last.lastDonor.address === state.wallet?.id ? t("YOU WON!") : esc(t("{team} WIN!", { team: t(team(last.team)?.team) }))}</h2><p>${t("{amount} FUSD of completely imaginary money. The charity receives exactly none of this.", { amount: money(last.amount) })}</p><p>${t("Want to try with $1 that actually exists?")}</p><a href="/arc?lang=${locale}#play">${t("PLAY FOR REAL — 1 USDC ↗")}</a>`;
+   if (last) $("practice-result").innerHTML = `<h2>${last.lastDonor.address === state.wallet?.id ? t("YOU WON!") : esc(t("{team} WIN!", { team: t(team(last.team)?.team) }))}</h2><p>${t("{amount} FUSD of completely imaginary money. The charity receives exactly none of this.", { amount: money(last.amount) })}</p><p>${t("Want to try with $1 that actually exists?")}</p><a href="/?lang=${locale}#play">${t("PLAY FOR REAL — 1 USDC ↗")}</a>`;
   }
 		const m = state.metrics;
 		$("research").innerHTML =
@@ -745,8 +784,11 @@
 	let practiceSessionReady = false;
 	async function sync() {
 		if (syncing) return;
+		// Pages-only deployment: keep the static campaign, re-probe once a minute.
+		if (offline && Date.now() - lastProbe < 60000) return;
 		syncing = true;
 		try {
+			lastProbe = Date.now();
 			if (practiceMode && !practiceSessionReady) { await api("session", {}); practiceSessionReady = true; }
 			const start = Date.now();
 			state = await api("state");
@@ -761,6 +803,7 @@
 
 			offset = state.now - (start + Date.now()) / 2;
 			lastSync = Date.now();
+			offline = false;
 			render();
 			if (!practiceMode && pending && state.campaign.accepting !== false) {
 				try {
@@ -772,8 +815,16 @@
 				}
 			}
 		} catch (e) {
-			$("notice").textContent = t("CAN’T REACH THE CAMPAIGN · Reconnecting…");
-			$("notice").classList.add("error");
+			if (e.offline) {
+				offline = true;
+				state = offlineState();
+				offset = 0;
+				lastSync = Date.now();
+				render();
+			} else {
+				$("notice").textContent = t("CAN’T REACH THE CAMPAIGN · Reconnecting…");
+				$("notice").classList.add("error");
+			}
 		} finally {
 			syncing = false;
 			tick();

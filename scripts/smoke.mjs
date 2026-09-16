@@ -27,15 +27,12 @@ assert.equal(
 	"unavailable",
 	"Smoke must never spend real funds.",
 );
-const redirect = await api("/");
-assert.equal(redirect.status, 302);
-assert.equal(redirect.headers.get("location"), "/arc");
-const html = await (await api("/arc")).text();
+const html = await (await api("/")).text();
 assert.match(html, /data-fomo/);
 assert.match(html, /MAKE CRYPTO/);
 for (const page of ["rules", "teams", "leaderboard", "practice", "practice/rules", "practice/teams", "practice/leaderboard"]) {
  const view = page === "practice" ? "play" : page.split("/").pop();
- const response = await api(`/arc/${page}`);
+ const response = await api(`/${page}`);
  assert.equal(response.status, 200);
  const body = await response.text();
  const dom = new JSDOM(body);
@@ -52,13 +49,14 @@ for (const page of ["rules", "teams", "leaderboard", "practice", "practice/rules
  dom.window.close();
  assert.ok(body.includes(`data-nav="${view}" aria-current="page"`));
  assert.ok(body.includes('data-live-timer'));
- assert.ok(body.includes('href="/arc#play"'));
- assert.ok(body.includes(`rel="canonical" href="${origin}/arc/${page}"`));
- assert.equal((await api(`/arc/${page}/`)).status, 200);
+ assert.ok(body.includes('href="/#play"'));
+ assert.ok(body.includes(`rel="canonical" href="${origin}/${page}/"`));
+ assert.equal((await api(`/${page}/`)).status, 200);
 }
-assert.equal((await api('/arc/unknown')).status, 404);
+assert.equal((await api('/unknown')).status, 404);
+assert.equal((await api('/arc')).status, 404, 'the old /arc prefix is gone');
 
-assert.ok(html.includes(`rel="canonical" href="${origin}/arc"`));
+assert.ok(html.includes(`rel="canonical" href="${origin}/"`));
 for (const match of html.matchAll(
 	/(?:src|href)="(\/(?:_arc\/assets\/|aup[^"\s]*\.(?:css|js)|media\/)[^"]*)"/g,
 )) {

@@ -4,7 +4,7 @@
 
 ## 固定范围
 
-- `/arc` 为本次 campaign；`/` 跳转。首笔有效捐款才开始回合。
+- 站点根 `/` 即本次 campaign（原定 `/arc` 前缀在 ARC 上取消：站点已有自己的域名，前缀只会让 ARC 的预渲染失效）。首笔有效捐款才开始回合。
 - 每笔有效捐款把倒计时重置为 10:00；不是累计加时。到零时，最后捐款人选定的慈善机构获得该回合全部金额；捐款人没有奖金。
 - 5 队：KIDS / Save the Children；DOGS / Best Friends Animal Society；TREES / Rainforest Trust；WATER / charity: water；INTERNET / EFF。
 - 1 / 5 / 10 / 100 / 自定义金额；可选名字、URL。无钱包连接、签名、DID 登录、智能合约或自动慈善转账。

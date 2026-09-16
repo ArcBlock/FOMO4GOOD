@@ -1,0 +1,10 @@
+# The practice world's sub-pages (/practice/{teams,leaderboard,rules}). Each
+# record is one view of the same campaign component; `pages/practice/[slug]`
+# renders it and inherits `pages/practice/sources/teams`.
+contentType: practice
+required: [title, view]
+fields:
+  title: { type: string, required: true }
+  description: { type: string }
+  view: { type: string, required: true }
+order: { type: number }

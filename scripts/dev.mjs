@@ -1,12 +1,17 @@
-import { spawn, spawnSync } from "node:child_process";
+// Local dev = the Blocklet served by a dedicated ARC instance. Nothing else:
+// the pages are real ARC web-device pages now, so there is no proxy to run.
+// The campaign service (`npm start`) is separate and optional until it moves
+// onto ARC; without it the pages render in their "not open yet" state.
+import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
-import { cli, sdk, requireRuntime } from "./runtime.mjs";
+import { cli, requireRuntime } from "./runtime.mjs";
 requireRuntime();
-const port = Number(process.env.ARC_PORT || 4930),
+const instance = "fomo4good-local",
+	port = Number(process.env.ARC_PORT || 4930),
 	blocklet = resolve("blocklets/fomo4good");
 const statusResult = spawnSync(
 	process.execPath,
-	[cli, "service", "status", "--instance", "fomo4good-local", "--json"],
+	[cli, "service", "status", "--instance", instance, "--json"],
 	{ encoding: "utf8" },
 );
 let status;
@@ -17,7 +22,7 @@ try {
 if (status?.status === "up") {
 	if (status.port !== port || !status.blocklets?.includes(blocklet))
 		throw new Error(
-			"The fomo4good-local ARC instance belongs to another source directory or port. Stop that specific instance before starting this checkout.",
+			`The ${instance} ARC instance belongs to another source directory or port. Stop that specific instance before starting this checkout.`,
 		);
 	console.log(`Using existing ARC instance at ${status.url}`);
 } else {
@@ -28,7 +33,7 @@ if (status?.status === "up") {
 			"service",
 			"start",
 			"--instance",
-			"fomo4good-local",
+			instance,
 			"--home",
 			resolve("var/arc"),
 			"--blocklet",
@@ -40,21 +45,10 @@ if (status?.status === "up") {
 	);
 	if (started.status !== 0) process.exit(started.status || 1);
 }
-const server = spawn(process.execPath, ["--watch", "server/index.mjs"], {
-	stdio: "inherit",
-	env: {
-		...process.env,
-		FOMO_MODE: "preview",
-		ARC_DID_SPACE_MODULE: sdk,
-		FOMO_ARC_URL: `http://127.0.0.1:${port}`,
-	},
-});
-for (const signal of ["SIGINT", "SIGTERM"])
-	process.on(signal, () => server.kill(signal));
-server.on("error", (e) => {
-	console.error(e.message);
-	process.exitCode = 1;
-});
-server.on("exit", (exit) => {
-	process.exitCode = exit || 0;
-});
+console.log(`
+FOMO4GOOD pages:
+  http://fomo4good.localhost:${port}/            real campaign
+  http://fomo4good.localhost:${port}/practice/   FUSD practice
+Edit blocklets/fomo4good and reload. Stop with:
+  node ${cli} service stop --instance ${instance}
+`);

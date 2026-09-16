@@ -65,7 +65,7 @@ The first matched donation starts a round. No donations, no round. We considered
 
 ### PRACTICE ROUND — Fake USD. Real FOMO. Zero cash value.
 
-Permanent practice lives at `/arc/practice`. Each browser identity receives **1,000 FUSD**. Pick a team, donate points, reset the same ten-minute clock. When your balance falls below 1 FUSD, refill another 1,000 for free.
+Permanent practice lives at `/practice`. Each browser identity receives **1,000 FUSD**. Pick a team, donate points, reset the same ten-minute clock. When your balance falls below 1 FUSD, refill another 1,000 for free.
 
 The money printer has one button. The central bank has one employee. The employee is also the button.
 
@@ -121,17 +121,23 @@ npm run dev
 
 | Local page | What manifests |
 | --- | --- |
-| `http://localhost:4931/arc` | Real campaign entry. Real collection currently closed. |
-| `http://localhost:4931/arc/practice` | Permanent FUSD Practice Round. Imaginary generosity is available now. |
-| `/arc/teams`, `/arc/leaderboard`, `/arc/rules` | Teams, records, rules and FAQ. |
-| `/arc/practice/teams`, `/arc/practice/leaderboard`, `/arc/practice/rules` | Independent practice versions. Same ego, separate data. |
+| `http://fomo4good.localhost:4930/` | Real campaign entry. Real collection currently closed. |
+| `http://fomo4good.localhost:4930/practice/` | Permanent FUSD Practice Round. Imaginary generosity is available now. |
+| `/teams`, `/leaderboard`, `/rules` | Teams, records, rules and FAQ. |
+| `/practice/teams`, `/practice/leaderboard`, `/practice/rules` | Independent practice versions. Same ego, separate data. |
 
 Every page keeps the live countdown and participation link. The UI supports **English**, **Traditional Chinese** (deliberately), and **AI Slop**. Language persists between pages. We spent a language slot on this. A human authorized it.
 
-`npm run dev` starts a dedicated ARC instance on **4930** and the companion app on **4931**. `Ctrl-C` stops the app. Stop the ARC instance separately:
+`npm run dev` serves the Blocklet from a dedicated ARC instance on **4930**. The pages are ARC web pages; no proxy stands in front of them, which is one fewer thing to hallucinate. Without the campaign service (`npm start`, still its own process) every page manifests in its "not open yet" state. Stop the instance when done:
 
 ```sh
 node ../arc/runtimes/node/dist/cli.mjs service stop --instance fomo4good-local
+```
+
+Publishing is one command against an ARC host. The Blocklet enters your DID Space and answers at `https://fomo4good.<host domain>/`. Deployment achieved; enlightenment sold separately:
+
+```sh
+arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token>
 ```
 
 ## Architecture, now with fewer hallucinations

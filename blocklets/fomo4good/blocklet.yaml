@@ -15,11 +15,42 @@ repository:
 keywords: [charity, donations, usdc]
 tags: [charity]
 surfaces: [/]
+# domains[0] is the SEO host: pre-render bakes it into canonical / og:url /
+# sitemap in EVERY environment (staging included — same as aside), so it is
+# the production domain. `arc deploy --server` registers every entry with the
+# target host first-come; a published copy also resolves by its id
+# (`fomo4good.<domain root>`, e.g. fomo4good.afsd.io on staging).
+# fomo4good.localhost is the local `npm run dev` host.
 sites:
   - name: fomo4good
-    domains: [fomo4good.localhost, localhost]
+    domains: [fomo4good.com, fomo4good.localhost]
 
 collections:
+  # Charity teams — page data bound through `pages/*/sources/teams`. Faces
+  # off: /teams is the custom campaign page, not a generated list.
+  teams:
+    type: local:team
+    scope: /packages
+    indexable: ["content/teams/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: false
+      sitemap: false
+      jsonld: false
+  # Practice world sub-pages: /practice is the custom list page
+  # (pages/practice/layout.aup), each record is one /practice/{view} page
+  # rendered by pages/practice/[slug]/layout.aup.
+  practice:
+    type: local:practice
+    scope: /packages
+    indexable: ["content/practice/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: true
+      sitemap: true
+      jsonld: false
   media:
     type: local:media
     scope: /packages

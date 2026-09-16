@@ -1,0 +1,100 @@
+name: Deploy Blocklet to Production
+
+# Production ships by hand only. Same steps as staging against the production
+# DID Space; see deploy-blocklet-staging.yml for why each step exists.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Must stay byte-identical to the staging workflow (pre-render fingerprint).
+env:
+  ARC_AUP_ASSETS_CDN: https://aup.arcblock.io
+
+# cancel-in-progress: false, unlike staging. A production deploy is a
+# multi-minute upload against a live DID Space; cancelling it mid-flight leaves
+# the space half-updated and reports "cancelled", which reads like nothing
+# happened. Queue instead.
+concurrency:
+  group: deploy-blocklet-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy blocklet to production DID Space
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check production deploy config
+        env:
+          ARC_DEPLOY_SERVER: ${{ secrets.ARC_DEPLOY_SERVER_PROD }}
+          ARC_DEPLOY_TOKEN: ${{ secrets.ARC_DEPLOY_TOKEN_PROD }}
+        run: |
+          test -n "$ARC_DEPLOY_SERVER" || {
+            echo "::error::Set ARC_DEPLOY_SERVER_PROD as an org/repo/environment secret."
+            exit 1
+          }
+          test -n "$ARC_DEPLOY_TOKEN" || {
+            echo "::error::Set ARC_DEPLOY_TOKEN_PROD as a production environment or repository secret."
+            exit 1
+          }
+
+      - name: Install arc CLI
+        run: |
+          curl -fsSL https://arc.afsd.io/install.sh | bash
+          echo "$HOME/.arc/current" >> "$GITHUB_PATH"
+
+      - name: Verify arc CLI
+        run: arc --version
+
+      - name: Check the blocklet
+        run: |
+          arc dsl lint blocklets/fomo4good
+          arc dsl validate blocklets/fomo4good
+          arc blocklet check blocklets/fomo4good
+
+      - name: Deploy blocklet to production
+        env:
+          ARC_DEPLOY_SERVER: ${{ secrets.ARC_DEPLOY_SERVER_PROD }}
+          ARC_DEPLOY_TOKEN: ${{ secrets.ARC_DEPLOY_TOKEN_PROD }}
+          ARC_LOG: node:deploy
+        run: |
+          arc deploy blocklets/fomo4good \
+            --server "$ARC_DEPLOY_SERVER" \
+            --token "$ARC_DEPLOY_TOKEN" \
+            --no-browser
+
+      # `arc deploy` updates the DID Space origin but does NOT purge the edge,
+      # and HTML ships with s-maxage=86400 — without this the public host keeps
+      # serving the previous pages for up to a day while this run reports green.
+      - name: Purge production HTML edge cache
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          FETCH_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
+        run: node .github/scripts/purge-html-cache.mjs
+
+      - name: Smoke check
+        id: smoke
+        env:
+          FETCH_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
+          SEO_HOST: ${{ vars.PROD_SEO_HOST || 'fomo4good.com' }}
+        run: node .github/scripts/smoke-site.mjs
+
+      - name: Summary
+        if: always()
+        env:
+          SITE_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
+          SMOKE_FAILED: ${{ steps.smoke.outputs.failed }}
+        run: |
+          version="$(grep -E '^version:' blocklets/fomo4good/blocklet.yaml | awk '{print $2}')"
+          {
+            echo "## FOMO4GOOD → production"
+            echo ""
+            echo "- Blocklet: fomo4good@${version} (${GITHUB_SHA::7})"
+            echo "- Site: https://${SITE_HOST}/"
+            echo "- Smoke: ${SMOKE_FAILED:-not run} failed"
+          } >> "$GITHUB_STEP_SUMMARY"

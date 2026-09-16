@@ -45,7 +45,7 @@
 
 ## 永久 FUSD 演练
 
-入口 `/arc/practice`，API `/api/practice/*`。独立 DID Space：默认 `var/practice/spaces`、owner `did:abt:fomo4good-practice-owner`、instance `did:abt:fomo4good-practice-v1`。不迁移旧 preview 数据，不与真实账本共用根目录，不读取真实付款 intent，也不输出真实捐款凭据。
+入口 `/practice`，API `/api/practice/*`。独立 DID Space：默认 `var/practice/spaces`、owner `did:abt:fomo4good-practice-owner`、instance `did:abt:fomo4good-practice-v1`。不迁移旧 preview 数据，不与真实账本共用根目录，不读取真实付款 intent，也不输出真实捐款凭据。
 
 Practice 没有结束日期。浏览器 HttpOnly Cookie 对应匿名玩家，初始 1,000 FUSD；不足 1 FUSD 可再领 1,000。保留 Cookie 才能恢复该浏览器身份；更换身份可以领取新点数，这些点数没有金钱价值。余额和回合变化一起通过 AFS 版本写入；同一请求 ID 重试不重复扣减。规则用服务端时间，重启后按原结束时间结算。
 

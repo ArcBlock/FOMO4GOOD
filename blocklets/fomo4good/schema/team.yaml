@@ -1,0 +1,13 @@
+# One record per charity team. Page data, not a web face: `collections.teams`
+# in blocklet.yaml turns the web/sitemap faces off so /arc/teams stays the
+# custom campaign page.
+contentType: team
+required: [id, team, name, emoji, tagline, url]
+fields:
+  id: { type: string, required: true }
+  team: { type: string, required: true }
+  name: { type: string, required: true }
+  emoji: { type: string, required: true }
+  tagline: { type: string, required: true }
+  url: { type: string, required: true }
+  order: { type: number }

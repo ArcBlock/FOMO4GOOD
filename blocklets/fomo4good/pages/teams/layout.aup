@@ -1,0 +1,5 @@
+page teams {
+  web-page root {
+    section game component=fomo-game view=teams mode=real teams=$source.teams
+  }
+}
