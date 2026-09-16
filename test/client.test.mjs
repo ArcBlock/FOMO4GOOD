@@ -77,9 +77,9 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 		w.fetch = async (path, options) => {
 			const data = options.body ? JSON.parse(options.body) : null;
 			let result;
-			if (path === "/api/fomo/state") result = state;
-			else if (path === "/api/fomo/visit") result = { ok: true };
-			else if (path === "/api/fomo/intents" && data) {
+			if (path === "/arc/api/fomo/state") result = state;
+			else if (path === "/arc/api/fomo/visit") result = { ok: true };
+			else if (path === "/arc/api/fomo/intents" && data) {
 				creates++;
 				assert.equal(data.team, "dogs");
 				assert.equal(data.amount, "5");
@@ -92,7 +92,7 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 					payment: null,
 				};
 				result = intent;
-			} else if (path === "/api/fomo/preview-confirm") {
+			} else if (path === "/arc/api/fomo/preview-confirm") {
 				assert.equal(data.intentId, intent.id);
 				intent.payment = { rogue: false };
 				state = {
@@ -100,7 +100,7 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 					metrics: { ...state.metrics, donors: 1, paidIntents: 1 },
 				};
 				result = intent.payment;
-			} else if (path === `/api/fomo/intents/${intent?.id}`) result = intent;
+			} else if (path === `/arc/api/fomo/intents/${intent?.id}`) result = intent;
 			else throw new Error("Unexpected client request: " + path);
 			return { ok: true, json: async () => structuredClone(result) };
 		};
@@ -199,20 +199,21 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  w.localStorage.setItem('fomo4good.intent.v2', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
  let plays = 0;
  w.fetch = async (path, options) => {
-  assert.ok(path.startsWith('/api/practice/'), path);
+  assert.ok(path.startsWith('/arc/api/practice/'), path);
   let result = state;
-  if (path === '/api/practice/session') result = state.wallet;
-  if (path === '/api/practice/donate') {
+  if (path === '/arc/api/practice/session') result = state.wallet;
+  if (path === '/arc/api/practice/donate') {
    plays++;
    const input = JSON.parse(options.body);
    assert.equal(input.amount, '5'); assert.equal(input.team, 'dogs'); assert.match(input.requestId, /^[a-f0-9-]{36}$/);
-   state.wallet.balance = '995'; result = { wallet: state.wallet };
+   state.wallet.balance = String(1000 - plays * 5); result = { wallet: state.wallet };
   }
   return { ok: true, json: async () => structuredClone(result) };
  };
  w.eval(script);
  const q = s => w.document.querySelector(s);
  await waitFor(() => q('[name="team"]'));
+ assert.equal(q('[name="team"]:checked')?.value, 'dogs');
  assert.match(q('[data-balance]').textContent, /1,000.00 FUSD/);
  assert.equal(q('[data-practice-result]').hidden, false);
  assert.match(q('[data-practice-result]').textContent, /YOU WON/);
@@ -222,6 +223,20 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  q('[data-form]').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
  await waitFor(() => q('[data-balance]').textContent === '995.00 FUSD');
  assert.equal(plays, 1);
+ await waitFor(()=>q('.f-confetti'));
+ assert.equal(q('.f-confetti').getAttribute('aria-hidden'),'true');
+ q('.f-confetti').remove();
+ w.matchMedia=()=>({matches:true});
+ await waitFor(() => !q('[data-submit]').disabled);
+ assert.match(q('[data-refill-hint]').textContent, /next round/);
+ q('[data-form]').reset();
+ await waitFor(() => q('[name="team"]').checked);
+ assert.equal(q('[data-submit]').disabled, false);
+ q('[data-form]').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
+ await waitFor(() => q('[data-balance]').textContent === '990.00 FUSD');
+ assert.equal(plays, 2);
+ assert.equal(q('.f-confetti'),null);
+ assert.equal(q('[data-refill]').disabled, true);
  assert.equal(q('[data-payment]').hidden, true);
  assert.equal(w.localStorage.getItem('fomo4good.intent.v2'), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
  assert.match(q('[data-live-pool]').textContent, /FUSD/);
@@ -254,4 +269,77 @@ test("pages-only deployment: a 404 campaign API renders the shipped teams, disab
 		await new Promise((r) => setTimeout(r, 50));
 		assert.equal(requests, before, "no polling while the service is absent");
 	}
+});
+
+test('rank invitation uses the Top 10 cutoff minus existing contributions and prefills without donating', async context => {
+ const state = { ...empty(), mode:'practice', currency:'FUSD', wallet:{id:'outside-top10',balance:'997',allTimeDonated:'3',roundDonated:'0'} };
+ state.topDonors=Array.from({length:10},(_,i)=>({address:`player-${i}`,name:`Player ${i}`,amount:String(20-i),count:1}));
+ const open = (url,view) => {
+  const dom=new JSDOM(render({props:{mode:'practice',view}}).html,{url,runScripts:'outside-only'});
+  const w=dom.window;context.after(()=>w.close());w.AbortSignal=globalThis.AbortSignal;
+  w.fetch=async path=>{assert.ok(!path.endsWith('/donate'),'Prefilling must not submit');return {ok:true,json:async()=>structuredClone(path.endsWith('/session')?state.wallet:state)}};
+  w.eval(script);return w;
+ };
+ const w=open('http://fomo4good.localhost/practice/leaderboard?lang=en','leaderboard');
+ await waitFor(()=>w.document.querySelector('[data-rank-cta]').textContent.includes('8.01'));
+ assert.equal(w.document.querySelectorAll('[data-leaderboard] .f-board-row').length,10);
+ const url=w.document.querySelector('[data-rank-cta]').href;
+ assert.equal(new URL(url).searchParams.get('donate'),'8.01');
+ const target=open(url,'play');
+ await waitFor(()=>target.document.querySelector('[name="team"]'));
+ assert.equal(target.document.querySelector('[name="amount"]').value,'8.01');
+ assert.ok(target.document.querySelector('[name="team"]:checked'),'A default team removes the dead-end');
+ assert.equal(target.document.querySelector('[data-submit]').disabled,false);
+});
+
+test('profile draft survives page changes before donation and deliberately cleared fields stay clear', async context => {
+ const open=saved=>{const dom=new JSDOM(render({props:{mode:'practice'}}).html,{url:'http://fomo4good.localhost/practice',runScripts:'outside-only'});context.after(()=>dom.window.close());const w=dom.window;w.AbortSignal=globalThis.AbortSignal;if(saved)w.localStorage.setItem('fomo4good.profile.v1',saved);w.fetch=async()=>({ok:true,json:async()=>({...empty(),mode:'practice',wallet:{id:'test',balance:'1000'}})});w.eval(script);return w;};
+ const w=open();
+ const name=w.document.querySelector('[name="name"]'),url=w.document.querySelector('[name="url"]');
+ name.value='Remember me';name.dispatchEvent(new w.Event('input',{bubbles:true}));
+ url.value='https://example.com/me';url.dispatchEvent(new w.Event('input',{bubbles:true}));
+ const next=open(w.localStorage.getItem('fomo4good.profile.v1'));
+ assert.equal(next.document.querySelector('[name="name"]').value,'Remember me');
+ assert.equal(next.document.querySelector('[name="url"]').value,'https://example.com/me');
+ next.document.querySelector('[name="url"]').value='';next.document.querySelector('[name="url"]').dispatchEvent(new next.Event('input',{bubbles:true}));
+ const cleared=open(next.localStorage.getItem('fomo4good.profile.v1'));
+ assert.equal(cleared.document.querySelector('[name="url"]').value,'');
+ assert.equal(cleared.document.querySelector('[name="name"]').value,'Remember me');
+});
+
+test('leaderboard scope keeps podium, personal rank and rows consistent; sound preference survives language changes', async context => {
+ const state={...empty(),mode:'practice',wallet:{id:'me',balance:'980'},topDonors:[{address:'me',name:'Me',amount:'1020',count:4}],roundDonors:[{address:'other',name:'Other',amount:'5',count:1}]};
+ const dom=new JSDOM(render({props:{mode:'practice',view:'leaderboard'}}).html,{url:'http://fomo4good.localhost/arc/practice/leaderboard',runScripts:'outside-only'});context.after(()=>dom.window.close());const w=dom.window;w.AbortSignal=globalThis.AbortSignal;
+ w.fetch=async()=>({ok:true,json:async()=>structuredClone(state)});w.eval(script);const q=s=>w.document.querySelector(s);
+ await waitFor(()=>q('[data-podium]').textContent.includes('1,020.00'));
+ assert.match(q('[data-leaderboard]').textContent,/1,020.00/);
+ q('[data-ranking]').value='round';q('[data-ranking]').dispatchEvent(new w.Event('change'));
+ assert.match(q('[data-board-scope]').textContent,/THIS ROUND/);assert.match(q('[data-podium]').textContent,/Other/);assert.doesNotMatch(q('[data-podium]').textContent,/1,020/);assert.match(q('[data-personal-rank]').textContent,/Not ranked/);
+ q('[data-sound]').click();assert.equal(w.localStorage.getItem('fomo4good.sound'),'on');
+ q('[data-language]').value='zh-Hant';q('[data-language]').dispatchEvent(new w.Event('change'));
+ assert.equal(q('[data-sound]').getAttribute('aria-pressed'),'true');assert.match(q('[data-sound]').textContent,/開/);
+ assert.match(q('.f-legal').textContent,/沒有夥伴關係/);
+ assert.equal(new URL(q('[data-share-x]').href).searchParams.get('url'),'https://fomo4good.com/arc/practice/leaderboard/?lang=zh-Hant');
+ assert.match(q('.f-source-cat').src,/^data:image\/svg\+xml;base64,/);
+ assert.equal(q('a[href="https://www.arcblock.io"] .f-link-favicon')?.src,'https://www.arcblock.io/favicon.ico');
+ assert.match(q('a[href="https://arc.io/"] .f-link-favicon')?.src || '',/arc-favicon-test\.png$/);
+});
+
+test('every public ARC view declares a dedicated 1200x630 social card', async () => {
+ const cards={
+  'pages/arc/seo/og-image':'og-arc.jpg',
+  'pages/arc/teams/seo/og-image':'og-arc-teams.jpg',
+  'pages/arc/leaderboard/seo/og-image':'og-arc-leaderboard.jpg',
+  'pages/arc/rules/seo/og-image':'og-arc-rules.jpg',
+  'pages/arc/practice/seo/og-image':'og-practice.jpg',
+  'pages/arc/practice/teams/seo/og-image':'og-practice-teams.jpg',
+  'pages/arc/practice/leaderboard/seo/og-image':'og-practice-leaderboard.jpg',
+  'pages/arc/practice/rules/seo/og-image':'og-practice-rules.jpg',
+ };
+ for(const [seo,card] of Object.entries(cards)) {
+  assert.equal((await readFile(new URL(`../blocklets/fomo4good/${seo}`,import.meta.url),'utf8')).trim(),`/media/${card}`);
+  const bytes=await readFile(new URL(`../blocklets/fomo4good/content/media/${card}`,import.meta.url));
+  assert.deepEqual([...bytes.subarray(0,3)],[0xff,0xd8,0xff]);
+  assert.ok(bytes.length>100_000,`${card} should contain the full illustrated card`);
+ }
 });

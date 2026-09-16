@@ -47,8 +47,8 @@ if (status?.status === "up") {
 }
 console.log(`
 FOMO4GOOD pages:
-  http://fomo4good.localhost:${port}/            real campaign
-  http://fomo4good.localhost:${port}/practice/   FUSD practice
+  http://fomo4good.localhost:${port}/arc/        real campaign
+  http://fomo4good.localhost:${port}/arc/practice/   FUSD practice
 Edit blocklets/fomo4good and reload. Stop with:
   node ${cli} service stop --instance ${instance}
 `);

@@ -38,7 +38,8 @@ if (!zone) {
 // leaves every real entry in place, which is how the sitemap kept naming the
 // previous SEO host at the CI runner's PoP after the pages were fresh.
 const pages = ["", "teams", "leaderboard", "rules", "practice", "practice/teams", "practice/leaderboard", "practice/rules"];
-const artifacts = ["/sitemap.xml", "/sitemap-pages.xml", "/sitemap-practice.xml", "/robots.txt", "/llms.txt", "/llms-full.txt"];
+pages.push(...pages.map((p) => `arc${p ? "/" + p : ""}`));
+const artifacts = ["/sitemap.xml", "/sitemap-pages.xml", "/sitemap-practice.xml", "/sitemap-arc.xml", "/robots.txt", "/llms.txt", "/llms-full.txt"];
 const files = [...new Set([
 	...pages.flatMap((p) => [`/${p}`, `/${p}/`, `/en/${p}/`].map((u) => u.replace(/\/+/g, "/"))),
 	...artifacts.flatMap((a) => [a, `${a}?__enc=br`, `${a}?__enc=gzip`, `${a}?__enc=identity`]),

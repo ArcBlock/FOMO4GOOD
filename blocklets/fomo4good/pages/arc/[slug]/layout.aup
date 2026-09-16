@@ -1,0 +1,5 @@
+page arc-view {
+  web-page root {
+    section game component=fomo-game view=$meta.view mode=$meta.mode teams=$source.teams
+  }
+}

@@ -231,7 +231,10 @@ export class Store {
 	async state(now = Date.now(), { settle = true } = {}) {
 		if (this.config.preview && settle) await this.update((s) => this.closeAt(s, now));
 		const { state: s } = await this.read();
-		const rank = (rows) => {
+    return this.projectState(s, now);
+  }
+  projectState(s, now) {
+		const rank = (rows, limit = 10) => {
 			const groups = new Map();
 			for (const p of rows) {
 				const key = p.from.toLowerCase();
@@ -250,7 +253,7 @@ export class Store {
 			}
 			return [...groups.values()]
 				.sort((a, b) => (a.units > b.units ? -1 : a.units < b.units ? 1 : 0))
-				.slice(0, 20)
+				.slice(0, limit)
 				.map((r) => ({
 					...r,
 					units: String(r.units),
@@ -269,6 +272,7 @@ export class Store {
 				allocated: amount(allocated),
 				topUp: amount(topUp),
 				wins: rounds.length,
+				topDonors: rank(regular.filter((p) => p.team === t.id), 3),
 			};
 		});
 		const round = s.round

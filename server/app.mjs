@@ -40,7 +40,7 @@ export function createApp(config, store, watcher, practice) {
 			const pageMatch = path.match(/^(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/);
 			const pageParts = pageMatch ? [pageMatch[1], pageMatch[2]].filter(Boolean) : null;
 			const pagePath = pageParts ? `/${pageParts.map((p) => `${p}/`).join("")}` : null;
-			if (!path.startsWith("/api/fomo/") && !path.startsWith("/api/practice/")) {
+			if (!path.startsWith("/arc/api/fomo/") && !path.startsWith("/arc/api/practice/")) {
 				if (
 					!["GET", "HEAD"].includes(req.method) ||
 					!(
@@ -131,9 +131,9 @@ export function createApp(config, store, watcher, practice) {
 				return;
 			}
 			const practiceToken = /(?:^|;\s*)fomo_practice=([a-f0-9]{64})(?:;|$)/.exec(req.headers.cookie || "")?.[1] || null;
-			if (req.method === "GET" && path === "/api/practice/state" && practice)
+			if (req.method === "GET" && path === "/arc/api/practice/state" && practice)
 				return send(res, 200, await practice.state(Date.now(), practiceToken));
-			if (req.method === "GET" && path === "/api/fomo/state") {
+			if (req.method === "GET" && path === "/arc/api/fomo/state") {
 				const state = realAvailable ? await store.state() : unavailableRealState(config);
 				if (realAvailable && watcher?.lastError) state.watcher.stale = true;
 				return send(res, 200, state);
@@ -166,20 +166,20 @@ export function createApp(config, store, watcher, practice) {
 			if (limits.size > 1000)
 				for (const [ip, row] of limits) if (row.until < now) limits.delete(ip);
 			const input = await body(req);
-			if (path.startsWith("/api/practice/") && practice) {
-				if (path === "/api/practice/session") {
+			if (path.startsWith("/arc/api/practice/") && practice) {
+				if (path === "/arc/api/practice/session") {
 					const token = practiceToken || randomBytes(32).toString("hex");
 					const wallet = await practice.session(token);
-					res.setHeader("Set-Cookie", `fomo_practice=${token}; HttpOnly; SameSite=Strict; Path=/api/practice; Max-Age=31536000${config.origin.startsWith("https:") ? "; Secure" : ""}`);
+					res.setHeader("Set-Cookie", `fomo_practice=${token}; HttpOnly; SameSite=Strict; Path=/arc/api/practice; Max-Age=31536000${config.origin.startsWith("https:") ? "; Secure" : ""}`);
 					return send(res, 200, wallet);
 				}
-				if (path === "/api/practice/donate") return send(res, 200, await practice.donate(practiceToken, input));
-				if (path === "/api/practice/refill") return send(res, 200, await practice.refill(practiceToken));
+				if (path === "/arc/api/practice/donate") return send(res, 200, await practice.donate(practiceToken, input));
+				if (path === "/arc/api/practice/refill") return send(res, 200, await practice.refill(practiceToken));
 				return send(res, 404, { error: "Not found." });
 			}
 			if (!realAvailable) return send(res, 409, { error: "Real donations are not open yet. Try Practice Round with FUSD." });
 
-			if (path === "/api/fomo/intents") {
+			if (path === "/arc/api/fomo/intents") {
 				const state = await store.state();
 				if (!config.preview && (state.watcher.stale || watcher?.lastError))
 					return send(res, 503, {
@@ -187,7 +187,7 @@ export function createApp(config, store, watcher, practice) {
 					});
 				return send(res, 201, await store.intent(input));
 			}
-			if (path === "/api/fomo/visit") {
+			if (path === "/arc/api/fomo/visit") {
 				await store.update((s) => s.visits++);
 				return send(res, 200, { ok: true });
 			}

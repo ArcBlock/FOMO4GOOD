@@ -22,8 +22,8 @@ if (!host) {
 const base = `https://${host}`;
 const get = (path) => fetch(base + path, { redirect: "manual", signal: AbortSignal.timeout(30000) });
 const pages = [
-	["/", "play", "real"], ["/teams/", "teams", "real"], ["/leaderboard/", "leaderboard", "real"], ["/rules/", "rules", "real"],
-	["/practice/", "play", "practice"], ["/practice/teams/", "teams", "practice"], ["/practice/leaderboard/", "leaderboard", "practice"], ["/practice/rules/", "rules", "practice"],
+	["/arc/", "play", "real"], ["/arc/teams/", "teams", "real"], ["/arc/leaderboard/", "leaderboard", "real"], ["/arc/rules/", "rules", "real"],
+	["/arc/practice/", "play", "practice"], ["/arc/practice/teams/", "teams", "practice"], ["/arc/practice/leaderboard/", "leaderboard", "practice"], ["/arc/practice/rules/", "rules", "practice"],
 ];
 let failed = 0;
 const check = async (label, fn) => {
@@ -53,9 +53,9 @@ for (const asset of assets) {
 	});
 }
 await check("/teams redirects to its canonical slash form", async () => {
-	const r = await get("/teams");
+	const r = await get("/arc/teams");
 	assert.equal(r.status, 308);
-	assert.equal(r.headers.get("location"), "/teams/");
+	assert.equal(r.headers.get("location"), "/arc/teams/");
 });
 await check("launch artwork is served", async () => {
 	const r = await get("/media/launch-pixel.jpg");
@@ -68,7 +68,7 @@ await check(`sitemap names ${seoHost}`, async () => {
 	const xml = await r.text();
 	assert.ok(xml.includes(`<loc>https://${seoHost}`), `first <loc> is ${xml.match(/<loc>[^<]*/)?.[0]} (cf-cache-status ${r.headers.get("cf-cache-status")})`);
 });
-await check("unknown practice page is a 404", async () => assert.equal((await get("/practice/nope/")).status, 404));
+await check("unknown practice page is a 404", async () => assert.equal((await get("/arc/practice/nope/")).status, 404));
 console.log(`smoke: ${failed} failed`);
 if (process.env.GITHUB_OUTPUT) {
 	const { appendFileSync } = await import("node:fs");

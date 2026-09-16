@@ -56,14 +56,14 @@ export default {
 		);
 		const token = tokenFor(request);
 		try {
-			if (path.startsWith("/api/")) {
-				if (request.method === "GET" && path === "/api/fomo/state") {
+			if (path.startsWith("/arc/api/")) {
+				if (request.method === "GET" && path === "/arc/api/fomo/state") {
 					const r = await game.read("/real");
 					return r.data
 						? reply(200, r.data.content)
 						: reply(503, { error: "Game unavailable" });
 				}
-				if (request.method === "GET" && path === "/api/practice/state") {
+				if (request.method === "GET" && path === "/arc/api/practice/state") {
 					const r = await game.exec("/practice/.actions/state", { token });
 					return r.success
 						? reply(200, r.data)
@@ -86,9 +86,9 @@ export default {
 				const body = await input(request);
 				if (
 					![
-						"/api/practice/session",
-						"/api/practice/donate",
-						"/api/practice/refill",
+						"/arc/api/practice/session",
+						"/arc/api/practice/donate",
+						"/arc/api/practice/refill",
 					].includes(path)
 				)
 					return reply(409, {
@@ -107,7 +107,7 @@ export default {
 				const headers =
 					action === "session"
 						? {
-								"Set-Cookie": `fomo_practice=${identity}; HttpOnly; SameSite=Strict; Path=/api/practice; Max-Age=31536000${env.FOMO_ORIGIN.startsWith("https:") ? "; Secure" : ""}`,
+								"Set-Cookie": `fomo_practice=${identity}; HttpOnly; SameSite=Strict; Path=/arc/api/practice; Max-Age=31536000${env.FOMO_ORIGIN.startsWith("https:") ? "; Secure" : ""}`,
 							}
 						: {};
 				return reply(200, r.data, headers);

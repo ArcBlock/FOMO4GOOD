@@ -21,18 +21,18 @@ async function api(path, input, headers = {}) {
 	if (r.headers.get("set-cookie")) cookie = r.headers.get("set-cookie").split(";")[0];
 	return r;
 }
-const before = await (await api("/api/fomo/state")).json();
+const before = await (await api("/arc/api/fomo/state")).json();
 assert.equal(
 	before.mode,
 	"unavailable",
 	"Smoke must never spend real funds.",
 );
-const html = await (await api("/")).text();
+const html = await (await api("/arc/")).text();
 assert.match(html, /data-fomo/);
 assert.match(html, /MAKE CRYPTO/);
 for (const page of ["rules", "teams", "leaderboard", "practice", "practice/rules", "practice/teams", "practice/leaderboard"]) {
  const view = page === "practice" ? "play" : page.split("/").pop();
- const response = await api(`/${page}`);
+ const response = await api(`/arc/${page}`);
  assert.equal(response.status, 200);
  const body = await response.text();
  const dom = new JSDOM(body);
@@ -77,39 +77,39 @@ for (const path of [
 	"/admin",
 	"/_arc/../admin",
 	"//example.com",
-	"/api/fomo/confirm",
+	"/arc/api/fomo/confirm",
 ])
 	assert.ok((await api(path)).status >= 400, path);
 const denied = await api(
-	"/api/fomo/intents",
+	"/arc/api/fomo/intents",
 	{ amount: "1", team: "dogs" },
 	{ Origin: "https://other.example" },
 );
 assert.equal(denied.status, 403);
 
-assert.equal((await api('/api/fomo/intents', { amount: '1', team: 'dogs' })).status, 409);
-assert.equal((await api('/api/fomo/preview-confirm', { intentId: 'retired' })).status, 409);
-assert.equal((await api('/api/practice/donate', { amount: '1', team: 'dogs', requestId: crypto.randomUUID() })).status, 400);
-const session = await (await api('/api/practice/session', {})).json();
+assert.equal((await api('/arc/api/fomo/intents', { amount: '1', team: 'dogs' })).status, 409);
+assert.equal((await api('/arc/api/fomo/preview-confirm', { intentId: 'retired' })).status, 409);
+assert.equal((await api('/arc/api/practice/donate', { amount: '1', team: 'dogs', requestId: crypto.randomUUID() })).status, 400);
+const session = await (await api('/arc/api/practice/session', {})).json();
 assert.equal(session.balance, '1000');
-const again = await (await api('/api/practice/session', {})).json();
+const again = await (await api('/arc/api/practice/session', {})).json();
 assert.equal(again.id, session.id);
-const practiceBefore = await (await api('/api/practice/state')).json();
+const practiceBefore = await (await api('/arc/api/practice/state')).json();
 const input = { amount: '5', team: 'dogs', name: 'Smoke test · FUSD only', requestId: crypto.randomUUID() };
-const first = await api('/api/practice/donate', input);
+const first = await api('/arc/api/practice/donate', input);
 assert.equal(first.status, 200);
 const receipt = await first.json();
 assert.equal(receipt.wallet.balance, '995');
-const repeated = await (await api('/api/practice/donate', input)).json();
+const repeated = await (await api('/arc/api/practice/donate', input)).json();
 assert.equal(repeated.wallet.balance, '995');
 assert.equal(repeated.paymentId, receipt.paymentId);
-const practiceAfter = await (await api('/api/practice/state')).json();
+const practiceAfter = await (await api('/arc/api/practice/state')).json();
 assert.equal(practiceAfter.mode, 'practice');
 assert.equal(practiceAfter.currency, 'FUSD');
 assert.equal(practiceAfter.wallet.balance, '995');
 assert.equal(practiceAfter.metrics.paidIntents, practiceBefore.metrics.paidIntents + 1);
 assert.ok(practiceAfter.teams.every(t => t.topUp === '0'));
-const realAfter = await (await api('/api/fomo/state')).json();
+const realAfter = await (await api('/arc/api/fomo/state')).json();
 assert.equal(realAfter.community, '0');
 assert.equal(realAfter.topDonors.length, 0);
 assert.equal(realAfter.round, null);

@@ -1,0 +1,5 @@
+page practice-leaderboard {
+  web-page root {
+    section game component=fomo-game view=leaderboard mode=practice teams=$source.teams
+  }
+}

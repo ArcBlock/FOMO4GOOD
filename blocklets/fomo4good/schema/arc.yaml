@@ -1,0 +1,8 @@
+contentType: arc
+required: [title, view, mode]
+fields:
+  title: { type: string, required: true }
+  description: { type: string }
+  ogImage: { type: string }
+  view: { type: string, required: true }
+  mode: { type: string, required: true }
