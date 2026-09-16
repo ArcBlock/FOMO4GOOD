@@ -1536,3 +1536,13 @@ body {
 .fomo[data-locale="zh-Hant"] .f-sticky { font-family: inherit; font-size: 18px; line-height: 1.5; }
 .fomo[data-locale="en-x-slop"] .f-header nav { font-size: 13px; }
 @media (max-width: 650px) { .f-language { margin-left: auto; } .fomo[data-locale="zh-Hant"] .f-section-heading h2 { font-size: 28px; } }
+
+/* An original, sleep-deprived source-code mascot. */
+.f-source-link { display: inline-flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid #34364f; background: #101322; }
+.f-source-cat { width: 58px; height: 58px; image-rendering: pixelated; flex-shrink: 0; transition: transform .15s steps(2); }
+.f-source-wordmark { display: block; font: 30px/1 "VT323", monospace; color: var(--mint); letter-spacing: 1px; }
+.f-source-wordmark > span { color: var(--pink); font-size: 14px; vertical-align: top; }
+.f-source-caption { display: block; color: var(--muted); font-size: 13px; margin-top: 6px; }
+.f-source-link:hover { border-color: var(--mint); }
+.f-source-link:hover .f-source-cat { transform: rotate(-8deg) translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .f-source-link:hover .f-source-cat { transform: none; } }
