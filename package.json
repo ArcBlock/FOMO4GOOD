@@ -1,0 +1,23 @@
+{
+	"name": "fomo4good",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=22.13"
+	},
+	"scripts": {
+		"start": "node --env-file-if-exists=.env server/index.mjs",
+		"dev": "node scripts/dev.mjs",
+		"test": "node --test test/*.test.mjs",
+		"check": "node scripts/check.mjs",
+		"smoke": "node scripts/smoke.mjs",
+		"report": "node --env-file-if-exists=.env scripts/report.mjs"
+	},
+	"dependencies": {
+		"ethers": "6.17.0"
+	},
+	"devDependencies": {
+		"jsdom": "26.1.0"
+	}
+}

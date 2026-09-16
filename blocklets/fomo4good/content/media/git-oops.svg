@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" shape-rendering="crispEdges">
+  <title>Git Oops — a very awake coding cat</title>
+  <path fill="#090912" d="M12 2h40v4h6v6h4v40h-4v6h-6v4H12v-4H6v-6H2V12h4V6h6z"/>
+  <path fill="#ad88ed" d="M10 4h44v4h6v46h-6v6H10v-6H4V10h6z"/>
+  <path fill="#191b32" d="M12 8h40v4h4v40h-4v4H12v-4H8V12h4z"/>
+  <path fill="#77bba0" d="M20 46v6H10v-4H6v-8h4v6z"/>
+  <path fill="#b9ffd0" d="M14 14h6v4h6v2h14v-4h6v-4h6v24h-4v6h-8v12h4v4H24v-4h4V42h-8v-4h-6z"/>
+  <path fill="#ad88ed" d="M18 18h4v6h-4zm28-2h2v8h-4v-4h2z"/>
+  <path fill="#f4eedd" d="M18 26h10v10H18zm18-4h12v12H36z"/>
+  <path fill="#090912" d="M20 30h4v4h-4zm22-6h4v4h-4zm-14 8h4v4h-4zm-6 6h6v2h12v-4h6v6h-6v4H28v-2h-6z"/>
+  <path fill="#f4eedd" d="M30 40h4v4h-4z"/>
+  <path fill="#ad88ed" d="M40 44h4v6h-4z"/>
+  <path fill="#ffe374" d="M2 34h4v-4h2v4h4v6H2zm48 14h4v-4h2v4h4v2h-4v4h-2v-4h-4z"/>
+</svg>
