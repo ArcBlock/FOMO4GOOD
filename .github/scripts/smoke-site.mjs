@@ -65,7 +65,8 @@ await check("launch artwork is served", async () => {
 await check(`sitemap names ${seoHost}`, async () => {
 	const r = await get("/sitemap.xml");
 	assert.equal(r.status, 200);
-	assert.match(await r.text(), new RegExp(`<loc>https://${seoHost.replace(/\./g, "\\.")}`));
+	const xml = await r.text();
+	assert.ok(xml.includes(`<loc>https://${seoHost}`), `first <loc> is ${xml.match(/<loc>[^<]*/)?.[0]} (cf-cache-status ${r.headers.get("cf-cache-status")})`);
 });
 await check("unknown practice page is a 404", async () => assert.equal((await get("/practice/nope/")).status, 404));
 console.log(`smoke: ${failed} failed`);

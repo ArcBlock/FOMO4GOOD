@@ -30,10 +30,13 @@ if (!zone) {
 	console.log(`::warning::Could not resolve Cloudflare zone id for ${zoneName} — HTML cache not purged.`);
 	process.exit(0);
 }
-// Every campaign page, in the three spellings the edge may have cached:
-// bare, trailing slash, and ARC's locale-prefixed canonical.
+// Every campaign page, in the three spellings the edge may have cached
+// (bare, trailing slash, ARC's locale-prefixed canonical), plus the site
+// artifacts pre-render regenerates — the sitemap kept naming the previous
+// SEO host at the CI runner's PoP after the pages themselves were purged.
 const pages = ["", "teams", "leaderboard", "rules", "practice", "practice/teams", "practice/leaderboard", "practice/rules"];
-const files = [...new Set(pages.flatMap((p) => [`/${p}`, `/${p}/`, `/en/${p}/`].map((u) => `https://${host}${u.replace(/\/+/g, "/")}`)))];
+const artifacts = ["/sitemap.xml", "/sitemap-pages.xml", "/sitemap-practice.xml", "/robots.txt", "/llms.txt", "/llms-full.txt"];
+const files = [...new Set([...pages.flatMap((p) => [`/${p}`, `/${p}/`, `/en/${p}/`].map((u) => u.replace(/\/+/g, "/"))), ...artifacts].map((u) => `https://${host}${u}`))];
 const result = await api(`/zones/${zone}/purge_cache`, { method: "POST", body: JSON.stringify({ files }) });
 if (result.success) console.log(`purged ${files.length} HTML URLs on ${host}`);
 else console.log(`::warning::HTML edge cache purge failed: ${JSON.stringify(result.errors).slice(0, 400)}`);
