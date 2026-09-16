@@ -151,3 +151,9 @@ var/
 **/.web-cache/
 **/dist/
 artifacts/
+
+.wrangler/
+
+# Generated deployment configurations
+worker/.deploy-*.json
+arc-runtime/

@@ -61,8 +61,8 @@ export class PracticeStore extends Store {
    return { paymentId: id, wallet: wallet(player) };
   });
  }
- async state(now = Date.now(), token = null) {
-  const result = await super.state(now);
+ async state(now = Date.now(), token = null, options = {}) {
+  const result = await super.state(now, options);
   const { state } = await this.read();
   const player = token ? state.players?.[key(token)] : null;
   return { ...result, currency: 'FUSD', realDonationTotal: '0', wallet: player ? wallet(player) : null,

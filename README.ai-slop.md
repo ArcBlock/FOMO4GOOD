@@ -154,7 +154,7 @@ arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token
 ## Evidence that someone ran something
 
 ```sh
-npm test        # 12 tests: persistence, money, isolation, retries, languages, client flows
+npm test        # 14 tests: persistence, money, isolation, retries, languages, client flows
 npm run check   # ARC lint, validate, blocklet check, build
 npm run smoke   # Requires the running local app; creates an explicitly named FUSD-only play
 ```
@@ -176,3 +176,5 @@ npm run smoke   # Requires the running local app; creates an explicitly named FU
 Code is [MIT licensed](LICENSE). The supplied launch artwork has separate rights and is not automatically covered by the code license. VT323 includes its [OFL license](blocklets/fomo4good/content/media/VT323-LICENSE.txt). Git Oops is this project's original parody mascot, not GitHub's official logo.
 
 Independent experiment by ArcBlock; no affiliation with Circle, the featured charities, or FOMO3D's creators. Donations are not investments and offer no financial return. Practice offers the same return with dramatically improved liquidity: there is nothing to withdraw.
+
+[Put the nonsense in the cloud](docs/cloudflare.md) — Worker topology, setup and current verification boundaries.

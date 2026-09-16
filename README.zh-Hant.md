@@ -152,7 +152,7 @@ arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token
 ## 工作證明，真的有工作
 
 ```sh
-npm test        # 12 項測試：儲存、金額、隔離、重試、語言、客戶端流程
+npm test        # 14 項測試：儲存、金額、隔離、重試、語言、客戶端流程
 npm run check   # ARC lint、驗證、Blocklet 檢查與建置
 npm run smoke   # 需先啟動本地應用；新增明確標示的 FUSD 演練操作
 ```
@@ -174,3 +174,5 @@ npm run smoke   # 需先啟動本地應用；新增明確標示的 FUSD 演練�
 程式碼採 [MIT 授權](LICENSE)。提供的發表主視覺另有權利歸屬，不自動納入程式碼授權。VT323 隨附 [OFL 授權](blocklets/fomo4good/content/media/VT323-LICENSE.txt)。Git Oops 是本專案的原創惡搞吉祥物，不是 GitHub 官方標誌。
 
 ArcBlock 的獨立實驗，與 Circle、列出的慈善機構或 FOMO3D 作者無從屬關係。捐款不是投資，沒有財務回報。演練版提供同等回報，手續顯著更少。
+
+[Cloudflare 部署](docs/cloudflare.md) — 部署步驟與目前驗證範圍。

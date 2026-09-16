@@ -1,0 +1,30 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "fomo4good-provider",
+	"main": "../dist/worker/index.mjs",
+	"compatibility_date": "2026-09-15",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": false,
+	"preview_urls": false,
+	"durable_objects": {
+		"bindings": [{ "name": "FOMO_CAMPAIGN", "class_name": "FomoCampaign" }]
+	},
+	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["FomoCampaign"] }],
+	"vars": {
+		"FOMO_MODE": "practice",
+		"FOMO_ORIGIN": "http://localhost:4931",
+		"FOMO_OWNER_DID": "did:abt:fomo4good-practice-owner",
+		"FOMO_INSTANCE_DID": "did:abt:fomo4good-worker-local"
+	},
+	"r2_buckets": [
+		{ "binding": "FOMO_OBJECTS", "bucket_name": "fomo4good-space" }
+	],
+	"d1_databases": [
+		{
+			"binding": "FOMO_INDEX",
+			"database_name": "fomo4good-space-index",
+			"database_id": "00000000-0000-0000-0000-000000000000",
+			"migrations_dir": "../dist/worker/migrations"
+		}
+	]
+}
