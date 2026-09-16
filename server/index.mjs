@@ -29,7 +29,7 @@ try {
 	throw e;
 }
 console.log(
-	`FOMO4GOOD ${config.mode}: ${config.origin}/arc | DID Space: ${config.instanceDid}`,
+	`FOMO4GOOD ${config.mode}: ${config.origin}/ | DID Space: ${config.instanceDid}`,
 );
 for (const signal of ["SIGINT", "SIGTERM"])
 	process.on(signal, () => {

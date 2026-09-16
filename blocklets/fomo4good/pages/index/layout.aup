@@ -1,5 +1,5 @@
 page index {
   web-page root {
-    component game component=fomo-game
+    section game component=fomo-game view=play mode=real teams=$source.teams
   }
 }

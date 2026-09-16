@@ -15,18 +15,20 @@ npm run check
 npm run dev
 ```
 
-Open **http://localhost:4931/arc** for the real campaign entry, which currently says real donations are not open. **http://localhost:4931/arc/practice** is the permanent Practice Round: each browser identity starts with 1,000 FUSD, selects a team and spends points instantly. No wallet, payment intent, chain transaction or real donation is involved. The former public preview-confirm API is retired; old preview data is retained separately and never presented as real fundraising.
+Open **http://fomo4good.localhost:4930/** for the real campaign entry, which currently says real donations are not open. **http://fomo4good.localhost:4930/practice/** is the permanent Practice Round: each browser identity starts with 1,000 FUSD, selects a team and spends points instantly. No wallet, payment intent, chain transaction or real donation is involved. The former public preview-confirm API is retired; old preview data is retained separately and never presented as real fundraising.
 
-The ARC web daemon runs as the separate `fomo4good-local` instance on port 4930. The public application binds to loopback on 4931. `Ctrl-C` stops the app; stop the named ARC instance separately with `node ../arc/runtimes/node/dist/cli.mjs service stop --instance fomo4good-local` when it is no longer needed. No desktop automation is used by these scripts.
+The Blocklet is served by the dedicated `fomo4good-local` ARC instance on port 4930 — the pages are ARC web-device pages, so nothing sits in front of them. The campaign service (`npm start`, loopback 4931) is a separate process; when it is not running, the pages detect the missing `/api/*` and render their "not open yet" state instead of an outage. Stop the ARC instance with `node ../arc/runtimes/node/dist/cli.mjs service stop --instance fomo4good-local` when it is no longer needed. No desktop automation is used by these scripts.
+
+To publish, point `arc deploy` at an ARC host: `arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token>`. The Blocklet is published to your DID Space and resolves by its id (`fomo4good.<host domain>`); pre-rendering runs as part of the deploy. Use the **released** CLI (`install.sh`) with `ARC_AUP_ASSETS_CDN=https://aup.arcblock.io`: the pre-rendered pages reference ARC's shell assets by build hash, and only released builds are on the CDN. CI does exactly this — `.github/workflows/deploy-blocklet-staging.yml` deploys every push to `main` that touches the Blocklet (staging: https://fomo4good.afsd.io/), purges the HTML edge cache (`arc deploy` does not) and smokes the eight pages; `deploy-blocklet-production.yml` is the manual production twin.
 
 ## Pages
 
-- `/arc`: pool, countdown and donation flow.
-- `/arc/teams`: charities, allocations and the ArcBlock guarantee.
-- `/arc/leaderboard`: donors, recent activity, Rogue Donors, round history and research jokes.
-- `/arc/rules`: game rules, all FAQs, upgrade notes and campaign terms.
+- `/`: pool, countdown and donation flow.
+- `/teams`: charities, allocations and the ArcBlock guarantee.
+- `/leaderboard`: donors, recent activity, Rogue Donors, round history and research jokes.
+- `/rules`: game rules, all FAQs, upgrade notes and campaign terms.
 
-Practice has parallel `/arc/practice`, `/arc/practice/teams`, `/arc/practice/leaderboard` and `/arc/practice/rules` pages, with a purple theme, FUSD labels and an explicit zero real-charity payout.
+Practice has parallel `/practice`, `/practice/teams`, `/practice/leaderboard` and `/practice/rules` pages, with a purple theme, FUSD labels and an explicit zero real-charity payout.
 
 Every page keeps a sticky live round strip with countdown, pool and a link to participate. Old home-page anchors redirect to their new pages. Body copy is enlarged, with pixel typography reserved for display headings and key numbers.
 
@@ -46,13 +48,13 @@ All FAQ entries and authored payment/status copy have Traditional Chinese transl
 
 ## Architecture
 
-- `blocklets/fomo4good`: real Blocklet + AUP page + web component, following ArcBlock-site's web-device structure. ARC renders HTML/CSS/JS and serves media.
+- `blocklets/fomo4good`: real Blocklet, following ArcBlock-site's web-device structure. ARC renders HTML/CSS/JS and serves media. One `fomo-game` component renders every page; `pages/*/layout.aup` passes `view` / `mode`, and the charity teams are the `content/teams` collection bound as `$source.teams` (the practice sub-pages are records of the `content/practice` collection so they share that binding). The page ships the teams as JSON, which is what the client renders when no campaign service answers.
 - `server/`: small Node campaign service: anonymous payment intents, Circle Arc watcher, public state projection. This is an explicit companion service, **not** a native ARC exec provider. The current deployment therefore needs both services; the blocklet artifact alone is the UI.
 - **DID Space is the only application persistence**: the official ARC SDK's `getInstanceSpace({role:'system'})`. All business reads/writes go through AFS. No application SQLite driver, schema, or fallback store.
 - `campaign/ledger.json`: exact integer money, raw transfers, private intents, round snapshots and watcher cursor in one version-checked commit. Failed writes do not advance the watcher. Intended for one finite MVP campaign, not an unbounded transaction archive.
 - SDK and CLI resolve from the built ARC checkout. No private copied persistence implementation. The DID Space implementation itself may maintain its own internal metadata index; the app does not access or depend on that index.
 
-The ARC admin/RPC surface is not proxied publicly. Only campaign/practice endpoints, `/arc` pages and the web assets are exposed. Serve HTTPS at the edge if making the app public; set `FOMO_ORIGIN` to that exact origin. Run **one application/watcher process per campaign instance**. The SDK's CAS also protects conflicting ledger writes, but initialization is a single-operator operation.
+The campaign service exposes only the campaign/practice endpoints; pages and assets are ARC's. Serve HTTPS at the edge if making the app public; set `FOMO_ORIGIN` to that exact origin. Run **one application/watcher process per campaign instance**. The SDK's CAS also protects conflicting ledger writes, but initialization is a single-operator operation.
 
 ## Testnet watcher
 

@@ -15,11 +15,39 @@ repository:
 keywords: [charity, donations, usdc]
 tags: [charity]
 surfaces: [/]
+# Local dev answers on fomo4good.localhost. A published copy resolves by its
+# id first (`fomo4good.<domain root>`); add a brand domain here once DNS
+# points at the ARC host — `arc deploy --server` registers it first-come.
 sites:
   - name: fomo4good
-    domains: [fomo4good.localhost, localhost]
+    domains: [fomo4good.localhost]
 
 collections:
+  # Charity teams — page data bound through `pages/*/sources/teams`. Faces
+  # off: /teams is the custom campaign page, not a generated list.
+  teams:
+    type: local:team
+    scope: /packages
+    indexable: ["content/teams/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: false
+      sitemap: false
+      jsonld: false
+  # Practice world sub-pages: /practice is the custom list page
+  # (pages/practice/layout.aup), each record is one /practice/{view} page
+  # rendered by pages/practice/[slug]/layout.aup.
+  practice:
+    type: local:practice
+    scope: /packages
+    indexable: ["content/practice/**/content.md"]
+    readRole: guest
+    access: public
+    faces:
+      web: true
+      sitemap: true
+      jsonld: false
   media:
     type: local:media
     scope: /packages

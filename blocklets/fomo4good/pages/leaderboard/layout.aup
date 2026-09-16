@@ -1,0 +1,5 @@
+page leaderboard {
+  web-page root {
+    section game component=fomo-game view=leaderboard mode=real teams=$source.teams
+  }
+}

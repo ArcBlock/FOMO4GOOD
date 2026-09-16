@@ -65,7 +65,7 @@
 
 **一樣 FOMO。錢是假的。沒有人受傷。**
 
-永久演練入口是 `/arc/practice`。每個瀏覽器身分起手 **1,000 FUSD**。選隊、花假錢、重設同樣的十分鐘倒數。餘額不到 1 FUSD，就能免費再印 1,000。終於有一套貨幣政策，一個按鈕就裝得下。
+永久演練入口是 `/practice`。每個瀏覽器身分起手 **1,000 FUSD**。選隊、花假錢、重設同樣的十分鐘倒數。餘額不到 1 FUSD，就能免費再印 1,000。終於有一套貨幣政策，一個按鈕就裝得下。
 
 | FUSD — Fake United States Dollar | 完全沒人審計 |
 | --- | --- |
@@ -119,17 +119,23 @@ npm run dev
 
 | 本地頁面 | 用途 |
 | --- | --- |
-| `http://localhost:4931/arc` | 真實活動入口，目前未開放收款。 |
-| `http://localhost:4931/arc/practice` | 永久 FUSD 演練。 |
-| `/arc/teams`, `/arc/leaderboard`, `/arc/rules` | 戰隊、紀錄、玩法與 FAQ。 |
-| `/arc/practice/teams`, `/arc/practice/leaderboard`, `/arc/practice/rules` | 上述內容的幻想版本。 |
+| `http://fomo4good.localhost:4930/` | 真實活動入口，目前未開放收款。 |
+| `http://fomo4good.localhost:4930/practice/` | 永久 FUSD 演練。 |
+| `/teams`, `/leaderboard`, `/rules` | 戰隊、紀錄、玩法與 FAQ。 |
+| `/practice/teams`, `/practice/leaderboard`, `/practice/rules` | 上述內容的幻想版本。 |
 
 每頁都有即時倒數與參與入口。支援英文、**繁體中文**與 **🤖 AI Slop**，語言會跨頁保留。中文故意只有繁體：字可以繁，付款別繁。切換語言不會幫你把 FUSD 翻譯成真錢。
 
-`npm run dev` 使用獨立的 ARC 實例（**4930**）及配套應用（**4931**）。`Ctrl-C` 停止應用；結束後可另外停止 ARC：
+`npm run dev` 用獨立的 ARC 實例（**4930**）直接提供 Blocklet；頁面就是 ARC 網頁，前面沒有任何代理。沒有啟動活動服務（`npm start`，目前仍是獨立程序）時，每頁都會顯示「尚未開放」狀態。用完後停止實例：
 
 ```sh
 node ../arc/runtimes/node/dist/cli.mjs service stop --instance fomo4good-local
+```
+
+發佈只需對 ARC 主機下一條命令——Blocklet 會進入你的 DID Space，並在 `https://fomo4good.<主機網域>/` 回應：
+
+```sh
+arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token>
 ```
 
 ## 連帽衫下面是什麼

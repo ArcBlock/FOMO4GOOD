@@ -67,7 +67,7 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 		creates = 0;
 	function browser(saved) {
 		const dom = new JSDOM(render().html, {
-			url: "http://localhost:4931/arc",
+			url: "http://fomo4good.localhost/",
 			runScripts: "outside-only",
 		});
 		const w = dom.window;
@@ -156,7 +156,7 @@ test("language switch translates FAQs and live state, preserves input and user n
  const state = empty();
  state.round = { id: 2, endsAt: Date.now() + 420000, amount: "12.004237", team: "dogs", lastDonor: { name: "Nothing.", address: "0x123456789" } };
  state.topDonors = [{ name: "Nothing.", amount: "12.004237", count: 1 }];
- const dom = new JSDOM(render().html.replace('data-view="play"', 'data-view="rules"'), { url: "http://localhost:4931/arc/rules?lang=zh-Hant", runScripts: "outside-only" });
+ const dom = new JSDOM(render({ props: { view: "rules" } }).html, { url: "http://fomo4good.localhost/rules?lang=zh-Hant", runScripts: "outside-only" });
  testContext.after(() => dom.window.close());
  const w = dom.window;
  w.AbortSignal = globalThis.AbortSignal;
@@ -170,8 +170,8 @@ test("language switch translates FAQs and live state, preserves input and user n
  assert.match(q('[data-notice]').textContent, /非真實捐款/);
  assert.equal(q('[data-leaderboard] strong').textContent, 'Nothing.');
  for (const summary of w.document.querySelectorAll('.f-faq summary')) assert.match(summary.textContent, /[\u3400-\u9fff]/);
- assert.match(q('[data-nav="teams"]').href, /\/arc\/teams\?lang=zh-Hant$/);
- assert.match(q('.f-livebar a').href, /\/arc\?lang=zh-Hant#play$/);
+ assert.match(q('[data-nav="teams"]').href, /\/teams\?lang=zh-Hant$/);
+ assert.match(q('.f-livebar a').href, /\/\?lang=zh-Hant#play$/);
  q('[name="team"]').checked = true;
  q('[name="amount"]').value = '23.45';
  q('[name="name"]').value = 'Nothing.';
@@ -193,7 +193,7 @@ test("language switch translates FAQs and live state, preserves input and user n
 test('practice uses only its API, preserves real receipts, spends FUSD and offers a real-money link after a round', async context => {
  const state = { ...empty(), mode: 'practice', currency: 'FUSD', wallet: { id: 'practice-player', balance: '1000' } };
  state.history = [{ id: 1, team: 'dogs', amount: '45', lastDonor: { address: 'practice-player', name: 'Me' } }];
- const dom = new JSDOM(render().html.replace('data-mode="real"', 'data-mode="practice"'), { url: 'http://localhost:4931/arc/practice?lang=en', runScripts: 'outside-only' });
+ const dom = new JSDOM(render({ props: { mode: "practice" } }).html, { url: 'http://fomo4good.localhost/practice?lang=en', runScripts: 'outside-only' });
  context.after(() => dom.window.close());
  const w = dom.window; w.AbortSignal = globalThis.AbortSignal;
  w.localStorage.setItem('fomo4good.intent.v2', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
@@ -216,8 +216,8 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  assert.match(q('[data-balance]').textContent, /1,000.00 FUSD/);
  assert.equal(q('[data-practice-result]').hidden, false);
  assert.match(q('[data-practice-result]').textContent, /YOU WON/);
- assert.match(q('[data-practice-result] a').href, /\/arc\?lang=en#play$/);
- assert.match(q('[data-nav="leaderboard"]').href, /\/arc\/practice\/leaderboard\?lang=en$/);
+ assert.match(q('[data-practice-result] a').href, /\/\?lang=en#play$/);
+ assert.match(q('[data-nav="leaderboard"]').href, /\/practice\/leaderboard\?lang=en$/);
  q('[name="team"]').checked = true;
  q('[data-form]').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
  await waitFor(() => q('[data-balance]').textContent === '995.00 FUSD');
@@ -226,4 +226,32 @@ test('practice uses only its API, preserves real receipts, spends FUSD and offer
  assert.equal(w.localStorage.getItem('fomo4good.intent.v2'), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
  assert.match(q('[data-live-pool]').textContent, /FUSD/);
  assert.equal(q('[data-practice-result] a').textContent, 'PLAY FOR REAL — 1 USDC ↗');
+});
+
+test("pages-only deployment: a 404 campaign API renders the shipped teams, disables play and never reports an outage", async (context) => {
+	const props = { view: "play", mode: "real", teams: [{ id: "dogs", team: "DOGS", name: "Best Friends Animal Society", emoji: "🐶", tagline: "Objectively good boys.", url: "https://bestfriends.org", order: 2 }, { id: "kids", team: "KIDS", name: "Save the Children", emoji: "👶", tagline: "They're the future.", url: "https://www.savethechildren.org", order: 1 }] };
+	for (const mode of ["real", "practice"]) {
+		const dom = new JSDOM(render({ props: { ...props, mode } }).html, { url: `http://fomo4good.localhost/${mode === "practice" ? "practice" : ""}`, runScripts: "outside-only" });
+		context.after(() => dom.window.close());
+		const w = dom.window;
+		w.AbortSignal = globalThis.AbortSignal;
+		let requests = 0;
+		w.fetch = async () => { requests++; return { ok: false, status: 404, json: async () => { throw new Error("not json"); } }; };
+		w.eval(script);
+		const q = (s) => w.document.querySelector(s);
+		await waitFor(() => q('[name="team"]'));
+		assert.deepEqual([...w.document.querySelectorAll('[name="team"]')].map((r) => r.value), ["kids", "dogs"]);
+		assert.equal(w.document.querySelectorAll(".f-team-card").length, 2);
+		assert.equal(q("[data-submit]").disabled, true);
+		assert.equal(q("[data-notice]").classList.contains("error"), false);
+		assert.match(q("[data-notice]").textContent, mode === "practice" ? /PRACTICE ROUND IS NOT OPEN YET/ : /REAL DONATIONS ARE NOT OPEN YET/);
+		assert.equal(q("[data-unavailable]").hidden, mode === "practice");
+		if (mode === "practice") {
+			assert.equal(q("[data-balance]").textContent, "— FUSD");
+			assert.match(q("[data-wallet-feedback]").textContent, /not connected/);
+		}
+		const before = requests;
+		await new Promise((r) => setTimeout(r, 50));
+		assert.equal(requests, before, "no polling while the service is absent");
+	}
 });
