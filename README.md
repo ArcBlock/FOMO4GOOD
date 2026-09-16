@@ -28,6 +28,12 @@ The ARC web daemon runs as the separate `fomo4good-local` instance on port 4930.
 
 Every page keeps a sticky live round strip with countdown, pool and a link to participate. Old home-page anchors redirect to their new pages. Body copy is enlarged, with pixel typography reserved for display headings and key numbers.
 
+## Languages
+
+The header offers English, Traditional Chinese (`zh-Hant`, deliberately no Simplified Chinese option), and **AI Slop**, an English novelty voice. Chinese browser locales default to Traditional Chinese. `?lang=zh-Hant` and `?lang=en-x-slop` make links shareable; the selector remembers preferences locally and carries the language across campaign pages.
+
+All FAQ entries and authored payment/status copy have Traditional Chinese translations. Charity names, wallet addresses, exact amounts, transaction IDs, and donor-supplied names/URLs stay unchanged. AI Slop changes the jokes while retaining plain payment instructions. Language switching preserves selected teams, form values and pending receipts. The supplied artwork stays in its original form.
+
 ## Architecture
 
 - `blocklets/fomo4good`: real Blocklet + AUP page + web component, following ArcBlock-site's web-device structure. ARC renders HTML/CSS/JS and serves media.
@@ -58,4 +64,4 @@ The original supplied pixel artwork is preserved at `blocklets/fomo4good/content
 
 ## Current verification
 
-Nine tests cover DID Space persistence, concurrent writes, expiry/deduplication, campaign end, native USDC event decoding, watcher recovery, financial reconciliation, and client payment/receipt recovery in a DOM test. HTTP smoke passes against the running ARC-rendered preview. Browser screenshot/mobile visual acceptance has not been performed in this session: desktop automation was stopped after it interfered with the user’s access.
+Ten tests cover DID Space persistence, concurrent writes, expiry/deduplication, campaign end, native USDC event decoding, watcher recovery, financial reconciliation, and client payment/receipt recovery in a DOM test. HTTP smoke passes against the running ARC-rendered preview. Browser screenshot/mobile visual acceptance has not been performed in this session: desktop automation was stopped after it interfered with the user’s access.

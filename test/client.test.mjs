@@ -123,7 +123,16 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 		w.document.querySelector("[data-exact]").textContent,
 		"5.004237 USDC",
 	);
+
 	assert.equal(creates, 1);
+	const language = w.document.querySelector('[data-language]');
+	language.value = 'zh-Hant';
+	language.dispatchEvent(new w.Event('change', { bubbles: true }));
+	assert.equal(w.document.querySelector('[data-exact]').textContent, '5.004237 USDC');
+	assert.match(w.document.querySelector('[data-network]').textContent, /請勿轉入資金/);
+	assert.match(w.document.querySelector('[data-expiry]').textContent, /後到期/);
+	language.value = 'en';
+	language.dispatchEvent(new w.Event('change', { bubbles: true }));
 	assert.equal(w.document.querySelector("[data-copy-address]").disabled, true);
 	w.document.querySelector("[data-simulate]").click();
 	await waitFor(() =>
@@ -141,4 +150,42 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 	);
 	assert.equal(creates, 1);
 	assert.equal(resumed.document.querySelector("[data-simulate]").hidden, true);
+});
+
+test("language switch translates FAQs and live state, preserves input and user names, and follows inner-page links", async (testContext) => {
+ const state = empty();
+ state.round = { id: 2, endsAt: Date.now() + 420000, amount: "12.004237", team: "dogs", lastDonor: { name: "Nothing.", address: "0x123456789" } };
+ state.topDonors = [{ name: "Nothing.", amount: "12.004237", count: 1 }];
+ const dom = new JSDOM(render().html.replace('data-view="play"', 'data-view="rules"'), { url: "http://localhost:4931/arc/rules?lang=zh-Hant", runScripts: "outside-only" });
+ testContext.after(() => dom.window.close());
+ const w = dom.window;
+ w.AbortSignal = globalThis.AbortSignal;
+ w.fetch = async () => ({ ok: true, json: async () => structuredClone(state) });
+ w.eval(script);
+ await waitFor(() => w.document.querySelector('[name="team"]'));
+ const q = (s) => w.document.querySelector(s);
+ assert.equal(w.document.documentElement.lang, "zh-Hant");
+ assert.match(q('[data-live-round]').textContent, /第 002 輪/);
+ assert.match(q('[data-live-status]').textContent, /狗狗隊 領先/);
+ assert.match(q('[data-notice]').textContent, /非真實捐款/);
+ assert.equal(q('[data-leaderboard] strong').textContent, 'Nothing.');
+ for (const summary of w.document.querySelectorAll('.f-faq summary')) assert.match(summary.textContent, /[\u3400-\u9fff]/);
+ assert.match(q('[data-nav="teams"]').href, /\/arc\/teams\?lang=zh-Hant$/);
+ assert.match(q('.f-livebar a').href, /\/arc\?lang=zh-Hant#play$/);
+ q('[name="team"]').checked = true;
+ q('[name="amount"]').value = '23.45';
+ q('[name="name"]').value = 'Nothing.';
+ q('[data-language]').value = 'en-x-slop';
+ q('[data-language]').dispatchEvent(new w.Event('change', { bubbles: true }));
+ assert.equal(w.document.documentElement.lang, 'en');
+ assert.equal(q('[name="team"]').checked, true);
+ assert.equal(q('[name="amount"]').value, '23.45');
+ assert.equal(q('[name="name"]').value, 'Nothing.');
+ assert.match(q('[data-submit]').textContent, /SHIP GOOD/);
+ assert.equal(q('[data-leaderboard] strong').textContent, 'Nothing.');
+ assert.equal(w.localStorage.getItem('fomo4good.language'), 'en-x-slop');
+ q('[data-language]').value = 'en';
+ q('[data-language]').dispatchEvent(new w.Event('change', { bubbles: true }));
+ assert.equal(q('.f-faq summary').textContent, 'What does the winner get?');
+ assert.match(q('[data-notice]').textContent, /NO REAL DONATIONS/);
 });
