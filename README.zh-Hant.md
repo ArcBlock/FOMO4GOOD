@@ -152,7 +152,7 @@ arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token
 ## 工作證明，真的有工作
 
 ```sh
-npm test        # 13 項測試：儲存、金額、隔離、重試、語言、客戶端流程
+npm test        # 14 項測試：儲存、金額、隔離、重試、語言、客戶端流程
 npm run check   # ARC lint、驗證、Blocklet 檢查與建置
 npm run smoke   # 需先啟動本地應用；新增明確標示的 FUSD 演練操作
 ```

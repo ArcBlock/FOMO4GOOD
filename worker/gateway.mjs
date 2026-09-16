@@ -112,65 +112,7 @@ export default {
 						: {};
 				return reply(200, r.data, headers);
 			}
-			if (path === "/")
-				return Response.redirect(new URL("/arc", env.FOMO_ORIGIN), 302);
-			const match = path.match(
-				/^\/arc(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/,
-			);
-			const asset =
-				/^\/(?:_arc\/assets\/|media\/|aup(?:-core|-app|-ssr|-inspect-bridge)?\.[a-z0-9]+\.(?:js|css)$|favicon.ico$|logo.svg$)/.test(
-					path,
-				);
-			if (!["GET", "HEAD"].includes(request.method) || (!match && !asset))
-				return reply(404, { error: "Not found" });
-			const upstream = new URL(env.FOMO_ARC_ORIGIN);
-			upstream.pathname = match ? "/en/" : path;
-			upstream.search = url.search;
-			// Service Binding target is deployment-owned. Browser cannot select a host.
-			const response = await env.ARC_SITE.fetch(
-				new Request(upstream, { method: request.method }),
-			);
-			const headers = new Headers();
-			for (const name of [
-				"content-type",
-				"cache-control",
-				"content-security-policy",
-				"x-content-type-options",
-				"referrer-policy",
-				"permissions-policy",
-			])
-				if (response.headers.has(name))
-					headers.set(name, response.headers.get(name));
-			if (request.method === "HEAD")
-				return new Response(null, { status: response.status, headers });
-			if (!headers.get("content-type")?.includes("text/html"))
-				return new Response(response.body, {
-					status: response.status,
-					headers,
-				});
-			const view = match?.[2] || "play",
-				mode = match?.[1] ? "practice" : "real";
-			let html = await response.text();
-			html = html
-				.replace(
-					/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-view=)"play"/,
-					`$1"${view}"`,
-				)
-				.replace(
-					/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-mode=)"real"/,
-					`$1"${mode}"`,
-				)
-				.replace(`data-nav="${view}"`, `data-nav="${view}" aria-current="page"`)
-				.replace(
-					/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
-					"",
-				);
-			html = html
-				.split(new URL("/en/", env.FOMO_ARC_ORIGIN).href)
-				.join(env.FOMO_ORIGIN + path)
-				.split(new URL("/media/", env.FOMO_ARC_ORIGIN).href)
-				.join(env.FOMO_ORIGIN + "/media/");
-			return new Response(html, { status: response.status, headers });
+			return reply(404, { error: "Not found" });
 		} catch {
 			return reply(503, { error: "Service temporarily unavailable." });
 		}

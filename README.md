@@ -151,7 +151,7 @@ arc deploy blocklets/fomo4good --server https://<arc-host> --token <deploy-token
 ## Proof of work, unfortunately literal
 
 ```sh
-npm test        # 13 tests: persistence, money, isolation, retries, languages, client flows
+npm test        # 14 tests: persistence, money, isolation, retries, languages, client flows
 npm run check   # ARC lint, validate, blocklet check, build
 npm run smoke   # Running local app required; creates one explicitly named FUSD-only play
 ```

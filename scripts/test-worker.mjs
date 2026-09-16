@@ -38,14 +38,9 @@ const gateway = {
 	compatibilityFlags: ["nodejs_compat"],
 	bindings: {
 		FOMO_ORIGIN: "https://game.test",
-		FOMO_ARC_ORIGIN: "https://fomo4good.localhost",
 	},
 	serviceBindings: {
 		FOMO_PROVIDER: "fomo-provider",
-		ARC_SITE: () =>
-			new Response('<div data-fomo data-view="play" data-mode="real"></div>', {
-				headers: { "content-type": "text/html" },
-			}),
 	},
 	ratelimits: { FOMO_RATE_LIMITER: { simple: { limit: 30, period: 60 } } },
 };
@@ -146,13 +141,12 @@ try {
 		409,
 	);
 	assert.equal((await edge.fetch("https://game.test/afs/read")).status, 404);
-	const html = await (
-		await edge.fetch("https://game.test/arc/practice/rules?lang=zh-Hant")
-	).text();
-	assert.ok(html.includes('data-view="rules"'));
-	assert.ok(html.includes('data-mode="practice"'));
+	// Pages belong to ARC's native site, never to the API gateway.
+	for (const path of ["/", "/rules/", "/practice/rules/", "/arc/practice/rules", "/en/practice/rules/"])
+		assert.equal((await edge.fetch(`https://game.test${path}`)).status, 404);
+
 	console.log(
-		"Gateway: service binding, origin/cookie identity, real-payment closure and page routing passed.",
+		"Gateway: service binding, origin/cookie identity, real-payment closure and API-only routing passed.",
 	);
 	console.log(
 		"Workers runtime: DID Space persistence, retry dedup, restart, real/practice isolation and private-ledger denial passed.",
