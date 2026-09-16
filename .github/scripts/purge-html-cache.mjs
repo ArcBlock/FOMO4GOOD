@@ -32,11 +32,23 @@ if (!zone) {
 }
 // Every campaign page, in the three spellings the edge may have cached
 // (bare, trailing slash, ARC's locale-prefixed canonical), plus the site
-// artifacts pre-render regenerates — the sitemap kept naming the previous
-// SEO host at the CI runner's PoP after the pages themselves were purged.
+// artifacts pre-render regenerates. Pages are keyed by their bare URL; the
+// artifacts are keyed per negotiated encoding (`?__enc=br|gzip|identity`,
+// arc runtimes/cloudflare/src/web-cache.ts) — purging the bare artifact URL
+// leaves every real entry in place, which is how the sitemap kept naming the
+// previous SEO host at the CI runner's PoP after the pages were fresh.
 const pages = ["", "teams", "leaderboard", "rules", "practice", "practice/teams", "practice/leaderboard", "practice/rules"];
 const artifacts = ["/sitemap.xml", "/sitemap-pages.xml", "/sitemap-practice.xml", "/robots.txt", "/llms.txt", "/llms-full.txt"];
-const files = [...new Set([...pages.flatMap((p) => [`/${p}`, `/${p}/`, `/en/${p}/`].map((u) => u.replace(/\/+/g, "/"))), ...artifacts].map((u) => `https://${host}${u}`))];
-const result = await api(`/zones/${zone}/purge_cache`, { method: "POST", body: JSON.stringify({ files }) });
-if (result.success) console.log(`purged ${files.length} HTML URLs on ${host}`);
-else console.log(`::warning::HTML edge cache purge failed: ${JSON.stringify(result.errors).slice(0, 400)}`);
+const files = [...new Set([
+	...pages.flatMap((p) => [`/${p}`, `/${p}/`, `/en/${p}/`].map((u) => u.replace(/\/+/g, "/"))),
+	...artifacts.flatMap((a) => [a, `${a}?__enc=br`, `${a}?__enc=gzip`, `${a}?__enc=identity`]),
+].map((u) => `https://${host}${u}`))];
+// The purge API takes at most 30 URLs per call.
+let purged = 0;
+for (let i = 0; i < files.length; i += 30) {
+	const batch = files.slice(i, i + 30);
+	const result = await api(`/zones/${zone}/purge_cache`, { method: "POST", body: JSON.stringify({ files: batch }) });
+	if (result.success) purged += batch.length;
+	else console.log(`::warning::HTML edge cache purge failed: ${JSON.stringify(result.errors).slice(0, 400)}`);
+}
+console.log(`purged ${purged}/${files.length} URLs on ${host}`);
