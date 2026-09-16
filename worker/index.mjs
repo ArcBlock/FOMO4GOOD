@@ -9,6 +9,22 @@ import { chainRpc } from "../server/evm.mjs";
 import { FomoProvider } from "../providers/fomo4good/provider.ts";
 import { workerConfig, practiceConfig } from "./config.mjs";
 
+if (typeof AbortSignal.timeout !== "function") {
+	AbortSignal.timeout = (ms) => {
+		const controller = new AbortController();
+		setTimeout(() => controller.abort(), ms);
+		return controller.signal;
+	};
+}
+const rpcFetch = (input, init = {}) => {
+	const { signal: _ignored, redirect: _redirect, ...rest } = init;
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), 20000);
+	return globalThis
+		.fetch(input, { ...rest, redirect: "follow", signal: controller.signal })
+		.finally(() => clearTimeout(timer));
+};
+
 /** Private service-bound Worker. No workers.dev or public route. */
 export default {
 	async fetch(request, env) {
@@ -65,6 +81,7 @@ export class FomoCampaign {
 				new AFSEVM({
 					endpoint: config.rpcUrl,
 					chainId: String(config.chainId),
+					fetch: rpcFetch,
 				}),
 				"/dev/chain/arc",
 			);
