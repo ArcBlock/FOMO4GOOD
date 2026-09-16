@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+import { unavailableRealState } from "./practice.mjs";
 import { createServer, request as httpRequest } from "node:http";
 import { request as httpsRequest } from "node:https";
 const HEADERS = {
@@ -19,8 +21,9 @@ async function body(req) {
 	}
 	return JSON.parse(data);
 }
-export function createApp(config, store, watcher) {
+export function createApp(config, store, watcher, practice) {
 	const limits = new Map();
+	const realAvailable = config.mode === "mainnet";
 	const server = createServer(async (req, res) => {
 		try {
 			if (!server.ready) return send(res, 503, { error: "Campaign starting." });
@@ -32,15 +35,17 @@ export function createApp(config, store, watcher) {
 				return send(res, 400, { error: "Invalid path." });
 			const url = new URL(req.url, config.origin),
 				path = url.pathname;
-			const pageMatch = path.match(/^\/arc(?:\/(rules|teams|leaderboard))?\/?$/);
-			const pageView = pageMatch ? (pageMatch[1] || "play") : null;
-			const pagePath = pageView === "play" ? "/arc" : `/arc/${pageView}`;
+			const pageMatch = path.match(/^\/arc(?:\/(practice))?(?:\/(rules|teams|leaderboard))?\/?$/);
+			const pageView = pageMatch ? (pageMatch[2] || "play") : null;
+			const pageMode = pageMatch?.[1] ? "practice" : "real";
+			const pageBase = pageMode === "practice" ? "/arc/practice" : "/arc";
+			const pagePath = pageView === "play" ? pageBase : `${pageBase}/${pageView}`;
 			if (path === "/") {
 				res.writeHead(302, { Location: "/arc" });
 				res.end();
 				return;
 			}
-			if (!path.startsWith("/api/fomo/")) {
+			if (!path.startsWith("/api/fomo/") && !path.startsWith("/api/practice/")) {
 				if (
 					!["GET", "HEAD"].includes(req.method) ||
 					!(
@@ -110,6 +115,7 @@ export function createApp(config, store, watcher) {
 						content
 							.toString()
 							.replace(/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-view=)"play"/, `$1"${pageView}"`)
+							.replace(/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-mode=)"real"/, `$1"${pageMode}"`)
 							.replace(`data-nav="${pageView}"`, `data-nav="${pageView}" aria-current="page"`)
 							.replace(
 								/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
@@ -129,13 +135,16 @@ export function createApp(config, store, watcher) {
 				res.end(req.method === "HEAD" ? undefined : content);
 				return;
 			}
+			const practiceToken = /(?:^|;\s*)fomo_practice=([a-f0-9]{64})(?:;|$)/.exec(req.headers.cookie || "")?.[1] || null;
+			if (req.method === "GET" && path === "/api/practice/state" && practice)
+				return send(res, 200, await practice.state(Date.now(), practiceToken));
 			if (req.method === "GET" && path === "/api/fomo/state") {
-				const state = await store.state();
-				if (watcher?.lastError) state.watcher.stale = true;
+				const state = realAvailable ? await store.state() : unavailableRealState(config);
+				if (realAvailable && watcher?.lastError) state.watcher.stale = true;
 				return send(res, 200, state);
 			}
 			if (
-				req.method === "GET" &&
+				realAvailable && req.method === "GET" &&
 				/^\/api\/fomo\/intents\/[a-f0-9-]{36}$/.test(path)
 			) {
 				const intent = await store.status(path.split("/").pop());
@@ -162,6 +171,19 @@ export function createApp(config, store, watcher) {
 			if (limits.size > 1000)
 				for (const [ip, row] of limits) if (row.until < now) limits.delete(ip);
 			const input = await body(req);
+			if (path.startsWith("/api/practice/") && practice) {
+				if (path === "/api/practice/session") {
+					const token = practiceToken || randomBytes(32).toString("hex");
+					const wallet = await practice.session(token);
+					res.setHeader("Set-Cookie", `fomo_practice=${token}; HttpOnly; SameSite=Strict; Path=/api/practice; Max-Age=31536000${config.origin.startsWith("https:") ? "; Secure" : ""}`);
+					return send(res, 200, wallet);
+				}
+				if (path === "/api/practice/donate") return send(res, 200, await practice.donate(practiceToken, input));
+				if (path === "/api/practice/refill") return send(res, 200, await practice.refill(practiceToken));
+				return send(res, 404, { error: "Not found." });
+			}
+			if (!realAvailable) return send(res, 409, { error: "Real donations are not open yet. Try Practice Round with FUSD." });
+
 			if (path === "/api/fomo/intents") {
 				const state = await store.state();
 				if (!config.preview && (state.watcher.stale || watcher?.lastError))
@@ -170,8 +192,6 @@ export function createApp(config, store, watcher) {
 					});
 				return send(res, 201, await store.intent(input));
 			}
-			if (path === "/api/fomo/preview-confirm" && config.preview)
-				return send(res, 200, await store.simulate(String(input.intentId)));
 			if (path === "/api/fomo/visit") {
 				await store.update((s) => s.visits++);
 				return send(res, 200, { ok: true });

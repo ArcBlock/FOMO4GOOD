@@ -189,3 +189,41 @@ test("language switch translates FAQs and live state, preserves input and user n
  assert.equal(q('.f-faq summary').textContent, 'What does the winner get?');
  assert.match(q('[data-notice]').textContent, /NO REAL DONATIONS/);
 });
+
+test('practice uses only its API, preserves real receipts, spends FUSD and offers a real-money link after a round', async context => {
+ const state = { ...empty(), mode: 'practice', currency: 'FUSD', wallet: { id: 'practice-player', balance: '1000' } };
+ state.history = [{ id: 1, team: 'dogs', amount: '45', lastDonor: { address: 'practice-player', name: 'Me' } }];
+ const dom = new JSDOM(render().html.replace('data-mode="real"', 'data-mode="practice"'), { url: 'http://localhost:4931/arc/practice?lang=en', runScripts: 'outside-only' });
+ context.after(() => dom.window.close());
+ const w = dom.window; w.AbortSignal = globalThis.AbortSignal;
+ w.localStorage.setItem('fomo4good.intent.v2', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+ let plays = 0;
+ w.fetch = async (path, options) => {
+  assert.ok(path.startsWith('/api/practice/'), path);
+  let result = state;
+  if (path === '/api/practice/session') result = state.wallet;
+  if (path === '/api/practice/donate') {
+   plays++;
+   const input = JSON.parse(options.body);
+   assert.equal(input.amount, '5'); assert.equal(input.team, 'dogs'); assert.match(input.requestId, /^[a-f0-9-]{36}$/);
+   state.wallet.balance = '995'; result = { wallet: state.wallet };
+  }
+  return { ok: true, json: async () => structuredClone(result) };
+ };
+ w.eval(script);
+ const q = s => w.document.querySelector(s);
+ await waitFor(() => q('[name="team"]'));
+ assert.match(q('[data-balance]').textContent, /1,000.00 FUSD/);
+ assert.equal(q('[data-practice-result]').hidden, false);
+ assert.match(q('[data-practice-result]').textContent, /YOU WON/);
+ assert.match(q('[data-practice-result] a').href, /\/arc\?lang=en#play$/);
+ assert.match(q('[data-nav="leaderboard"]').href, /\/arc\/practice\/leaderboard\?lang=en$/);
+ q('[name="team"]').checked = true;
+ q('[data-form]').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
+ await waitFor(() => q('[data-balance]').textContent === '995.00 FUSD');
+ assert.equal(plays, 1);
+ assert.equal(q('[data-payment]').hidden, true);
+ assert.equal(w.localStorage.getItem('fomo4good.intent.v2'), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+ assert.match(q('[data-live-pool]').textContent, /FUSD/);
+ assert.equal(q('[data-practice-result] a').textContent, 'PLAY FOR REAL — 1 USDC ↗');
+});

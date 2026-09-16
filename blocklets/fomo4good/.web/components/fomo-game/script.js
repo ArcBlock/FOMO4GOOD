@@ -303,7 +303,89 @@
     "When does the money actually reach charity?": "錢到底什麼時候捐出去？",
     "ArcBlock will complete the campaign’s charity donations after the campaign ends and before December 31, 2026, and publish the donation receipts. A leaderboard allocation is not a payment receipt. “The agent said it sent the money” is not a receipt either.": "ArcBlock 會在活動結束後、2026 年 12 月 31 日前完成本活動的慈善捐款，並公布捐款憑證。排行榜上的分配不等於付款收據。「代理說它已經匯了」也不算收據。",
     "Allocations are recorded here. ArcBlock will complete charity donations after the campaign ends and before December 31, 2026, and publish receipts.": "此處記錄款項分配。ArcBlock 會在活動結束後、2026 年 12 月 31 日前完成慈善捐款，並公布憑證。",
-    "ArcBlock covers any shortfall below $100 for each charity at the end of the real campaign; that contribution never buys a place on the board. ArcBlock will complete the charity donations through official channels after the campaign ends and before December 31, 2026, and publish receipts. Preview and testnet activity is not real fundraising.": "真實活動結束時，ArcBlock 會為每個慈善機構補足至 100 美元；補款不會取得排行榜名次。ArcBlock 將在活動結束後、2026 年 12 月 31 日前，透過官方管道完成慈善捐款並公布憑證。預覽版與測試網活動不是真實募款。"
+    "ArcBlock covers any shortfall below $100 for each charity at the end of the real campaign; that contribution never buys a place on the board. ArcBlock will complete the charity donations through official channels after the campaign ends and before December 31, 2026, and publish receipts. Preview and testnet activity is not real fundraising.": "真實活動結束時，ArcBlock 會為每個慈善機構補足至 100 美元；補款不會取得排行榜名次。ArcBlock 將在活動結束後、2026 年 12 月 31 日前，透過官方管道完成慈善捐款並公布憑證。預覽版與測試網活動不是真實募款。",
+    "DONATE FOR REAL": "認真捐一次",
+    "Too cheap? Play with fake money →": "捨不得？用假錢玩 →",
+    "YOUR FUSD BALANCE": "你的 FUSD 餘額",
+    "Worth approximately $0.00.": "價值約為 $0.00。",
+    "PRINT ANOTHER 1,000 FUSD": "再印 1,000 FUSD",
+    "REAL DONATIONS ARE NOT OPEN YET.": "真實捐款尚未開放。",
+    "No receiving address is active. Practice is open; real giving comes next.": "目前沒有啟用的收款地址。先來演練，真實捐款稍後開放。",
+    "TRY PRACTICE ROUND ↗": "進入演練回合 ↗",
+    "PRACTICE ROUND": "演練回合",
+    "PRACTICE ROUND {n}": "演練第 {n} 輪",
+    "Same FOMO. Fake money. Nobody gets hurt.": "一樣 FOMO。錢是假的。沒有人受傷。",
+    "Same FOMO. Fake money.": "一樣 FOMO。錢是假的。",
+    "Nobody gets hurt.": "沒有人受傷。",
+    "PRACTICE": "演練",
+    "ROUND.": "回合。",
+    "FAKE USD. REAL FOMO. ZERO CONSEQUENCES.": "假美元。真 FOMO。零金錢後果。",
+    "THE IMAGINARY POOL": "本輪幻想池",
+    "PRACTICE NONSENSE": "演練胡鬧總額",
+    "REAL CHARITY PAYOUT": "實際慈善捐款",
+    "EXACTLY NONE.": "一毛都沒有。",
+    "TOP FUSD DONORS": "FUSD 好人榜",
+    "TOP FUSD DONORS.": "FUSD 好人榜。",
+    "★ TOP FUSD DONORS": "★ FUSD 好人榜",
+    "Generosity has never been easier.": "慷慨從未如此容易。",
+    "No wallet. No transfer. Spend imaginary FUSD instantly.": "不用錢包、不用轉帳。直接花掉幻想中的 FUSD。",
+    "SPEND FUSD. RESET CLOCK.": "花 FUSD。重設倒數。",
+    "JOIN PRACTICE ↗": "加入演練 ↗",
+    "Practice amount in FUSD": "演練金額（FUSD）",
+    "01 / PICK A PRACTICE TEAM": "01 / 選擇演練戰隊",
+    "02 / HOW MUCH IMAGINARY GOOD?": "02 / 要多大方地幻想？",
+    "The first practice play starts the round.": "第一筆演練操作開啟本輪。",
+    "Every FUSD play resets the clock to 10:00.": "每次花 FUSD 都將倒數重設為 10:00。",
+    "FIVE TEAMS. ZERO REAL DOLLARS.": "五支戰隊。零元真錢。",
+    "Imaginary allocations. Charities receive exactly none of this.": "純屬幻想分配。慈善機構不會收到這裡的任何金額。",
+    "The winner gets nothing. Their charity also gets nothing. This is practice.": "贏家一無所獲。慈善機構也一無所獲。這是演練。",
+    "Real donations use Arc.": "真實捐款走 Arc。",
+    "Pick a practice team. Spend FUSD. Reset the clock.": "選演練戰隊。花 FUSD。重設倒數。",
+    "Imaginary generosity. Real ego.": "幻想的慷慨。真實的自尊。",
+    "↳ RECENT IMAGINARY GENEROSITY": "↳ 最近的幻想善舉",
+    "PRACTICE PLAYERS": "演練玩家",
+    "FUSD PLAYS": "FUSD 操作次數",
+    "ACTIVE PRACTICE PLAYERS": "活躍演練玩家",
+    "FUSD PLAY COMPLETION": "FUSD 操作完成率",
+    "MEDIAN FUSD PLAY": "FUSD 操作中位數",
+    "IMAGINARY ALLOCATION": "幻想分配",
+    "PRACTICE ROUND HISTORY": "演練歷輪紀錄",
+    "Start with 1,000 FUSD. No wallet, no blockchain.": "起手 1,000 FUSD。不用錢包，不上鏈。",
+    "Pick a team and spend FUSD. Each play resets the clock to 10:00.": "選擇戰隊並花 FUSD，每次操作將倒數重設為 10:00。",
+    "At zero, the final player’s team wins the imaginary pool. No charity receives money from practice.": "歸零時，最後玩家的戰隊贏得幻想池。演練不會向慈善機構支付任何金錢。",
+    "FUSD (Fake United States Dollar)": "FUSD（Fake United States Dollar，假美元）",
+    "A highly centralized currency issued in unlimited quantities by FOMO4GOOD.": "由 FOMO4GOOD 無限發行的高度中心化貨幣。",
+    "Backing": "擔保",
+    "Reserves": "儲備",
+    "Audits": "審計",
+    "Value": "價值",
+    "Stability": "穩定性",
+    "None.": "沒有。",
+    "Unnecessary.": "不需要。",
+    "Remarkably stable at zero.": "令人驚嘆地穩定在零。",
+    "FUSD is not a cryptocurrency. We didn't have time to make one.": "FUSD 不是加密貨幣。我們沒空做一個。",
+    "It is only practice points in DID Space. No contract, no wallet asset, no token listing. FUSD cannot be withdrawn, exchanged, or donated for real.": "它只是 DID Space 裡的演練點數。沒有合約、錢包資產或代幣上架。FUSD 無法提領、兌換或實際捐出。",
+    "Your balance belongs to this browser session. Keep its cookie to keep your balance. When less than 1 FUSD remains, print another 1,000 for free.": "餘額綁定這個瀏覽器身分，請保留 Cookie。剩餘不到 1 FUSD 時，可免費再印 1,000。",
+    "Practice players, pools and rankings never enter the real campaign. The real donation guarantee and deadline do not apply to FUSD.": "演練玩家、獎池和排名絕不計入真實活動。真實捐款保底和期限不適用於 FUSD。",
+    "PLAY FOR REAL — 1 USDC ↗": "用真錢玩 — 1 USDC ↗",
+    "PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO": "演練模式 · 假美元 · 假錢排行榜 · 真自尊",
+    "FUSD spent. Your team takes the imaginary lead.": "FUSD 已花掉。你的戰隊取得幻想中的領先。",
+    "Not enough FUSD. Fake money still has a balance.": "FUSD 不夠了。假錢也是有餘額的。",
+    "Start a practice session first.": "請先建立演練身分。",
+    "Use your remaining FUSD before refilling.": "請先用掉剩餘的 FUSD 再補充。",
+    "Real donations are not open yet. Try Practice Round with FUSD.": "真實捐款尚未開放，先用 FUSD 玩演練回合吧。",
+    "1,000 FUSD printed. Reserves remain zero.": "1,000 FUSD 印好了。儲備依然是零。",
+    "YOU WON!": "你贏了！",
+    "{team} WIN!": "{team} 贏了！",
+    "{amount} FUSD of completely imaginary money. The charity receives exactly none of this.": "完全幻想的 {amount} FUSD。慈善機構一毛都收不到。",
+    "Want to try with $1 that actually exists?": "想用真正存在的 1 美元試試嗎？",
+    "REAL RAISED": "真實募款",
+    "No chain. No transfer. Only FUSD.": "不上鏈、不轉帳，只有 FUSD。",
+    "Play saved. Refreshing the round…": "操作已記錄，正在更新回合…",
+    "SETTLING THE PRACTICE ROUND…": "正在結算演練回合…",
+    "Use 1 to 100,000 FUSD, with at most two decimals.": "請輸入 1 至 100,000 FUSD，最多兩位小數。",
+    "Waiting for first practice play": "等待第一筆演練操作",
+    "PRACTICE CONNECTION DELAY · Reconnecting…": "演練連線延遲 · 正在重新連線…"
   },
   "en-x-slop": {
     "PLAY": "EXECUTE GOOD.EXE",
@@ -358,7 +440,12 @@
     "So bugs are normal?": "Is this a bug or emergent intelligence?",
     "Yes. This was vibe-coded by AI agents, not delivered on stone tablets. A bug is not an Easter egg, a feature, or an advanced donation strategy. We fix bugs. We do not ask you to believe harder.": "A bug. The model is 99.9% confident it is a bug. This was vibe-coded by AI agents; bugs are normal and still ours to fix. Please do not fine-tune your expectations around a broken button.",
     "What do you actually guarantee?": "What is your proof-of-not-hallucinating?",
-    "When does the money actually reach charity?": "What is the deadline in human time?"
+    "When does the money actually reach charity?": "What is the deadline in human time?",
+    "PRACTICE": "SANDBOX",
+    "ROUND.": "HUMANITY.",
+    "SPEND FUSD. RESET CLOCK.": "HALLUCINATE GENEROSITY.",
+    "YOUR FUSD BALANCE": "YOUR SYNTHETIC LIQUIDITY",
+    "PRINT ANOTHER 1,000 FUSD": "HALLUCINATE ANOTHER 1,000 FUSD"
   }
 };
 
@@ -366,11 +453,14 @@
 	if (!root || root.dataset.ready) return;
 	const legacyPage = { "#rules": "rules", "#faq": "rules", "#teams": "teams", "#donors": "leaderboard" }[location.hash];
 	if (root.dataset.view === "play" && legacyPage) {
-		location.replace(`/arc/${legacyPage}${location.search}${location.hash}`);
+		location.replace(`/arc${root.dataset.mode === "practice" ? "/practice" : ""}/${legacyPage}${location.search}${location.hash}`);
 		return;
 	}
 
 	root.dataset.ready = "true";
+	const practiceMode = root.dataset.mode === "practice";
+	const currency = practiceMode ? "FUSD" : "USDC";
+	const practiceCopy = {"MAKE CRYPTO": "PRACTICE", "FUN AGAIN.": "ROUND.", "TWO ARCS. ONE VERY GOOD EXCUSE.": "FAKE USD. REAL FOMO. ZERO CONSEQUENCES.", "The winner gets nothing.": "Same FOMO. Fake money.", "Their charity gets everything.": "Nobody gets hurt.", "USDC": "FUSD", "THE DONATION POOL": "THE IMAGINARY POOL", "COMMUNITY": "PRACTICE NONSENSE", "REAL RAISED": "PRACTICE NONSENSE", "ARCBLOCK GUARANTEE": "REAL CHARITY PAYOUT", "$100": "$0", "PER CHARITY": "EXACTLY NONE.", "HALL OF GOOD": "TOP FUSD DONORS", "HALL OF GOOD.": "TOP FUSD DONORS.", "★ HALL OF GOOD": "★ TOP FUSD DONORS", "Donors, round history, and questionable scientific findings.": "Generosity has never been easier.", "No wallet connection. No signature. Just send the exact amount.": "No wallet. No transfer. Spend imaginary FUSD instantly.", "DO GOOD. RESET CLOCK.": "SPEND FUSD. RESET CLOCK.", "JOIN THE ROUND ↗": "JOIN PRACTICE ↗", "Donation amount in USDC": "Practice amount in FUSD", "01 / CHOOSE YOUR ALLEGIANCE": "01 / PICK A PRACTICE TEAM", "02 / HOW MUCH GOOD?": "02 / HOW MUCH IMAGINARY GOOD?", "The first donor starts the round.": "The first practice play starts the round.", "Every donation resets the clock to 10:00.": "Every FUSD play resets the clock to 10:00.", "FIVE TEAMS. ZERO BAD GUYS.": "FIVE TEAMS. ZERO REAL DOLLARS.", "ArcBlock covers each charity’s shortfall to $100 at campaign end. Top-ups are separate from community donations and leaderboards. Preview/testnet figures are simulations.": "Imaginary allocations. Charities receive exactly none of this.", "The winner gets nothing. Their charity gets everything.": "The winner gets nothing. Their charity also gets nothing. This is practice.", "Paid on Arc.": "Real donations use Arc.", "Pick a charity. Send the exact amount. Reset the clock.": "Pick a practice team. Spend FUSD. Reset the clock.", "Money buys rank, not pixels.": "Imaginary generosity. Real ego.", "↳ RECENT BAD FINANCIAL DECISIONS": "↳ RECENT IMAGINARY GENEROSITY", "PAGE SESSIONS": "PRACTICE PLAYERS", "PAYMENT INTENTS": "FUSD PLAYS", "DONOR ADDRESSES": "ACTIVE PRACTICE PLAYERS", "INTENT → PAID": "FUSD PLAY COMPLETION", "MEDIAN DONATION": "MEDIAN FUSD PLAY", "ROUND {n}": "PRACTICE ROUND {n}", "PREVIEW ALLOCATION": "IMAGINARY ALLOCATION", "TESTNET ALLOCATION": "IMAGINARY ALLOCATION", "SIMULATED": "FUSD", "How deeply is FOMO4GOOD integrated with Arc?": "How deeply is FOMO4GOOD integrated with Arc?", "CONFIRMING THE FINAL CHAIN HISTORY…": "SETTLING THE PRACTICE ROUND…", "Use a donation from 1 to 100,000 USDC, with at most two decimals.": "Use 1 to 100,000 FUSD, with at most two decimals.", "Donation must be between 1 and 100,000 USDC.": "Use 1 to 100,000 FUSD, with at most two decimals.", "Waiting for first donation": "Waiting for first practice play", "WAITING FOR FIRST DONATION": "Waiting for first practice play", "CONNECTION / WATCHER DELAY · Confirmations paused. Reconnecting…": "PRACTICE CONNECTION DELAY · Reconnecting…"};
 	const supported = ["en", "zh-Hant", "en-x-slop"];
 	const localeKey = "fomo4good.language";
 	let locale = "en";
@@ -379,12 +469,15 @@
 		const saved = localStorage.getItem(localeKey);
 		locale = supported.includes(requested) ? requested : supported.includes(saved) ? saved : navigator.language?.startsWith("zh") ? "zh-Hant" : "en";
 	} catch {}
-	const t = (source, values = {}) => String(messages[locale]?.[source] || source || "").replace(/\{(\w+)\}/g, (match, key) => String(values[key] ?? match));
+	const t = (source, values = {}) => {
+  source = practiceMode ? (practiceCopy[source] || source) : source;
+  return String(messages[locale]?.[source] || source || "").replace(/\{(\w+)\}/g, (match, key) => String(values[key] ?? match));
+ };
 	const fixedText = [];
 	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
 	for (let node; (node = walker.nextNode());) {
 		const source = node.textContent.trim();
-		if (messages["zh-Hant"][source] || messages["en-x-slop"][source]) fixedText.push([node, source, node.textContent]);
+		if (practiceCopy[source] || messages["zh-Hant"][source] || messages["en-x-slop"][source]) fixedText.push([node, source, node.textContent]);
 	}
 	const fixedAttributes = [];
 	for (const node of root.querySelectorAll("[aria-label], [placeholder]")) {
@@ -401,6 +494,7 @@
 		root.querySelector("[data-language]").value = locale;
 		for (const link of root.querySelectorAll('a[href^="/arc"]')) {
 			const url = new URL(link.getAttribute("href"), location.origin);
+			if (practiceMode && !link.hasAttribute("data-world") && !url.pathname.startsWith("/arc/practice")) url.pathname = url.pathname.replace(/^\/arc/, "/arc/practice");
 			url.searchParams.set("lang", locale);
 			link.setAttribute("href", url.pathname + url.search + url.hash);
 		}
@@ -436,7 +530,7 @@
 	const key = "fomo4good.intent.v2";
 	try {
 		const id = localStorage.getItem(key);
-		if (/^[a-f0-9-]{36}$/.test(id || "")) pending = { id };
+		if (!practiceMode && /^[a-f0-9-]{36}$/.test(id || "")) pending = { id };
 	} catch {}
 	const save = (i) => {
 		pending = i;
@@ -446,7 +540,7 @@
 		} catch {}
 	};
 	async function api(path, input) {
-		const response = await fetch(`/api/fomo/${path}`, {
+		const response = await fetch(`/api/${practiceMode ? "practice" : "fomo"}/${path}`, {
 			...(input
 				? {
 						method: "POST",
@@ -473,7 +567,7 @@
 		return rows
 			.map(
 				(d, i) =>
-					`<div class="f-board-row"><span>${String(i + 1).padStart(2, "0")}</span><div><strong>${rogue ? esc(short(d.address)) : donor(d)}</strong><small>${t(d.count === 1 ? t("1 donation") : t("{n} donations"), { n: d.count })}</small></div><b title="${esc(d.amount)} USDC">${money(d.amount)}<small>USDC</small></b></div>`,
+					`<div class="f-board-row"><span>${String(i + 1).padStart(2, "0")}</span><div><strong>${rogue ? esc(short(d.address)) : donor(d)}</strong><small>${t(d.count === 1 ? t("1 donation") : t("{n} donations"), { n: d.count })}</small></div><b title="${esc(d.amount)} ${currency}">${money(d.amount)}<small>${currency}</small></b></div>`,
 			)
 			.join("");
 	}
@@ -509,13 +603,15 @@
 		const stale = Date.now() - lastSync > 15000 || state.watcher.stale;
 		$("live-round").textContent = $("round-label").textContent;
 		$("live-timer").textContent = $("timer").textContent;
-		$("live-pool").textContent = `${money(r?.amount || "0")} USDC`;
+		$("live-pool").textContent = `${money(r?.amount || "0")} ${currency}`;
 		$("live-status").textContent = stale ? t("Connection delayed") : state.campaign.ended ? t("Campaign ended") : !r ? t("Waiting for first donation") : remaining === 0 ? t("Confirming result…") : t("{team} leads", { team: t(team(r.team)?.team || t("Charity")) });
 
 		$("submit").disabled =
 			busy ||
 			stale ||
 			state.campaign.ended ||
+			state.campaign.accepting === false ||
+			(practiceMode && !state.wallet) ||
 			!$("form").querySelector('input[name="team"]:checked');
 		if (stale) {
 			$("notice").textContent =
@@ -533,11 +629,11 @@
 	function render() {
 		$("notice").classList.remove("error");
 		$("notice").textContent =
-			state.mode === "preview"
+			practiceMode ? t("PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO") : state.mode === "unavailable" ? t("REAL DONATIONS ARE NOT OPEN YET.") : state.mode === "preview"
 				? t("LOCAL PREVIEW · SIMULATED USDC · NO REAL DONATIONS")
 				: t("CIRCLE ARC TESTNET · TEST USDC ONLY · NO REAL DONATIONS");
 		$("sim-label").textContent =
-			state.mode === "preview" ? t("SIMULATED") : t("TEST USDC");
+			practiceMode ? "FUSD" : state.mode === "unavailable" ? "USDC" : state.mode === "preview" ? t("SIMULATED") : t("TEST USDC");
 		$("round-label").textContent =
 			t("ROUND {n}", { n: String(state.round?.id || (state.history[0]?.id || 0) + 1).padStart(3, "0") });
 		$("round-status").textContent = state.campaign.ended
@@ -546,8 +642,8 @@
 				? t("ROUND IS LIVE")
 				: t("WAITING FOR FIRST DONATION");
 		$("pot").textContent = money(state.round?.amount || "0");
-		$("pot").title = (state.round?.amount || "0") + " USDC";
-		$("community").innerHTML = `${money(state.community)} <small>USDC</small>`;
+		$("pot").title = (state.round?.amount || "0") + ` ${currency}`;
+		$("community").innerHTML = `${money(state.community)} <small>${currency}</small>`;
 		$("leading").textContent = state.round
 			? t("{team} gets the pool.", { team: team(state.round.team)?.name })
 			: t("Literally nobody wins. Yet.");
@@ -566,14 +662,14 @@
 			? state.recent
 					.map(
 						(d) =>
-							`<div class="f-board-row"><span>↗</span><div><strong>${d.rogue ? esc(short(d.from)) : donor(d)}</strong><small>${d.rogue ? t("ROGUE → KIDS") : esc(t(team(d.team)?.team))} · ${d.txHash ? `<a target="_blank" rel="noopener" href="${state.payment.explorer}/tx/${esc(d.txHash)}">${t("TX ↗")}</a>` : t("SIMULATED")}</small></div><b title="${esc(d.amount)} USDC">+${money(d.amount)}<small>USDC</small></b></div>`,
+							`<div class="f-board-row"><span>↗</span><div><strong>${d.rogue ? esc(short(d.from)) : donor(d)}</strong><small>${d.rogue ? t("ROGUE → KIDS") : esc(t(team(d.team)?.team))} · ${d.txHash ? `<a target="_blank" rel="noopener" href="${state.payment.explorer}/tx/${esc(d.txHash)}">${t("TX ↗")}</a>` : t("SIMULATED")}</small></div><b title="${esc(d.amount)} ${currency}">+${money(d.amount)}<small>${currency}</small></b></div>`,
 					)
 					.join("")
 			: `<p class="f-empty">${t("No donations yet.")}<br>${t("The charities are fine. Our ego is not.")}</p>`;
 		$("teams").innerHTML = state.teams
 			.map(
 				(t) =>
-					`<article class="f-team-card"><span class="emoji" aria-hidden="true">${t.emoji}</span><h3>${esc(translateTeam(t.team))}</h3><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.name)} ↗</a><p>${esc(translateTeam(t.tagline))}</p><strong>${money(t.allocated)} USDC</strong><small>${translateTeam("{n} round wins · allocated", { n: t.wins })}</small><small>${translateTeam("ArcBlock shortfall: ${amount}", { amount: money(t.topUp) })}</small></article>`,
+					`<article class="f-team-card"><span class="emoji" aria-hidden="true">${t.emoji}</span><h3>${esc(translateTeam(t.team))}</h3><a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.name)} ↗</a><p>${esc(translateTeam(t.tagline))}</p><strong>${money(t.allocated)} ${currency}</strong><small>${translateTeam("{n} round wins · allocated", { n: t.wins })}</small><small>${practiceMode ? translateTeam("Imaginary allocations. Charities receive exactly none of this.") : translateTeam("ArcBlock shortfall: ${amount}", { amount: money(t.topUp) })}</small></article>`,
 			)
 			.join("");
 		$("rogues").innerHTML = state.rogueDonors.length
@@ -583,13 +679,24 @@
 			? state.history
 					.map(
 						(r) =>
-							`<div class="f-board-row"><span>#${r.id}</span><div><strong>${esc(team(r.team)?.name)}</strong><small>${state.mode === "preview" ? t("PREVIEW ALLOCATION") : t("TESTNET ALLOCATION")} · ${esc(r.lastDonor.name || short(r.lastDonor.address))}</small></div><b>${money(r.amount)}<small>USDC</small></b></div>`,
+							`<div class="f-board-row"><span>#${r.id}</span><div><strong>${esc(team(r.team)?.name)}</strong><small>${(practiceMode || state.mode === "preview") ? t("PREVIEW ALLOCATION") : t("TESTNET ALLOCATION")} · ${esc(r.lastDonor.name || short(r.lastDonor.address))}</small></div><b>${money(r.amount)}<small>${currency}</small></b></div>`,
 					)
 					.join("")
 			: `<p class="f-empty">${t("No completed rounds.")}<br>${t("We refuse to celebrate an empty pot.")}</p>`;
+
+  $("unavailable").hidden = practiceMode || state.campaign.accepting !== false;
+  if (!practiceMode && state.campaign.accepting === false) { $("form").hidden = true; $("payment").hidden = true; pending = null; }
+  if (practiceMode) {
+   $("balance").textContent = `${money(state.wallet?.balance)} FUSD`;
+   $("refill").disabled = busy || !state.wallet || Number(state.wallet.balance) >= 1;
+   $("practice-history").innerHTML = $("history").innerHTML;
+   const last = state.history[0];
+   $("practice-result").hidden = !last;
+   if (last) $("practice-result").innerHTML = `<h2>${last.lastDonor.address === state.wallet?.id ? t("YOU WON!") : esc(t("{team} WIN!", { team: t(team(last.team)?.team) }))}</h2><p>${t("{amount} FUSD of completely imaginary money. The charity receives exactly none of this.", { amount: money(last.amount) })}</p><p>${t("Want to try with $1 that actually exists?")}</p><a href="/arc?lang=${locale}#play">${t("PLAY FOR REAL — 1 USDC ↗")}</a>`;
+  }
 		const m = state.metrics;
 		$("research").innerHTML =
-			`<dl><div><dt>${t("PAGE SESSIONS")}</dt><dd>${m.visits}</dd></div><div><dt>${t("PAYMENT INTENTS")}</dt><dd>${m.intents}</dd></div><div><dt>${t("DONOR ADDRESSES")}</dt><dd>${m.donors}</dd></div><div><dt>${t("INTENT → PAID")}</dt><dd>${m.intentConversion}%</dd></div><div><dt>${t("MEDIAN DONATION")}</dt><dd>${money(m.median)} USDC</dd></div><div><dt>${t("LAST-MINUTE MOVES")}</dt><dd>${m.lastMinuteMoves}</dd></div></dl>`;
+			`<dl><div><dt>${t("PAGE SESSIONS")}</dt><dd>${m.visits}</dd></div><div><dt>${t("PAYMENT INTENTS")}</dt><dd>${m.intents}</dd></div><div><dt>${t("DONOR ADDRESSES")}</dt><dd>${m.donors}</dd></div><div><dt>${t("INTENT → PAID")}</dt><dd>${m.intentConversion}%</dd></div><div><dt>${t("MEDIAN DONATION")}</dt><dd>${money(m.median)} ${currency}</dd></div><div><dt>${t("LAST-MINUTE MOVES")}</dt><dd>${m.lastMinuteMoves}</dd></div></dl>`;
 		$("finding").textContent =
 			m.rogueTransfers > m.paidIntents
 				? t("Finding: Documentation remains ineffective.")
@@ -614,7 +721,7 @@
 	function payment(i) {
 		$("form").hidden = true;
 		$("payment").hidden = false;
-		$("exact").textContent = `${i.amount} USDC`;
+		$("exact").textContent = `${i.amount} ${currency}`;
 		$("network").textContent =
 			state.mode === "preview"
 				? t("LOCAL SIMULATION — DO NOT SEND FUNDS")
@@ -635,16 +742,27 @@
 		} else $("back").textContent = t("← Back");
 		tick();
 	}
+	let practiceSessionReady = false;
 	async function sync() {
 		if (syncing) return;
 		syncing = true;
 		try {
+			if (practiceMode && !practiceSessionReady) { await api("session", {}); practiceSessionReady = true; }
 			const start = Date.now();
 			state = await api("state");
+   if (!practiceMode && state.campaign.accepting !== false) {
+    try {
+     if (!sessionStorage.getItem("fomo4good.visited")) {
+      await api("visit", {});
+      sessionStorage.setItem("fomo4good.visited", "1");
+     }
+    } catch {}
+   }
+
 			offset = state.now - (start + Date.now()) / 2;
 			lastSync = Date.now();
 			render();
-			if (pending) {
+			if (!practiceMode && pending && state.campaign.accepting !== false) {
 				try {
 					const i = await api(`intents/${pending.id}`);
 					save(i);
@@ -661,6 +779,15 @@
 			tick();
 		}
 	}
+let practiceAttempt = null;
+ try { practiceAttempt = JSON.parse(localStorage.getItem("fomo4good.practice.retry") || "null"); } catch {}
+ $("refill").addEventListener("click", async () => {
+  if (busy || !practiceMode) return;
+  busy = true; $("refill").disabled = true;
+  try { await api("refill", {}); $("wallet-feedback").textContent = t("1,000 FUSD printed. Reserves remain zero."); await sync(); }
+  catch (error) { $("wallet-feedback").textContent = error.message; }
+  finally { busy = false; $("refill").disabled = !state?.wallet || Number(state.wallet.balance) >= 1; }
+ });
 	$("form").addEventListener("submit", async (e) => {
 		e.preventDefault();
 		if (busy) return;
@@ -669,6 +796,18 @@
 		feedback(t("Generating your very specific good deed…"));
 		try {
 			const form = new FormData($("form"));
+
+   if (practiceMode) {
+    const input = Object.fromEntries(form), fingerprint = JSON.stringify(input);
+    if (!practiceAttempt || practiceAttempt.fingerprint !== fingerprint) practiceAttempt = { fingerprint, requestId: crypto.randomUUID() };
+    try { localStorage.setItem("fomo4good.practice.retry", JSON.stringify(practiceAttempt)); } catch {}
+    await api("donate", { ...input, requestId: practiceAttempt.requestId });
+    practiceAttempt = null;
+    try { localStorage.removeItem("fomo4good.practice.retry"); } catch {}
+    feedback(t("FUSD spent. Your team takes the imaginary lead."));
+    await sync();
+    return;
+   }
 			const i = await api("intents", Object.fromEntries(form));
 			save(i);
 			feedback("");
@@ -739,13 +878,6 @@
 			tick();
 		}
 	});
-	try {
-		if (!sessionStorage.getItem("fomo4good.visited")) {
-			api("visit", {})
-				.then(() => sessionStorage.setItem("fomo4good.visited", "1"))
-				.catch(() => {});
-		}
-	} catch {}
 	root.querySelector("[data-language]").addEventListener("change", (event) => {
 		if (!supported.includes(event.target.value)) return;
 		locale = event.target.value;

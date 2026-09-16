@@ -33,7 +33,7 @@
 - https://docs.arc.io/arc/references/usdc-system-events：系统 emitter `0xfffffffffffffffffffffffffffffffffffffffe`，18 位 Transfer；ERC-20 镜像 6 位，不能双计。
 - https://docs.arc.io/build/evm-differences：非递减块时间、确定性终局、native 转账日志。
 
-官方 index 写 Testnet only，但事件历史页面提及 mainnet，资料有不一致；本实现不推测真实 mainnet 参数。当前只开放 preview/testnet。
+官方 index 写 Testnet only，但事件历史页面提及 mainnet，资料有不一致；本实现不推测真实 mainnet 参数。底层只支持 preview/testnet 配置，公共真实捐款 API 在两种配置下都不开放；公共演练使用独立的 FUSD Practice。
 
 ## 后续 ARC 集成
 
@@ -42,3 +42,13 @@
 ## 静态字体
 
 当前 ARC content media 路由只允许图片/影音/PDF，不直接提供字体。VT323 以 data URL 随组件 CSS 打包；原始 TTF 和 OFL 许可证随仓库保留。不需要额外字体服务，也没有修改 ARC 内部代码或伪装文件扩展名。
+
+## 永久 FUSD 演练
+
+入口 `/arc/practice`，API `/api/practice/*`。独立 DID Space：默认 `var/practice/spaces`、owner `did:abt:fomo4good-practice-owner`、instance `did:abt:fomo4good-practice-v1`。不迁移旧 preview 数据，不与真实账本共用根目录，不读取真实付款 intent，也不输出真实捐款凭据。
+
+Practice 没有结束日期。浏览器 HttpOnly Cookie 对应匿名玩家，初始 1,000 FUSD；不足 1 FUSD 可再领 1,000。保留 Cookie 才能恢复该浏览器身份；更换身份可以领取新点数，这些点数没有金钱价值。余额和回合变化一起通过 AFS 版本写入；同一请求 ID 重试不重复扣减。规则用服务端时间，重启后按原结束时间结算。
+
+真实活动尚未配置时 `/api/fomo/state` 返回明确的 unavailable 状态和零真实捐款，不暴露旧 preview/testnet 数字；真实付款与旧 preview-confirm 写接口拒绝请求。不得把 FUSD 余额、排行榜、幻想分配或练习收据用于真实募款核对。现有 report/receipt 工具不连接 Practice scope。
+
+对两个 scope 分别备份。当前仍为整份账本 CAS；长期高流量演练需要在保留余额、总排名和请求去重的前提下另行实现归档，不能直接清空账本。
