@@ -307,17 +307,18 @@ test('profile draft survives page changes before donation and deliberately clear
  assert.equal(cleared.document.querySelector('[name="name"]').value,'Remember me');
 });
 
-test('leaderboard scope keeps podium, personal rank and rows consistent; sound preference survives language changes', async context => {
+test('leaderboard scope stays consistent; sound defaults on and an explicit opt-out survives language changes', async context => {
  const state={...empty(),mode:'practice',wallet:{id:'me',balance:'980'},topDonors:[{address:'me',name:'Me',amount:'1020',count:4}],roundDonors:[{address:'other',name:'Other',amount:'5',count:1}]};
  const dom=new JSDOM(render({props:{mode:'practice',view:'leaderboard'}}).html,{url:'http://fomo4good.localhost/arc/practice/leaderboard',runScripts:'outside-only'});context.after(()=>dom.window.close());const w=dom.window;w.AbortSignal=globalThis.AbortSignal;
  w.fetch=async()=>({ok:true,json:async()=>structuredClone(state)});w.eval(script);const q=s=>w.document.querySelector(s);
  await waitFor(()=>q('[data-podium]').textContent.includes('1,020.00'));
+ assert.equal(q('[data-sound]').getAttribute('aria-pressed'),'true');assert.match(q('[data-sound]').textContent,/ON/);
  assert.match(q('[data-leaderboard]').textContent,/1,020.00/);
  q('[data-ranking]').value='round';q('[data-ranking]').dispatchEvent(new w.Event('change'));
  assert.match(q('[data-board-scope]').textContent,/THIS ROUND/);assert.match(q('[data-podium]').textContent,/Other/);assert.doesNotMatch(q('[data-podium]').textContent,/1,020/);assert.match(q('[data-personal-rank]').textContent,/Not ranked/);
- q('[data-sound]').click();assert.equal(w.localStorage.getItem('fomo4good.sound'),'on');
+ q('[data-sound]').click();assert.equal(w.localStorage.getItem('fomo4good.sound'),'off');
  q('[data-language]').value='zh-Hant';q('[data-language]').dispatchEvent(new w.Event('change'));
- assert.equal(q('[data-sound]').getAttribute('aria-pressed'),'true');assert.match(q('[data-sound]').textContent,/開/);
+ assert.equal(q('[data-sound]').getAttribute('aria-pressed'),'false');assert.match(q('[data-sound]').textContent,/關/);
  assert.match(q('.f-legal').textContent,/沒有夥伴關係/);
  assert.equal(new URL(q('[data-share-x]').href).searchParams.get('url'),'https://fomo4good.com/arc/practice/leaderboard/?lang=zh-Hant');
  assert.match(q('.f-source-cat').src,/^data:image\/svg\+xml;base64,/);
