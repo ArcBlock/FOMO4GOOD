@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { JSDOM } from "jsdom";
 const origin = process.env.FOMO_ORIGIN || "http://localhost:4931";
 async function api(path, input, headers = {}) {
 	const r = await fetch(origin + path, {
@@ -33,7 +34,17 @@ for (const page of ["rules", "teams", "leaderboard"]) {
  const response = await api(`/arc/${page}`);
  assert.equal(response.status, 200);
  const body = await response.text();
- assert.ok(body.includes(`data-view="${page}"`));
+ const dom = new JSDOM(body);
+ const document = dom.window.document;
+ assert.equal(document.querySelector('[data-fomo]').dataset.view, page);
+ assert.ok([...document.querySelectorAll('style')].some(style => style.textContent.includes('.fomo[data-view="play"]')));
+ const visibleHeroes = [...document.querySelectorAll('h1')].filter(heading => {
+  for (let node = heading; node; node = node.parentElement) if (dom.window.getComputedStyle(node).display === 'none') return false;
+  return true;
+ });
+ assert.equal(visibleHeroes.length, 1, `${page} must show exactly one hero`);
+ assert.equal(visibleHeroes[0].closest('[data-page]').dataset.page, page);
+ dom.window.close();
  assert.ok(body.includes(`data-nav="${page}" aria-current="page"`));
  assert.ok(body.includes('data-live-timer'));
  assert.ok(body.includes('href="/arc#play"'));

@@ -109,7 +109,7 @@ export function createApp(config, store, watcher) {
 					content = Buffer.from(
 						content
 							.toString()
-							.replace('data-view="play"', `data-view="${pageView}"`)
+							.replace(/(<div\b[^>]*\bdata-fomo\b[^>]*\bdata-view=)"play"/, `$1"${pageView}"`)
 							.replace(`data-nav="${pageView}"`, `data-nav="${pageView}" aria-current="page"`)
 							.replace(
 								/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
