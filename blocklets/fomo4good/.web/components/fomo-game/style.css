@@ -1546,3 +1546,6 @@ body {
 .f-source-link:hover { border-color: var(--mint); }
 .f-source-link:hover .f-source-cat { transform: rotate(-8deg) translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .f-source-link:hover .f-source-cat { transform: none; } }
+
+.fomo .f-context-link { text-decoration: underline; text-decoration-color: #666488; text-underline-offset: 4px; }
+.fomo .f-context-link:hover { color: var(--mint); text-decoration-color: var(--mint); }

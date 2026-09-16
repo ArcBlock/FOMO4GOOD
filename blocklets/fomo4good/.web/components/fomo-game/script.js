@@ -279,7 +279,13 @@
     "Use a public http or https URL, at most 200 characters.": "請填寫公開的 http 或 https 網址，最多 200 個字元。",
     "This donation amount is busy. Try another base amount.": "這個捐款金額暫時無法使用，請換一個基本金額。",
     "Use a donation from 1 to 100,000 USDC, with at most two decimals.": "請輸入 1 至 100,000 USDC 的捐款金額，最多兩位小數。",
-    "Invalid URL": "網址格式不正確。"
+    "Invalid URL": "網址格式不正確。",
+    "Built on ARC.": "建於 ARC。",
+    "Paid on Arc.": "付款走 Arc。",
+    "BUILT ON ARC.": "建於 ARC。",
+    "PAID ON Arc.": "付款走 Arc。",
+    "Confused? Working as intended.": "搞混了？符合預期。",
+    "The campaign service and watcher run alongside ARC.": "活動服務與監看程式和 ARC 一起運行。"
   },
   "en-x-slop": {
     "PLAY": "EXECUTE GOOD.EXE",
