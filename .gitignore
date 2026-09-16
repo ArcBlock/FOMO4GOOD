@@ -151,3 +151,5 @@ var/
 **/.web-cache/
 **/dist/
 artifacts/
+
+.wrangler/

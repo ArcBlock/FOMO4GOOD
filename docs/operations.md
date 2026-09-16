@@ -35,9 +35,9 @@
 
 官方 index 写 Testnet only，但事件历史页面提及 mainnet，资料有不一致；本实现不推测真实 mainnet 参数。底层只支持 preview/testnet 配置，公共真实捐款 API 在两种配置下都不开放；公共演练使用独立的 FUSD Practice。
 
-## 后续 ARC 集成
+## ARC 集成与 Cloudflare
 
-目前页面使用 ARC Blocklet/AUP，数据使用 ARC DID Space SDK；HTTP handler 与链 watcher 是 companion Node service。没有声称它们已经成为 ARC 原生 exec/scheduler provider。若要只部署一个 Blocklet，应把通用受控服务/后台任务生命周期接到 ARC，而不是在核心仓库添加 FOMO4GOOD 专用功能。当前实现无需改动 ARC 源码。
+本地开发仍使用 companion Node service。测试网 watcher 已改经 ARC 通用 EVM provider 读取链。独立游戏 AFS provider 与 Cloudflare 公共网关／私有 Worker 已实现，本地 workerd 验证通过；云端资源、域名和发布验收尚未完成。部署边界、跨仓依赖与验证步骤见 [Cloudflare 部署](cloudflare.md)。
 
 ## 静态字体
 

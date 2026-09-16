@@ -1,0 +1,23 @@
+{
+	"name": "fomo4good-gateway",
+	"main": "../dist/worker/gateway.mjs",
+	"compatibility_date": "2026-09-15",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": false,
+	"preview_urls": false,
+	"vars": {
+		"FOMO_ORIGIN": "https://REPLACE_WITH_PUBLIC_HOST",
+		"FOMO_ARC_ORIGIN": "https://REPLACE_WITH_ARC_BLOCKLET_HOST"
+	},
+	"services": [
+		{ "binding": "FOMO_PROVIDER", "service": "fomo4good-provider" },
+		{ "binding": "ARC_SITE", "service": "REPLACE_WITH_ARC_SITE_WORKER" }
+	],
+	"ratelimits": [
+		{
+			"name": "FOMO_RATE_LIMITER",
+			"namespace_id": "4931",
+			"simple": { "limit": 30, "period": 60 }
+		}
+	]
+}

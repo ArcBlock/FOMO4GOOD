@@ -228,8 +228,8 @@ export class Store {
 			payment: s.payments.find((p) => p.id === i.paymentId) || null,
 		};
 	}
-	async state(now = Date.now()) {
-		if (this.config.preview) await this.update((s) => this.closeAt(s, now));
+	async state(now = Date.now(), { settle = true } = {}) {
+		if (this.config.preview && settle) await this.update((s) => this.closeAt(s, now));
 		const { state: s } = await this.read();
 		const rank = (rows) => {
 			const groups = new Map();

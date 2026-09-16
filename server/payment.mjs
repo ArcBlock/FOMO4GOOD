@@ -38,22 +38,10 @@ export class Watcher {
 	constructor(config, store, rpc) {
 		this.config = config;
 		this.store = store;
-		this.rpc = rpc || this.request.bind(this);
+		if (!rpc) throw new Error("Watcher requires an ARC EVM provider RPC adapter.");
+		this.rpc = rpc;
 		this.busy = false;
 		this.lastError = null;
-	}
-	async request(method, params) {
-		const res = await fetch(this.config.rpcUrl, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-			signal: AbortSignal.timeout(15000),
-		});
-		if (!res.ok) throw new Error(`RPC HTTP ${res.status}`);
-		const data = await res.json();
-		if (data.error || data.result == null)
-			throw new Error(data.error?.message || "Empty RPC result");
-		return data.result;
 	}
 	async tick() {
 		if (this.busy) return;

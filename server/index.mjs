@@ -1,3 +1,4 @@
+import { chainRpc } from "./evm.mjs";
 import { configuration } from "./config.mjs";
 import { openSpace } from "./space.mjs";
 import { Store } from "./store.mjs";
@@ -7,7 +8,14 @@ import { PracticeStore, practiceConfiguration } from "./practice.mjs";
 const config = configuration();
 const space = await openSpace(config);
 const store = new Store(space.afs, config);
-const watcher = config.preview ? null : new Watcher(config, store);
+let chain;
+if (!config.preview) {
+ const { AFSEVM } = await import(config.evmSdk);
+ const { AFS } = await import(config.afsSdk);
+ chain = new AFS();
+ await chain.mount(new AFSEVM({ endpoint: config.rpcUrl, chainId: String(config.chainId) }), '/dev/chain/arc');
+}
+const watcher = config.preview ? null : new Watcher(config, store, chainRpc(chain));
 const practiceConfig = practiceConfiguration(config);
 const practiceSpace = await openSpace(practiceConfig);
 const practice = new PracticeStore(practiceSpace.afs, practiceConfig);

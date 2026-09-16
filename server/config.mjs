@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { sdk } from "../scripts/runtime.mjs";
+import { sdk, arcHome } from "../scripts/runtime.mjs";
 export function configuration(env = process.env) {
 	const mode = env.FOMO_MODE;
 	if (!["preview", "testnet"].includes(mode))
@@ -21,6 +21,8 @@ export function configuration(env = process.env) {
 			env.FOMO_OWNER_DID || (preview ? "did:abt:fomo-preview-owner" : ""),
 		instanceDid: env.FOMO_INSTANCE_DID || `did:abt:fomo4good-${mode}`,
 		sdk: env.ARC_DID_SPACE_MODULE || sdk,
+		evmSdk: resolve(arcHome, "providers/runtime/evm/dist/index.mjs"),
+		afsSdk: resolve(arcHome, "packages/core/dist/index.mjs"),
 		chainId: 5042002,
 		rpcUrl: env.FOMO_RPC_URL || "https://rpc.testnet.arc.io",
 		recipient: (env.FOMO_RECIPIENT || "").toLowerCase(),

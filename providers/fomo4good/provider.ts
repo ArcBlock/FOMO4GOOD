@@ -1,0 +1,187 @@
+import {
+	Actions,
+	AFSBaseProvider,
+	AFSNotFoundError,
+	Explain,
+	List,
+	Meta,
+	Read,
+	Stat,
+	type ProviderTreeSchema,
+	type RouteContext,
+} from "@aigne/afs";
+import { joinURL } from "ufo";
+
+/** Private service-bound provider. Only sanitized state and semantic actions.
+ * The trusted gateway supplies tokens; clients cannot select storage scopes.
+ */
+export class FomoProvider extends AFSBaseProvider {
+	override readonly name = "fomo4good";
+	override readonly accessMode = "readwrite" as const;
+	constructor(private readonly services: any) {
+		super();
+	}
+	static treeSchema(): ProviderTreeSchema {
+		return {
+			operations: ["read", "list", "stat", "explain", "exec"],
+			tree: {
+				"/": { kind: "fomo:root" },
+				"/real": { kind: "fomo:state" },
+				"/practice": {
+					kind: "fomo:state",
+					actions: ["session", "state", "donate", "refill"],
+				},
+			},
+			bestFor: ["FOMO4GOOD game"],
+			notFor: ["raw ledger access", "chain RPC"],
+		};
+	}
+	@Read("/")
+	root() {
+		return this.buildEntry("/", {
+			content: { modes: ["real", "practice"] },
+			meta: { kind: "fomo:root", childrenCount: 2 },
+		});
+	}
+	@List("/")
+	children() {
+		return {
+			data: ["real", "practice"].map((name) =>
+				this.buildEntry(joinURL("/", name), {
+					meta: { kind: "fomo:state", childrenCount: 0 },
+				}),
+			),
+		};
+	}
+	@Read("/real")
+	async real() {
+		const { config, store, unavailableRealState } = this.services;
+		return this.buildEntry("/real", {
+			content:
+				config.mode === "mainnet"
+					? await store.state()
+					: unavailableRealState(config),
+		});
+	}
+	@Read("/practice")
+	async practice() {
+		return this.buildEntry("/practice", {
+			content: await this.services.practice.state(Date.now(), null, {
+				settle: false,
+			}),
+		});
+	}
+	@Stat("/")
+	statRoot() {
+		return {
+			data: this.buildEntry("/", {
+				meta: { kind: "fomo:root", childrenCount: 2 },
+			}),
+		};
+	}
+	@Meta("/")
+	metaRoot() {
+		return this.buildEntry("/.meta", {
+			content: { kind: "fomo:root" },
+			meta: { kind: "fomo:root" },
+		});
+	}
+	@Stat("/:mode")
+	statMode(ctx: RouteContext) {
+		const mode = ctx.params.mode;
+		if (!["real", "practice"].includes(mode))
+			throw new AFSNotFoundError(ctx.path);
+		return {
+			data: this.buildEntry(joinURL("/", mode), {
+				meta: { kind: "fomo:state", childrenCount: 0 },
+			}),
+		};
+	}
+	@Meta("/:mode")
+	metaMode(ctx: RouteContext) {
+		this.statMode(ctx);
+		return this.buildEntry(joinURL("/", ctx.params.mode, ".meta"), {
+			content: { kind: "fomo:state" },
+			meta: { kind: "fomo:state" },
+		});
+	}
+	@List("/:mode")
+	listMode(ctx: RouteContext) {
+		this.statMode(ctx);
+		return { data: [] };
+	}
+	@Read("/.meta/.capabilities")
+	capabilities() {
+		return this.buildEntry("/.meta/.capabilities", {
+			content: {
+				schemaVersion: 1,
+				provider: this.name,
+				operations: this.getOperationsDeclaration(),
+				tools: [],
+				actions: [{ discovery: { pathTemplate: "/practice/.actions" } }],
+			},
+		});
+	}
+	@Explain("/")
+	explainRoot() {
+		return {
+			format: "markdown" as const,
+			content:
+				"FOMO4GOOD private provider: real/practice state and practice session/state/donate/refill actions. No raw ledger, generic writes or caller-supplied chain events. Browser identity is supplied only by the trusted gateway.",
+		};
+	}
+	@Actions("/practice")
+	actions() {
+		return {
+			data: ["session", "state", "donate", "refill"].map((name) =>
+				this.buildEntry(joinURL("/practice/.actions", name), {
+					meta: { kind: "afs:executable" },
+					content: {
+						description: `Practice ${name}`,
+						schema: {
+							type: "object",
+							required: ["token"],
+							properties: {
+								token: { type: "string" },
+								input: { type: "object" },
+							},
+						},
+					},
+				}),
+			),
+		};
+	}
+	@Actions.Exec("/practice", "session", undefined, { effect: "write" })
+	async session(_ctx: RouteContext, args: Record<string, unknown>) {
+		return {
+			success: true,
+			data: await this.services.practice.session(args.token),
+		};
+	}
+	@Actions.Exec("/practice", "state", undefined, {
+		effect: "read",
+		readonly: true,
+	})
+	async state(_ctx: RouteContext, args: Record<string, unknown>) {
+		return {
+			success: true,
+			data: await this.services.practice.state(Date.now(), args.token, {
+				settle: false,
+			}),
+		};
+	}
+	@Actions.Exec("/practice", "donate", undefined, { effect: "write" })
+	async donate(_ctx: RouteContext, args: Record<string, unknown>) {
+		return {
+			success: true,
+			data: await this.services.practice.donate(args.token, args.input || {}),
+		};
+	}
+	@Actions.Exec("/practice", "refill", undefined, { effect: "write" })
+	async refill(_ctx: RouteContext, args: Record<string, unknown>) {
+		return {
+			success: true,
+			data: await this.services.practice.refill(args.token),
+		};
+	}
+}
