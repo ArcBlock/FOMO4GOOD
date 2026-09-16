@@ -74,19 +74,20 @@ jobs:
       - name: Purge production HTML edge cache
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          FETCH_HOST: ${{ vars.PROD_SITE_HOST }}
+          FETCH_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
         run: node .github/scripts/purge-html-cache.mjs
 
       - name: Smoke check
         id: smoke
         env:
-          FETCH_HOST: ${{ vars.PROD_SITE_HOST }}
+          FETCH_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
+          SEO_HOST: ${{ vars.PROD_SEO_HOST || 'fomo4good.com' }}
         run: node .github/scripts/smoke-site.mjs
 
       - name: Summary
         if: always()
         env:
-          SITE_HOST: ${{ vars.PROD_SITE_HOST }}
+          SITE_HOST: ${{ vars.PROD_SITE_HOST || 'fomo4good.com' }}
           SMOKE_FAILED: ${{ steps.smoke.outputs.failed }}
         run: |
           version="$(grep -E '^version:' blocklets/fomo4good/blocklet.yaml | awk '{print $2}')"
@@ -94,6 +95,6 @@ jobs:
             echo "## FOMO4GOOD → production"
             echo ""
             echo "- Blocklet: fomo4good@${version} (${GITHUB_SHA::7})"
-            echo "- Site: https://${SITE_HOST:-<PROD_SITE_HOST unset>}/"
+            echo "- Site: https://${SITE_HOST}/"
             echo "- Smoke: ${SMOKE_FAILED:-not run} failed"
           } >> "$GITHUB_STEP_SUMMARY"

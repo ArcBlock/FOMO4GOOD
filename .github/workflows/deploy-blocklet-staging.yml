@@ -92,10 +92,14 @@ jobs:
           FETCH_HOST: ${{ vars.STAGING_SITE_HOST || 'fomo4good.afsd.io' }}
         run: node .github/scripts/purge-html-cache.mjs
 
+      # SEO_HOST is fomo4good.com here too, on purpose — see smoke-site.mjs: the
+      # canonical/sitemap host comes from `sites[].domains[0]` at pre-render
+      # time, so staging bakes the production domain by design.
       - name: Smoke check
         id: smoke
         env:
           FETCH_HOST: ${{ vars.STAGING_SITE_HOST || 'fomo4good.afsd.io' }}
+          SEO_HOST: ${{ vars.PROD_SEO_HOST || 'fomo4good.com' }}
         run: node .github/scripts/smoke-site.mjs
 
       - name: Summary

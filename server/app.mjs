@@ -114,13 +114,14 @@ export function createApp(config, store, watcher, practice) {
 								/<!-- inspect-bridge-start -->[\s\S]*?<!-- inspect-bridge-end -->/g,
 								"",
 							)
-							// Absolute self-links (canonical, og:url) point at ARC's host; this origin serves them.
+							// Absolute self-links (canonical, og:url) name the SEO host baked at
+							// pre-render (sites.domains[0]) or the dev host; this origin serves them.
 							.replace(
-								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/en\//g,
+								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/en\//g,
 								config.origin + "/",
 							)
 							.replace(
-								/https?:\/\/fomo4good\.localhost(?::[0-9]+)?\/media\//g,
+								/https?:\/\/fomo4good\.(?:com|localhost)(?::[0-9]+)?\/media\//g,
 								config.origin + "/media/",
 							),
 					);

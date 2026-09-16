@@ -7,11 +7,14 @@
 // every page loaded without aup-core.css / aup-ssr.js — nothing in the deploy
 // output said so).
 //
-// The canonical / sitemap host is NOT asserted: it is `sites[].domains[0]` from
-// blocklet.yaml at pre-render time, and the campaign's public domain is not
-// decided yet.
+// TWO HOSTS, DELIBERATELY (same as aside):
+//   FETCH_HOST — the surface serving this environment (what we fetch).
+//   SEO_HOST   — the domain baked into canonical/og:url/sitemap at pre-render
+//                time. That is ALWAYS `sites[].domains[0]` from blocklet.yaml,
+//                so it is fomo4good.com in EVERY environment, staging included.
 import assert from "node:assert/strict";
 const host = process.env.FETCH_HOST;
+const seoHost = process.env.SEO_HOST || "fomo4good.com";
 if (!host) {
 	console.log("::notice::FETCH_HOST unset — smoke check skipped.");
 	process.exit(0);
@@ -39,6 +42,7 @@ for (const [path, view, mode] of pages) {
 		const teams = JSON.parse(html.match(/data-team-records>([^<]*)</)?.[1] || "[]");
 		assert.equal(teams.length, 5, `expected 5 teams, got ${teams.length}`);
 		assert.ok(html.includes(`data-nav="${view}" aria-current="page"`), "active nav not marked");
+		assert.ok(html.includes(`rel="canonical" href="https://${seoHost}/en${path}"`), `canonical is not https://${seoHost}/en${path}`);
 		for (const m of html.matchAll(/(?:src|href)="([^"]*\/aup[a-z-]*\.[a-z0-9]+\.(?:js|css))"/g)) assets.add(m[1]);
 	});
 }
@@ -58,7 +62,11 @@ await check("launch artwork is served", async () => {
 	assert.equal(r.status, 200);
 	assert.match(r.headers.get("content-type") || "", /image\/jpeg/);
 });
-await check("sitemap is served", async () => assert.equal((await get("/sitemap.xml")).status, 200));
+await check(`sitemap names ${seoHost}`, async () => {
+	const r = await get("/sitemap.xml");
+	assert.equal(r.status, 200);
+	assert.match(await r.text(), new RegExp(`<loc>https://${seoHost.replace(/\./g, "\\.")}`));
+});
 await check("unknown practice page is a 404", async () => assert.equal((await get("/practice/nope/")).status, 404));
 console.log(`smoke: ${failed} failed`);
 if (process.env.GITHUB_OUTPUT) {

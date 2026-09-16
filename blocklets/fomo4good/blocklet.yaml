@@ -15,12 +15,15 @@ repository:
 keywords: [charity, donations, usdc]
 tags: [charity]
 surfaces: [/]
-# Local dev answers on fomo4good.localhost. A published copy resolves by its
-# id first (`fomo4good.<domain root>`); add a brand domain here once DNS
-# points at the ARC host — `arc deploy --server` registers it first-come.
+# domains[0] is the SEO host: pre-render bakes it into canonical / og:url /
+# sitemap in EVERY environment (staging included — same as aside), so it is
+# the production domain. `arc deploy --server` registers every entry with the
+# target host first-come; a published copy also resolves by its id
+# (`fomo4good.<domain root>`, e.g. fomo4good.afsd.io on staging).
+# fomo4good.localhost is the local `npm run dev` host.
 sites:
   - name: fomo4good
-    domains: [fomo4good.localhost]
+    domains: [fomo4good.com, fomo4good.localhost]
 
 collections:
   # Charity teams — page data bound through `pages/*/sources/teams`. Faces
