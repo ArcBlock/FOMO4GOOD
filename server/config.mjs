@@ -3,11 +3,10 @@ import { resolve } from "node:path";
 import { sdk, arcHome } from "../scripts/runtime.mjs";
 export function configuration(env = process.env) {
 	const mode = env.FOMO_MODE;
-	if (!["preview", "testnet"].includes(mode))
-		throw new Error(
-			"Set FOMO_MODE=preview or testnet. Mainnet requires a verified Circle Arc network profile before enabling real donations.",
-		);
+	if (!["preview", "testnet", "mainnet"].includes(mode))
+		throw new Error("Set FOMO_MODE=preview, testnet, or mainnet.");
 	const preview = mode === "preview";
+	const mainnet = mode === "mainnet";
 	const port = Number(env.PORT || 4931);
 	const host = env.HOST || "127.0.0.1";
 	const loopback = ["127.0.0.1", "localhost", "::1"].includes(host);
@@ -15,7 +14,7 @@ export function configuration(env = process.env) {
 		env.FOMO_ACCEPT_REAL === "1" || env.FOMO_ACCEPT_REAL === "true";
 	if (wantReal && (preview || !loopback))
 		throw new Error(
-			"FOMO_ACCEPT_REAL is only allowed for FOMO_MODE=testnet bound to loopback.",
+			"FOMO_ACCEPT_REAL is only allowed for FOMO_MODE=testnet or mainnet bound to loopback.",
 		);
 	const config = {
 		mode,
@@ -32,10 +31,17 @@ export function configuration(env = process.env) {
 		sdk: env.ARC_DID_SPACE_MODULE || sdk,
 		evmSdk: resolve(arcHome, "providers/runtime/evm/dist/index.mjs"),
 		afsSdk: resolve(arcHome, "packages/core/dist/index.mjs"),
-		chainId: 5042002,
-		rpcUrl: env.FOMO_RPC_URL || "https://rpc.testnet.arc.io",
+		chainId: Number(env.FOMO_CHAIN_ID) || (mainnet ? 5042 : 5042002),
+		rpcUrl:
+			env.FOMO_RPC_URL ||
+			(mainnet
+				? "https://rpc.blockdaemon.mainnet.arc.io"
+				: "https://rpc.testnet.arc.io"),
 		recipient: (env.FOMO_RECIPIENT || "").toLowerCase(),
-		explorer: "https://testnet.arcscan.app",
+		explorer:
+			env.FOMO_EXPLORER ||
+			(mainnet ? "https://explorer.arc.io" : "https://testnet.arcscan.app"),
+		networkName: mainnet ? "Circle Arc" : "Circle Arc Testnet",
 		startBlock: Number(env.FOMO_START_BLOCK || 0),
 		startsAt: env.FOMO_STARTS_AT ? Date.parse(env.FOMO_STARTS_AT) : 0,
 		endsAt: env.FOMO_ENDS_AT ? Date.parse(env.FOMO_ENDS_AT) : 0,
@@ -66,7 +72,7 @@ export function configuration(env = process.env) {
 			!/^https:\/\//.test(config.rpcUrl))
 	)
 		throw new Error(
-			"Testnet requires recipient, owner DID, start block and finite campaign start/end.",
+			"Live collection requires recipient, owner DID, start block and finite campaign start/end.",
 		);
 	if (
 		config.acceptReal &&

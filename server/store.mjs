@@ -315,7 +315,10 @@ export class Store {
 				recipient: this.config.recipient,
 				networkName: this.config.preview
 					? "LOCAL PREVIEW"
-					: "Circle Arc Testnet",
+					: this.config.networkName ||
+						(this.config.mode === "mainnet"
+							? "Circle Arc"
+							: "Circle Arc Testnet"),
 				chainId: this.config.chainId,
 				explorer: this.config.explorer,
 			},

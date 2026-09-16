@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { configuration } from "../server/config.mjs";
 import { workerConfig } from "../worker/config.mjs";
 
@@ -81,6 +82,42 @@ test("worker FOMO_ACCEPT_REAL opens staging testnet and refuses production", () 
 				FOMO_OWNER_DID: "did:abt:x",
 				FOMO_INSTANCE_DID: "did:blocklet:x",
 			}),
-		/testnet/,
+		/testnet or mainnet/,
+	);
+});
+
+test("mainnet campaign profile is parsed and stays closed without FOMO_ACCEPT_REAL", () => {
+	const campaign = JSON.parse(
+		readFileSync(new URL("../config/mainnet-campaign.json", import.meta.url)),
+	);
+	assert.equal(campaign.recipient, "0x985F6a6B60a0fFeaEC463EB7D912502e539F06eA");
+	const env = {
+		FOMO_MODE: "mainnet",
+		HOST: "127.0.0.1",
+		FOMO_ORIGIN: "https://fomo4good.com",
+		FOMO_OWNER_DID: "did:abt:fomo-mainnet-config",
+		FOMO_INSTANCE_DID: campaign.instanceDid,
+		FOMO_RECIPIENT: campaign.recipient,
+		FOMO_RPC_URL: campaign.rpcUrl,
+		FOMO_START_BLOCK: String(campaign.startBlock),
+		FOMO_STARTS_AT: campaign.startsAt,
+		FOMO_ENDS_AT: campaign.endsAt,
+	};
+	const node = configuration(env);
+	assert.equal(node.mode, "mainnet");
+	assert.equal(node.chainId, 5042);
+	assert.equal(node.explorer, "https://explorer.arc.io");
+	assert.equal(node.acceptReal, false);
+	assert.equal(
+		node.recipient,
+		"0x985f6a6b60a0ffeaec463eb7d912502e539f06ea",
+	);
+	const worker = workerConfig(env);
+	assert.equal(worker.mode, "mainnet");
+	assert.equal(worker.chainId, 5042);
+	assert.equal(worker.acceptReal, false);
+	assert.throws(
+		() => workerConfig({ ...env, FOMO_ACCEPT_REAL: "1" }),
+		/production/,
 	);
 });

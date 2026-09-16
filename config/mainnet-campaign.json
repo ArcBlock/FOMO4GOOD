@@ -1,0 +1,13 @@
+{
+	"mode": "mainnet",
+	"chainId": 5042,
+	"rpcUrl": "https://rpc.blockdaemon.mainnet.arc.io",
+	"explorer": "https://explorer.arc.io",
+	"networkName": "Circle Arc",
+	"recipient": "0x985F6a6B60a0fFeaEC463EB7D912502e539F06eA",
+	"startBlock": 21162954,
+	"startsAt": "2026-09-16T00:00:00.000Z",
+	"endsAt": "2026-10-16T00:00:00.000Z",
+	"instanceDid": "did:blocklet:fomo4good-production-mainnet",
+	"practiceInstanceDid": "did:blocklet:fomo4good-production-practice"
+}

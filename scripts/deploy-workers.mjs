@@ -50,6 +50,8 @@ if (target === 'staging') {
 } else {
 	if (process.env.FOMO_ACCEPT_REAL === '1' || process.env.FOMO_ACCEPT_REAL === 'true')
 		throw new Error('Refusing to enable real collection on production');
+	// Mainnet profile lives in config/mainnet-campaign.json. Production stays
+	// on practice until that file is wired here with FOMO_ACCEPT_REAL=1.
 	provider.vars = {
 		FOMO_MODE: 'practice',
 		FOMO_ORIGIN: origin,

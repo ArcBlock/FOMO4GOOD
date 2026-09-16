@@ -191,6 +191,7 @@
     "Amount expired. Do not send this payment. Late arrivals become Rogue Donations.": "金額已到期。請勿再付款；逾期到帳將歸為野生捐款。",
     "LOCAL PREVIEW · SIMULATED USDC · NO REAL DONATIONS": "本地預覽 · 模擬 USDC · 非真實捐款",
     "ARC NETWORK TESTNET · TEST USDC ONLY · NO REAL DONATIONS": "ARC NETWORK 測試網 · 僅限測試 USDC · 非真實捐款",
+    "ARC NETWORK · USDC ON ARC": "ARC NETWORK · Arc 上的 USDC",
     "TEST USDC": "測試 USDC",
     "ROUND IS LIVE": "本輪進行中",
     "No donations yet.": "還沒有捐款。",
@@ -248,6 +249,7 @@
     "TX ↗": "交易 ↗",
     "PREVIEW ALLOCATION": "預覽分配",
     "TESTNET ALLOCATION": "測試網分配",
+    "MAINNET ALLOCATION": "主網分配",
     "{n} round wins · allocated": "贏得 {n} 輪 · 已分配",
     "ArcBlock shortfall: ${amount}": "ArcBlock 待補足：${amount}",
     "{mode} CAMPAIGN": "{mode} 活動",
@@ -856,9 +858,11 @@ Object.assign(messages["zh-Hant"], {
 		$("notice").textContent =
 			practiceMode ? t(offline ? "PRACTICE ROUND IS NOT OPEN YET." : "PRACTICE MODE · FAKE USD · FAKE LEADERBOARD · REAL EGO") : state.mode === "unavailable" ? t("REAL DONATIONS ARE NOT OPEN YET.") : state.mode === "preview"
 				? t("LOCAL PREVIEW · SIMULATED USDC · NO REAL DONATIONS")
-				: t("ARC NETWORK TESTNET · TEST USDC ONLY · NO REAL DONATIONS");
+				: state.mode === "mainnet"
+					? t("ARC NETWORK · USDC ON ARC")
+					: t("ARC NETWORK TESTNET · TEST USDC ONLY · NO REAL DONATIONS");
 		$("sim-label").textContent =
-			practiceMode ? "FUSD" : state.mode === "unavailable" ? "USDC" : state.mode === "preview" ? t("SIMULATED") : t("TEST USDC");
+			practiceMode ? "FUSD" : state.mode === "unavailable" || state.mode === "mainnet" ? "USDC" : state.mode === "preview" ? t("SIMULATED") : t("TEST USDC");
 		$("round-label").textContent =
 			t("ROUND {n}", { n: String(state.round?.id || (state.history[0]?.id || 0) + 1).padStart(3, "0") });
 		$("round-status").textContent = state.campaign.ended
@@ -915,7 +919,7 @@ Object.assign(messages["zh-Hant"], {
 			? state.history
 					.map(
 						(r) =>
-							`<div class="f-board-row"><span>#${r.id}</span><div><strong>${esc(team(r.team)?.name)}</strong><small>${(practiceMode || state.mode === "preview") ? t("PREVIEW ALLOCATION") : t("TESTNET ALLOCATION")} · ${esc(displayName(r.lastDonor))}</small></div><b>${money(r.amount)}<small>${currency}</small></b></div>`,
+							`<div class="f-board-row"><span>#${r.id}</span><div><strong>${esc(team(r.team)?.name)}</strong><small>${(practiceMode || state.mode === "preview") ? t("PREVIEW ALLOCATION") : state.mode === "mainnet" ? t("MAINNET ALLOCATION") : t("TESTNET ALLOCATION")} · ${esc(displayName(r.lastDonor))}</small></div><b>${money(r.amount)}<small>${currency}</small></b></div>`,
 					)
 					.join("")
 			: `<p class="f-empty">${t("No completed rounds.")}<br>${t("We refuse to celebrate an empty pot.")}</p>`;
