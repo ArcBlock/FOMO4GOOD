@@ -5,9 +5,9 @@
 	"explorer": "https://explorer.arc.io",
 	"networkName": "Circle Arc",
 	"recipient": "0x985F6a6B60a0fFeaEC463EB7D912502e539F06eA",
-	"startBlock": 21162954,
+	"startBlock": 21255986,
 	"startsAt": "2026-09-16T00:00:00.000Z",
 	"endsAt": "2026-10-16T00:00:00.000Z",
-	"instanceDid": "did:blocklet:fomo4good-production-mainnet",
+	"instanceDid": "did:blocklet:fomo4good-production-mainnet-v2",
 	"practiceInstanceDid": "did:blocklet:fomo4good-production-practice"
 }

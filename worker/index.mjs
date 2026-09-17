@@ -160,18 +160,17 @@ export class FomoCampaign {
 		return response;
 	}
 	async alarm() {
-		await this.init();
 		try {
-			await this.watcher?.tick();
-			await this.practice.agentTick();
-			await this.practice.state();
+			await this.init();
 		} catch (e) {
-			if (this.watcher) this.watcher.lastError = e.message;
-			console.error("Watcher paused:", e.message);
-		} finally {
+			console.error("Alarm init failed:", e.message);
+			await this.ctx.storage.setAlarm(Date.now() + 5000);
+			return;
+		}
+		if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);
+		else {
 			const { state } = await this.practice.read();
-			if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);
-			else if (state.round)
+			if (state.round)
 				await this.ctx.storage.setAlarm(
 					Math.min(
 						state.round.endsAt,
@@ -179,5 +178,17 @@ export class FomoCampaign {
 					),
 				);
 		}
+		this.ctx.waitUntil(
+			(async () => {
+				try {
+					await this.watcher?.tick();
+					await this.practice.agentTick();
+					await this.practice.state();
+				} catch (e) {
+					if (this.watcher) this.watcher.lastError = e.message;
+					console.error("Watcher paused:", e.message);
+				}
+			})(),
+		);
 	}
 }
