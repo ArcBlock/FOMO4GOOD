@@ -486,6 +486,27 @@ body {
 	color: var(--pink);
 	margin: 8px 0 0;
 }
+.f-resume-payment {
+	margin: 0 0 18px;
+}
+.f-resume-payment button {
+	width: 100%;
+	text-align: left;
+	background: #1b3432;
+	border: 1px solid var(--mint);
+	color: var(--mint);
+	font-weight: 700;
+	padding: 12px 14px;
+	cursor: pointer;
+}
+.f-livebar a[data-session="expired"] {
+	background: var(--pink);
+	color: #131122;
+}
+.f-livebar a[data-session="confirmed"] {
+	background: var(--yellow);
+	color: #131122;
+}
 .f-payment-head {
 	display: flex;
 	align-items: center;

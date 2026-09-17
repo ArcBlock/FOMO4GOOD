@@ -61,7 +61,7 @@ const waitFor = async (predicate) => {
 	}
 	assert.fail("Client did not reach expected state");
 };
-test("client selects team, creates exact intent, simulates arrival and restores receipt after reload", async (t) => {
+test("client selects team, creates exact intent, simulates arrival and treats a confirmed session as done on reload", async (t) => {
 	let state = empty(),
 		intent = null,
 		creates = 0;
@@ -145,11 +145,10 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 	const id = w.localStorage.getItem("fomo4good.intent.v2");
 	w.close();
 	const resumed = browser(id);
-	await waitFor(() =>
-		resumed.document
-			.querySelector("[data-payment-status]")
-			.textContent.includes("CONFIRMED"),
-	);
+	await waitFor(() => resumed.localStorage.getItem("fomo4good.intent.v2") === null);
+	assert.equal(resumed.document.querySelector("[data-payment]").hidden, true);
+	assert.equal(resumed.document.querySelector("[data-form]").hidden, false);
+	assert.match(resumed.document.querySelector("[data-live-cta]").textContent, /JOIN THE ROUND/);
 	assert.equal(creates, 1);
 	assert.equal(resumed.document.querySelector("[data-simulate]").hidden, true);
 });
@@ -419,6 +418,133 @@ test('leaderboard scope stays consistent; sound defaults on and an explicit opt-
  assert.match(q('.f-source-cat').src,/^data:image\/svg\+xml;base64,/);
  assert.equal(q('a[href="https://www.arcblock.io"] .f-link-favicon')?.src,'https://www.arcblock.io/favicon.ico');
  assert.match(q('a[href="https://arc.io/"] .f-link-favicon')?.src || '',/arc-favicon-test\.png$/);
+});
+
+test("pending donate session stays put: polling and language changes do not steal scroll, resume click does", async (t) => {
+	const state = empty();
+	state.campaign = { ...state.campaign, accepting: true };
+	let intent = {
+		id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+		team: "dogs",
+		amount: "5.004237",
+		expiresAt: Date.now() + 600000,
+		payment: null,
+	};
+	const dom = new JSDOM(render().html, {
+		url: "http://fomo4good.localhost/",
+		runScripts: "outside-only",
+	});
+	const w = dom.window;
+	t.after(() => w.close());
+	w.AbortSignal = globalThis.AbortSignal;
+	w.TextEncoder = globalThis.TextEncoder;
+	w.TextDecoder = globalThis.TextDecoder;
+	w.localStorage.setItem("fomo4good.intent.v2", intent.id);
+	const scrolls = [];
+	w.HTMLElement.prototype.scrollIntoView = function (opts) {
+		scrolls.push({
+			target: this.hasAttribute("data-payment") ? "payment" : this.id || this.tagName,
+			opts,
+		});
+	};
+	let pulse = null;
+	const realSetInterval = w.setInterval.bind(w);
+	w.setInterval = (fn, ms, ...args) => {
+		if (ms === 3000) pulse = fn;
+		return realSetInterval(fn, ms, ...args);
+	};
+	w.fetch = async (path) => {
+		if (path === "/arc/api/fomo/state") return { ok: true, json: async () => structuredClone(state) };
+		if (path === "/arc/api/fomo/visit") return { ok: true, json: async () => ({ ok: true }) };
+		if (path === `/arc/api/fomo/intents/${intent.id}`) return { ok: true, json: async () => structuredClone(intent) };
+		throw new Error("Unexpected " + path);
+	};
+	w.eval(script);
+	const q = (s) => w.document.querySelector(s);
+	await waitFor(() => q("[data-resume-payment]") && !q("[data-resume-payment]").hidden);
+	assert.equal(q("[data-payment]").hidden, true, "reload must not auto-open the payment panel");
+	assert.equal(q("[data-form]").hidden, false);
+	assert.equal(scrolls.length, 0, "restoring a pending session must not steal the viewport");
+	assert.match(q("[data-live-cta]").textContent, /5\.004237 USDC/);
+	assert.match(q("[data-resume-open]").textContent, /5\.004237 USDC/);
+	assert.equal(typeof pulse, "function");
+	await pulse();
+	await pulse();
+	assert.equal(q("[data-payment]").hidden, true);
+	assert.equal(scrolls.length, 0, "polling must not scroll to the donate panel");
+	q("[data-language]").value = "zh-Hant";
+	q("[data-language]").dispatchEvent(new w.Event("change", { bubbles: true }));
+	assert.equal(scrolls.length, 0, "language switch must not scroll");
+	assert.match(q("[data-live-cta]").textContent, /5\.004237 USDC/);
+	q("[data-resume-open]").click();
+	assert.equal(q("[data-payment]").hidden, false);
+	assert.equal(scrolls.length, 1);
+	assert.equal(scrolls[0].target, "payment");
+	q("[data-language]").value = "en";
+	q("[data-language]").dispatchEvent(new w.Event("change", { bubbles: true }));
+	assert.equal(scrolls.length, 1, "refreshing an open payment panel must not scroll again");
+	await pulse();
+	assert.equal(scrolls.length, 1);
+	assert.match(q("[data-payment-status]").textContent, /Waiting/);
+	q("[data-live-cta]").click();
+	assert.equal(scrolls.length, 2, "livebar resume is a user-initiated scroll");
+});
+
+test("submit scrolls once; confirmed payment on the same page does not keep scrolling", async (t) => {
+	const state = empty();
+	state.campaign = { ...state.campaign, accepting: true };
+	let intent = null;
+	const dom = new JSDOM(render().html, {
+		url: "http://fomo4good.localhost/",
+		runScripts: "outside-only",
+	});
+	const w = dom.window;
+	t.after(() => w.close());
+	w.AbortSignal = globalThis.AbortSignal;
+	w.TextEncoder = globalThis.TextEncoder;
+	w.TextDecoder = globalThis.TextDecoder;
+	const scrolls = [];
+	w.HTMLElement.prototype.scrollIntoView = function () {
+		if (this.hasAttribute("data-payment")) scrolls.push("payment");
+	};
+	let pulse = null;
+	const realSetInterval = w.setInterval.bind(w);
+	w.setInterval = (fn, ms, ...args) => {
+		if (ms === 3000) pulse = fn;
+		return realSetInterval(fn, ms, ...args);
+	};
+	w.fetch = async (path, options) => {
+		if (path === "/arc/api/fomo/state") return { ok: true, json: async () => structuredClone(state) };
+		if (path === "/arc/api/fomo/visit") return { ok: true, json: async () => ({ ok: true }) };
+		if (path === "/arc/api/fomo/intents" && options?.body) {
+			intent = {
+				id: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+				team: "dogs",
+				amount: "5.004237",
+				expiresAt: Date.now() + 600000,
+				payment: null,
+			};
+			return { ok: true, json: async () => structuredClone(intent) };
+		}
+		if (intent && path === `/arc/api/fomo/intents/${intent.id}`) {
+			return { ok: true, json: async () => structuredClone(intent) };
+		}
+		throw new Error("Unexpected " + path);
+	};
+	w.eval(script);
+	const q = (s) => w.document.querySelector(s);
+	await waitFor(() => q('[name="team"]'));
+	q('[name="team"]').checked = true;
+	q('[name="team"]').dispatchEvent(new w.Event("change", { bubbles: true }));
+	q("[data-form]").dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+	await waitFor(() => !q("[data-payment]").hidden);
+	assert.deepEqual(scrolls, ["payment"]);
+	assert.match(q("[data-live-cta]").textContent, /5\.004237 USDC/);
+	intent.payment = { rogue: false };
+	await pulse();
+	await waitFor(() => q("[data-payment-status]").textContent.includes("CONFIRMED"));
+	assert.deepEqual(scrolls, ["payment"], "confirmation must update in place without scrolling");
+	assert.match(q("[data-live-cta]").textContent, /CONFIRMED/);
 });
 
 test('every public ARC view declares a dedicated 1200x630 social card', async () => {

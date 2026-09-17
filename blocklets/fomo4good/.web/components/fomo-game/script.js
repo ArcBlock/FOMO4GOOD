@@ -527,8 +527,14 @@ Object.assign(messages["zh-Hant"], {
 		"Your team choice applies to this FUSD play only. The final player’s team wins the imaginary pool; no charity receives money. Past plays and completed rounds stay unchanged.": "戰隊只套用於這一筆 FUSD 操作。最後玩家的戰隊贏得虛擬獎池；慈善機構不會收到款項。過去操作與已結束輪次不會改寫。",
 		"100% of eligible USDC received on the configured Arc Network will be donated to the participating charities.": "在設定的 Arc Network 收到的合資格 USDC，100% 將實際捐給參與的慈善機構。",
 		"100% of eligible USDC received on the configured Arc Network will be donated. You can check the USDC transfer records on Arc and the receipts for ArcBlock’s actual charity donations after the campaign.": "在設定的 Arc Network 收到的合資格 USDC，100% 將實際捐出。你可以核對 Arc 上的 USDC 轉帳紀錄，以及活動結束後 ArcBlock 實際慈善捐贈的收據。",
+		"SEND {amount} {currency} ↗": "待支付 {amount} {currency} ↗",
+		"DON'T SEND — EXPIRED ↗": "請勿轉帳 — 已到期 ↗",
+		"RESUME PAYMENT ↗": "繼續付款 ↗",
+		"CONFIRMED ↗": "已確認 ↗",
+		"Continue this payment · {amount} {currency}": "繼續這筆付款 · {amount} {currency}",
+		"This payment expired. Don't send it.": "這筆付款已到期，請勿再轉帳。",
 	});
-	Object.assign(messages["en-x-slop"], {"EXPORT YOUR EGO.":"SYNDICATE YOUR SYNTHETIC EGO.","BIG EGOS. GOOD CAUSES.":"LEADERBOARD ALIGNMENT ACHIEVED."});
+	Object.assign(messages["en-x-slop"], {"EXPORT YOUR EGO.":"SYNDICATE YOUR SYNTHETIC EGO.","BIG EGOS. GOOD CAUSES.":"LEADERBOARD ALIGNMENT ACHIEVED.","SEND {amount} {currency} ↗":"PENDING TRANSFER {amount} {currency} ↗","DON'T SEND — EXPIRED ↗":"DO NOT SEND — EXPIRED ↗","RESUME PAYMENT ↗":"RESUME HUMAN TOOL CALL ↗","CONFIRMED ↗":"CONFIRMED ↗","Continue this payment · {amount} {currency}":"Resume pending transfer · {amount} {currency}","This payment expired. Don't send it.":"This transfer expired. Do not send it."});
 	const fixedText = [];
 	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
 	for (let node; (node = walker.nextNode());) {
@@ -894,6 +900,7 @@ Object.assign(messages["zh-Hant"], {
 				: t("Amount expired. Do not send this payment. Late arrivals become Rogue Donations.");
 			$("simulate").disabled = busy || seconds === 0;
 		}
+		updateSessionChrome();
 	}
 	function render() {
 		root.dataset.hydrated="true";
@@ -1017,7 +1024,45 @@ Object.assign(messages["zh-Hant"], {
 		if (!addr || !chain || state.mode === "preview" || i.payment) return "";
 		return `ethereum:${addr}@${chain}?value=${paymentValue(i)}`;
 	}
-	function payment(i) {
+	function intentExpired(i) {
+		if (!i?.expiresAt || i.payment) return false;
+		return Date.now() + offset >= i.expiresAt;
+	}
+	function sessionKind() {
+		if (practiceMode || !pending || state?.campaign?.accepting === false) return null;
+		if (pending.payment) return "confirmed";
+		if (!pending.amount) return null;
+		return intentExpired(pending) ? "expired" : "pending";
+	}
+	function updateSessionChrome() {
+		const cta = $("live-cta");
+		const resume = $("resume-payment");
+		const resumeBtn = $("resume-open");
+		if (!cta || !resume || !resumeBtn) return;
+		const kind = sessionKind();
+		if (kind === "pending") {
+			cta.textContent = t("SEND {amount} {currency} ↗", { amount: pending.amount, currency });
+			cta.dataset.session = "pending";
+		} else if (kind === "expired") {
+			cta.textContent = t("DON'T SEND — EXPIRED ↗");
+			cta.dataset.session = "expired";
+		} else if (kind === "confirmed") {
+			cta.textContent = t("CONFIRMED ↗");
+			cta.dataset.session = "confirmed";
+		} else {
+			cta.textContent = t("JOIN THE ROUND ↗");
+			cta.removeAttribute("data-session");
+		}
+		const showResume = (kind === "pending" || kind === "expired") && !$("form").hidden;
+		resume.hidden = !showResume;
+		if (showResume) {
+			resumeBtn.textContent =
+				kind === "expired"
+					? t("This payment expired. Don't send it.")
+					: t("Continue this payment · {amount} {currency}", { amount: pending.amount, currency });
+		}
+	}
+	function payment(i, { scroll = false } = {}) {
 		$("form").hidden = true;
 		$("payment").hidden = false;
 		$("exact").textContent = `${i.amount} ${currency}`;
@@ -1044,7 +1089,6 @@ Object.assign(messages["zh-Hant"], {
 		const qr = $("pay-qr");
 		const open = $("open-wallet");
 		const share = $("share-pay");
-		pendingUri = uri;
 		if (uri) {
 			pickup.hidden = false;
 			open.hidden = false;
@@ -1052,7 +1096,7 @@ Object.assign(messages["zh-Hant"], {
 			share.hidden =
 				typeof navigator.share !== "function" ||
 				!window.matchMedia("(pointer: coarse)").matches;
-			if (typeof FOMOQR?.toString === "function") {
+			if (uri !== pendingUri && typeof FOMOQR?.toString === "function") {
 				new Promise((resolve, reject) => {
 					let settled = false;
 					const done = (err, svg) => {
@@ -1088,14 +1132,19 @@ Object.assign(messages["zh-Hant"], {
 						qr.hidden = true;
 					});
 			}
+			pendingUri = uri;
 		} else {
+			pendingUri = "";
 			pickup.hidden = true;
 			open.hidden = true;
 			share.hidden = true;
 			qr.hidden = true;
 			qr.removeAttribute("src");
 		}
-		$("payment").scrollIntoView({ block: "start", behavior: "smooth" });
+		if (scroll) {
+			const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+			$("payment").scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+		}
 		tick();
 	}
 	let practiceSessionReady = false, refreshQueued = false;
@@ -1130,11 +1179,17 @@ Object.assign(messages["zh-Hant"], {
 			if (!practiceMode && pending && state.campaign.accepting !== false) {
 				try {
 					const i = await api(`intents/${pending.id}`);
-     if (i.payment && !pending.payment) celebrate("donate");
-					save(i);
-					if (!$("payment").hidden || !$("exact").textContent) payment(i);
+					const firstRestore = !pending.amount;
+					const newlyPaid = !!(i.payment && !pending.payment);
+					if (newlyPaid) celebrate("donate");
+					if (i.payment && firstRestore) save(null);
+					else {
+						save(i);
+						if (!$("payment").hidden) payment(i, { scroll: false });
+					}
 				} catch (e) {
-					$("payment-status").textContent = e.message;
+					if (!$("payment").hidden) $("payment-status").textContent = e.message;
+					if (/not found/i.test(e.message || "")) save(null);
 				}
 			}
 		} catch (e) {
@@ -1202,7 +1257,7 @@ let practiceAttempt = null;
 			const i = await api("intents", Object.fromEntries(form));
 			save(i);
 			feedback("");
-			payment(i);
+			payment(i, { scroll: true });
 		} catch (e) {
 			feedback(e.message);
 		} finally {
@@ -1239,7 +1294,18 @@ let practiceAttempt = null;
 		$("payment").hidden = true;
 		$("form").hidden = false;
 		if (pending?.payment) save(null);
+		tick();
 	});
+	function resumeOpenPayment(event) {
+		if (practiceMode || !pending?.amount) return;
+		event?.preventDefault();
+		payment(pending, { scroll: true });
+	}
+	$("live-cta").addEventListener("click", (event) => {
+		if (root.dataset.view !== "play" || !sessionKind()) return;
+		resumeOpenPayment(event);
+	});
+	$("resume-open").addEventListener("click", () => resumeOpenPayment());
 	async function copy(text, button) {
 		try {
 			await navigator.clipboard.writeText(text);
@@ -1301,7 +1367,7 @@ let practiceAttempt = null;
 		if (state) {
 			render();
 			for (const radio of $("choices").querySelectorAll("input")) radio.checked = radio.value === selected;
-			if (pending?.amount && !$("payment").hidden) payment(pending);
+			if (pending?.amount && !$("payment").hidden) payment(pending, { scroll: false });
 			tick();
 		}
 	});
