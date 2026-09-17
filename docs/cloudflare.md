@@ -12,7 +12,7 @@
 
 已验证实际 workerd 产物，以及两个 Worker 经 ARC Service Binding transport 的读写；覆盖 FUSD session、扣款、重试不重复扣减、重启恢复、真实池保持零、账本路径拒绝、网关 Origin/Cookie 边界及仅 API 的路由边界。测试不调用真实支付，不部署云资源。
 
-目前 Worker 仅允许 `practice` 或 `testnet`。Staging 部署 `FOMO_MODE=testnet` 且 `FOMO_ACCEPT_REAL=1`，在 Arc testnet 上开放 `/arc/api/fomo/intents`；production 保持 `practice`，真钱 API 关闭。不能通过设置 `mainnet` 绕过验收。`FOMO_ACCEPT_REAL` 在 `fomo4good.com` 上会拒绝启动。新云端 scope 不会自动导入本地账本；staging testnet 使用独立 instance DID，Practice 仍指向原 practice instance。
+Worker 允许 `practice`、`testnet` 或 `mainnet`。Staging 部署 `FOMO_MODE=testnet` 且 `FOMO_ACCEPT_REAL=1`；production 部署 `FOMO_MODE=mainnet` 且 `FOMO_ACCEPT_REAL=1`（`config/mainnet-campaign.json`）。`fomo4good.com` 拒绝 testnet 收款。新云端 scope 不会自动导入本地账本；真钱与 Practice 使用独立 instance DID。
 
 已合入原生 ARC 页面与集合绑定，Worker 不再改写页面 HTML。本轮保留整账本 CAS；账本集合化、公开状态快照／订阅是后续独立改动；`batchWrite` 不是多记录事务，不能直接用来拆开扣余额和回合更新。EVM provider 不推断各链终局性；Arc Network 的原生 USDC emitter 解码留在支付适配层。
 

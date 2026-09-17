@@ -53,8 +53,12 @@ export function workerConfig(env) {
 		env.FOMO_ACCEPT_REAL === "1" || env.FOMO_ACCEPT_REAL === "true";
 	if (wantReal && preview)
 		throw new Error("FOMO_ACCEPT_REAL requires FOMO_MODE=testnet or mainnet");
-	if (wantReal && /(?:^|\.)fomo4good\.com$/i.test(origin.hostname))
-		throw new Error("FOMO_ACCEPT_REAL is not allowed on production");
+	if (
+		wantReal &&
+		/(?:^|\.)fomo4good\.com$/i.test(origin.hostname) &&
+		!mainnet
+	)
+		throw new Error("Production collection requires FOMO_MODE=mainnet");
 	config.acceptReal = Boolean(wantReal && !preview);
 	config.practiceInstanceDid = env.FOMO_PRACTICE_INSTANCE_DID || "";
 	return config;

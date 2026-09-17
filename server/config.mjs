@@ -76,8 +76,9 @@ export function configuration(env = process.env) {
 		);
 	if (
 		config.acceptReal &&
-		/(?:^|\.)fomo4good\.com$/i.test(new URL(config.origin).hostname)
+		/(?:^|\.)fomo4good\.com$/i.test(new URL(config.origin).hostname) &&
+		!mainnet
 	)
-		throw new Error("FOMO_ACCEPT_REAL is not allowed on production");
+		throw new Error("Production collection requires FOMO_MODE=mainnet");
 	return config;
 }

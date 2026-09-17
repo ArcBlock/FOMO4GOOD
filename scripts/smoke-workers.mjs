@@ -10,7 +10,7 @@ for (let tries = 0; ; tries++) {
   const realResponse = await request(`${origin}/arc/api/fomo/state`);
   if (realResponse.status === 200) {
     real = await realResponse.json();
-    if (target !== 'staging' || real.watcher?.stale !== true) break;
+    if (real.watcher?.stale !== true) break;
   } else if (realResponse.status !== 404 || tries >= 18) {
     assert.equal(realResponse.status, 200);
   }
@@ -32,21 +32,10 @@ const state = await stateResponse.json();
 assert.equal(state.currency, 'FUSD');
 assert.equal(state.wallet.balance, '1000');
 const intents = await request(`${origin}/arc/api/fomo/intents`, {method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'});
-if (target === 'staging') {
-  const campaign = JSON.parse(readFileSync(new URL('../config/staging-campaign.json', import.meta.url), 'utf8'));
-  assert.equal(real.mode, 'testnet');
-  assert.equal(real.campaign.accepting, true);
-  assert.equal(real.payment.chainId, 5042002);
-  assert.equal(real.payment.recipient, campaign.recipient.toLowerCase());
-  assert.equal(intents.status, 400, 'Staging must reject an empty intent with 400, not stay closed');
-} else {
-  assert.equal(real.community, '0');
-  assert.equal(real.mode, 'unavailable');
-  assert.equal(real.campaign.accepting, false);
-  assert.equal(intents.status, 409);
-}
-console.log(
-  target === 'staging'
-    ? `Live API passed: FUSD session/state, Arc testnet collection open (${origin}).`
-    : `Live API passed: FUSD session/state, isolated real pool, real-payment closure (${origin}).`,
-);
+const campaign = JSON.parse(readFileSync(new URL(target === 'staging' ? '../config/staging-campaign.json' : '../config/mainnet-campaign.json', import.meta.url), 'utf8'));
+assert.equal(real.mode, campaign.mode);
+assert.equal(real.campaign.accepting, true);
+assert.equal(real.payment.chainId, campaign.chainId);
+assert.equal(real.payment.recipient, campaign.recipient.toLowerCase());
+assert.equal(intents.status, 400, `${target} must reject an empty intent with 400, not stay closed`);
+console.log(`Live API passed: FUSD session/state, Arc ${campaign.mode} collection open (${origin}).`);

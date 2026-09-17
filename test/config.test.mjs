@@ -50,7 +50,7 @@ const workerTestnet = {
 	FOMO_ENDS_AT: "2026-12-31T00:00:00.000Z",
 };
 
-test("worker FOMO_ACCEPT_REAL opens staging testnet and refuses production", () => {
+test("worker FOMO_ACCEPT_REAL opens staging testnet and refuses testnet on production", () => {
 	assert.equal(
 		workerConfig({
 			FOMO_MODE: "practice",
@@ -71,7 +71,7 @@ test("worker FOMO_ACCEPT_REAL opens staging testnet and refuses production", () 
 				FOMO_ACCEPT_REAL: "1",
 				FOMO_ORIGIN: "https://fomo4good.com",
 			}),
-		/production/,
+		/mainnet/,
 	);
 	assert.throws(
 		() =>
@@ -86,7 +86,7 @@ test("worker FOMO_ACCEPT_REAL opens staging testnet and refuses production", () 
 	);
 });
 
-test("mainnet campaign profile is parsed and stays closed without FOMO_ACCEPT_REAL", () => {
+test("mainnet campaign profile opens on production with FOMO_ACCEPT_REAL", () => {
 	const campaign = JSON.parse(
 		readFileSync(new URL("../config/mainnet-campaign.json", import.meta.url)),
 	);
@@ -116,8 +116,8 @@ test("mainnet campaign profile is parsed and stays closed without FOMO_ACCEPT_RE
 	assert.equal(worker.mode, "mainnet");
 	assert.equal(worker.chainId, 5042);
 	assert.equal(worker.acceptReal, false);
-	assert.throws(
-		() => workerConfig({ ...env, FOMO_ACCEPT_REAL: "1" }),
-		/production/,
-	);
+	const open = workerConfig({ ...env, FOMO_ACCEPT_REAL: "1" });
+	assert.equal(open.acceptReal, true);
+	assert.equal(open.mode, "mainnet");
+	assert.equal(open.chainId, 5042);
 });
