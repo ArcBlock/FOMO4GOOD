@@ -74,7 +74,7 @@ export class Watcher {
 				});
 				return;
 			}
-			const end = Math.min(head, start + 499);
+			const end = Math.min(head, start + 1999);
 			const endBlock = end === head ? latest : await block(end);
 			const logs = await this.rpc("eth_getLogs", [
 				{
