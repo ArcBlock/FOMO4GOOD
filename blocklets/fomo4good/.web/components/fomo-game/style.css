@@ -525,6 +525,61 @@ body {
 	color: var(--mint);
 	font-weight: 700;
 }
+.f-pay-pickup {
+	display: grid;
+	grid-template-columns: 184px minmax(0, 1fr);
+	gap: 18px 22px;
+	align-items: center;
+	margin: 18px 0 8px;
+	padding: 16px;
+	border: 1px solid var(--line);
+	background: #14182a;
+}
+.f-pay-qr-wrap {
+	margin: 0;
+	text-align: center;
+}
+.f-pay-qr-wrap img {
+	display: block;
+	width: 184px;
+	height: 184px;
+	background: #fff;
+	image-rendering: pixelated;
+}
+.f-pay-qr-wrap figcaption {
+	margin-top: 8px;
+	font-size: 13px;
+	color: var(--muted);
+}
+.f-pay-phone .f-eyebrow {
+	margin-bottom: 10px;
+}
+.f-pay-phone .f-primary,
+.f-pay-phone button {
+	display: block;
+	width: 100%;
+	margin: 8px 0 0;
+	text-align: center;
+	text-decoration: none;
+	box-sizing: border-box;
+}
+.f-pay-phone .f-fine {
+	margin: 10px 0 0;
+	font-size: 13px;
+}
+@media (max-width: 650px) {
+	.f-pay-pickup {
+		grid-template-columns: 1fr;
+		justify-items: center;
+	}
+	.f-pay-phone {
+		width: 100%;
+	}
+	.f-pay-phone .f-primary {
+		font-size: 18px;
+		padding: 14px 16px;
+	}
+}
 .f-stats {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);

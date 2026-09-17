@@ -74,6 +74,8 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 		t.after(() => w.close());
 		if (saved) w.localStorage.setItem("fomo4good.intent.v2", saved);
 		w.AbortSignal = globalThis.AbortSignal;
+		w.TextEncoder = globalThis.TextEncoder;
+		w.TextDecoder = globalThis.TextDecoder;
 		w.fetch = async (path, options) => {
 			const data = options.body ? JSON.parse(options.body) : null;
 			let result;
@@ -150,6 +152,63 @@ test("client selects team, creates exact intent, simulates arrival and restores 
 	);
 	assert.equal(creates, 1);
 	assert.equal(resumed.document.querySelector("[data-simulate]").hidden, true);
+});
+
+test("live payment screen shows QR and wallet link for the exact amount", async (t) => {
+	const state = empty();
+	state.mode = "mainnet";
+	state.campaign.accepting = true;
+	state.payment = {
+		recipient: "0x985f6a6b60a0ffeaec463eb7d912502e539f06ea",
+		networkName: "Circle Arc",
+		chainId: 5042,
+		explorer: "https://explorer.arc.io",
+	};
+	let intent = null;
+	const dom = new JSDOM(render().html, {
+		url: "http://fomo4good.localhost/",
+		runScripts: "outside-only",
+	});
+	const w = dom.window;
+	t.after(() => w.close());
+	w.AbortSignal = globalThis.AbortSignal;
+	w.TextEncoder = globalThis.TextEncoder;
+	w.TextDecoder = globalThis.TextDecoder;
+	w.fetch = async (path, options) => {
+		if (path === "/arc/api/fomo/state") return { ok: true, json: async () => structuredClone(state) };
+		if (path === "/arc/api/fomo/visit") return { ok: true, json: async () => ({ ok: true }) };
+		if (path === "/arc/api/fomo/intents" && options.body) {
+			intent = {
+				id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+				team: "dogs",
+				amount: "5.004237",
+				units: "5004237000000000000",
+				expiresAt: Date.now() + 600000,
+				payment: null,
+			};
+			return { ok: true, json: async () => structuredClone(intent) };
+		}
+		throw new Error("Unexpected " + path);
+	};
+	w.eval(script);
+	await waitFor(() => w.document.querySelector('[name="team"]'));
+	const radio = w.document.querySelector('[name="team"]');
+	radio.checked = true;
+	radio.dispatchEvent(new w.Event("change", { bubbles: true }));
+	w.document
+		.querySelector("[data-form]")
+		.dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+	await waitFor(() => !w.document.querySelector("[data-payment]").hidden);
+	const uri = `ethereum:0x985f6a6b60a0ffeaec463eb7d912502e539f06ea@5042?value=5004237000000000000`;
+	assert.equal(w.document.querySelector("[data-pay-pickup]").hidden, false);
+	assert.equal(w.document.querySelector("[data-open-wallet]").hidden, false);
+	assert.equal(w.document.querySelector("[data-open-wallet]").getAttribute("href"), uri);
+	await waitFor(() =>
+		(w.document.querySelector("[data-pay-qr]")?.getAttribute("src") || "").startsWith(
+			"data:image/svg+xml",
+		),
+	);
+	assert.match(w.document.querySelector("[data-pay-qr]").alt, /QR/i);
 });
 
 test("language switch translates FAQs and live state, preserves input and user names, and follows inner-page links", async (testContext) => {
