@@ -103,16 +103,10 @@ export class FomoCampaign {
 			maxBodySize: 8192,
 		});
 		// DO storage is only the runtime alarm; balances and cursors are in DID Space.
-		if (watcher) {
-			try {
-				await watcher.tick();
-			} catch (e) {
-				watcher.lastError = e.message;
-				console.error("Watcher paused:", e.message);
-			}
-			if ((await this.ctx.storage.getAlarm()) === null)
-				await this.ctx.storage.setAlarm(Date.now() + 2000);
-		}
+		// Do not await tick() here: mainnet catch-up can exceed the request CPU budget
+		// and 503 the public API. Alarms and post-fetch waitUntil advance the cursor.
+		if (watcher && (await this.ctx.storage.getAlarm()) === null)
+			await this.ctx.storage.setAlarm(Date.now() + 2000);
 	}
 	serialize(fn) {
 		const next = this.queue.then(fn);

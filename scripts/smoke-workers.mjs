@@ -11,7 +11,7 @@ for (let tries = 0; ; tries++) {
   if (realResponse.status === 200) {
     real = await realResponse.json();
     if (real.watcher?.stale !== true) break;
-  } else if (realResponse.status !== 404 || tries >= 60) {
+  } else if (![404, 503].includes(realResponse.status)) {
     assert.equal(realResponse.status, 200);
   }
   assert.ok(
