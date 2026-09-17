@@ -50,13 +50,17 @@ export class FomoCampaign {
 		return this.ready;
 	}
 	async open() {
+		let stage = "config";
+		try {
 		const config = workerConfig(this.env);
 		// All application persistence stays behind the ARC DID Space SDK.
+		stage = "space";
 		const space = new CloudflareDIDSpace({
 			userDid: config.ownerDid,
 			objectStore: this.env.FOMO_OBJECTS,
 			indexDb: this.env.FOMO_INDEX,
 		});
+		stage = "real-space";
 		const store = new Store(
 			await space.getInstanceSpace({
 				instanceDid: config.instanceDid,
@@ -65,6 +69,7 @@ export class FomoCampaign {
 			config,
 		);
 		const pc = practiceConfig(config);
+		stage = "practice-space";
 		const practice = new PracticeStore(
 			await space.getInstanceSpace({
 				instanceDid: pc.instanceDid,
@@ -72,11 +77,14 @@ export class FomoCampaign {
 			}),
 			pc,
 		);
+		stage = "real-init";
 		await store.init();
+		stage = "practice-init";
 		await practice.init();
 		const afs = new AFS();
 		let watcher = null;
 		if (!config.preview) {
+			stage = "evm";
 			await afs.mount(
 				new AFSEVM({
 					endpoint: config.rpcUrl,
@@ -107,6 +115,9 @@ export class FomoCampaign {
 		// and 503 the public API. Alarms and post-fetch waitUntil advance the cursor.
 		if (watcher && (await this.ctx.storage.getAlarm()) === null)
 			await this.ctx.storage.setAlarm(Date.now() + 2000);
+		} catch (e) {
+			throw new Error(`${stage}: ${e.message || e}`);
+		}
 	}
 	serialize(fn) {
 		const next = this.queue.then(fn);
@@ -138,12 +149,13 @@ export class FomoCampaign {
 				}
 				return response;
 			} catch (e) {
+				console.error(e);
 				return Response.json(
 					{
 						success: false,
 						error: {
 							code: e.code || "FOMO_ERROR",
-							message: "Game request failed",
+							message: e.message || "Game request failed",
 						},
 					},
 					{ status: 400 },
