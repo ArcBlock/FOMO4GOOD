@@ -152,31 +152,32 @@ export class FomoCampaign {
 		});
 		if (this.watcher)
 			this.ctx.waitUntil(
-				this.serialize(() =>
-					this.watcher.tick().catch((e) => {
-						this.watcher.lastError = e.message;
-						console.error("Watcher paused:", e.message);
-					}),
-				),
+				this.watcher.tick().catch((e) => {
+					this.watcher.lastError = e.message;
+					console.error("Watcher paused:", e.message);
+				}),
 			);
 		return response;
 	}
 	async alarm() {
-		return this.serialize(async () => {
-			await this.init();
-			try {
-				await this.watcher?.tick();
-				await this.practice.agentTick();
-				await this.practice.state();
-			} catch (e) {
-				if (this.watcher) this.watcher.lastError = e.message;
-				console.error("Watcher paused:", e.message);
-			} finally {
-				const { state } = await this.practice.read();
-				if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);
-				else if (state.round)
-					await this.ctx.storage.setAlarm(Math.min(state.round.endsAt, (await this.practice.nextAgentAt()) || Infinity));
-			}
-		});
+		await this.init();
+		try {
+			await this.watcher?.tick();
+			await this.practice.agentTick();
+			await this.practice.state();
+		} catch (e) {
+			if (this.watcher) this.watcher.lastError = e.message;
+			console.error("Watcher paused:", e.message);
+		} finally {
+			const { state } = await this.practice.read();
+			if (this.watcher) await this.ctx.storage.setAlarm(Date.now() + 2000);
+			else if (state.round)
+				await this.ctx.storage.setAlarm(
+					Math.min(
+						state.round.endsAt,
+						(await this.practice.nextAgentAt()) || Infinity,
+					),
+				);
+		}
 	}
 }
