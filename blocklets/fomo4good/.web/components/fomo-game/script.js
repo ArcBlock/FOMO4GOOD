@@ -652,13 +652,20 @@ Object.assign(messages["zh-Hant"], {
 				: { cache: "no-store" }),
 			signal: timeoutSignal(12000),
 		});
-		if (response.status === 404 || response.status === 405) {
+		if (
+			(response.status === 404 || response.status === 405) &&
+			(path === "state" || path === "session")
+		) {
 			const error = new Error(t("The campaign service is not connected. Pages only, for now."));
 			error.offline = true;
 			throw error;
 		}
-		const data = await response.json();
-		if (!response.ok) throw new Error(t(data.error || "Please try again."));
+		const data = await response.json().catch(() => ({}));
+		if (!response.ok) {
+			const error = new Error(t(data.error || "Please try again."));
+			error.status = response.status;
+			throw error;
+		}
 		return data;
 	}
 	const translateTeam = t;
@@ -1198,7 +1205,7 @@ Object.assign(messages["zh-Hant"], {
 					}
 				} catch (e) {
 					if (!$("payment").hidden) $("payment-status").textContent = e.message;
-					if (/not found/i.test(e.message || "")) save(null);
+					if (e.status === 404 || /not found/i.test(e.message || "")) save(null);
 				}
 			}
 		} catch (e) {

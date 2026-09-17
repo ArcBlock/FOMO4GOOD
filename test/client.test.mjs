@@ -362,6 +362,45 @@ test("pages-only deployment: a 404 campaign API renders the shipped teams, disab
 	}
 });
 
+test("a missing donate intent is dropped instead of treated as campaign offline", async (t) => {
+	const state = empty();
+	state.mode = "mainnet";
+	state.campaign = { ended: false, accepting: true };
+	const id = "3c68e394-05f0-4c18-ad47-0d75e0f3ac0a";
+	let intentGets = 0;
+	const dom = new JSDOM(render().html, {
+		url: "http://fomo4good.localhost/",
+		runScripts: "outside-only",
+	});
+	t.after(() => dom.window.close());
+	const w = dom.window;
+	w.AbortSignal = globalThis.AbortSignal;
+	w.localStorage.setItem("fomo4good.intent.v2", id);
+	w.fetch = async (path) => {
+		if (path === "/arc/api/fomo/state")
+			return { ok: true, json: async () => structuredClone(state) };
+		if (path === "/arc/api/fomo/visit")
+			return { ok: true, json: async () => ({ ok: true }) };
+		if (path === `/arc/api/fomo/intents/${id}`) {
+			intentGets++;
+			return {
+				ok: false,
+				status: 404,
+				json: async () => ({ error: "Intent not found." }),
+			};
+		}
+		throw new Error("Unexpected " + path);
+	};
+	w.eval(script);
+	const q = (s) => w.document.querySelector(s);
+	await waitFor(() => w.localStorage.getItem("fomo4good.intent.v2") === null);
+	assert.equal(intentGets, 1);
+	assert.match(q("[data-notice]").textContent, /ARC NETWORK/);
+	assert.equal(q("[data-notice]").classList.contains("error"), false);
+	await new Promise((r) => setTimeout(r, 40));
+	assert.equal(intentGets, 1, "gone intents must not be polled again");
+});
+
 test("a healthy mainnet poll does not flash the reconnecting banner", async (t) => {
 	const state = empty();
 	state.mode = "mainnet";
