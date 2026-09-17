@@ -163,8 +163,11 @@ export default {
 				return reply(200, r.data, headers);
 			}
 			return reply(404, { error: "Not found" });
-		} catch {
-			return reply(503, { error: "Service temporarily unavailable." });
+		} catch (error) {
+			console.error(error);
+			return reply(503, {
+				error: error.message || "Service temporarily unavailable.",
+			});
 		}
 	},
 };

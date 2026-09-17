@@ -52,7 +52,7 @@ export class Watcher {
 				this.config.chainId
 			)
 				throw new Error("RPC chain mismatch.");
-			const { state } = await this.store.read();
+			const { state } = await this.store.ensure();
 			const block = (n) =>
 				this.rpc("eth_getBlockByNumber", ["0x" + n.toString(16), false]);
 			if (state.cursor) {

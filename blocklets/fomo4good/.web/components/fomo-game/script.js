@@ -586,6 +586,12 @@ Object.assign(messages["zh-Hant"], {
 		const [a, b = ""] = String(value || "0").split(".");
 		return `${a.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${b.padEnd(2, "0").slice(0, 2)}`;
 	};
+	const timeoutSignal = (ms) => {
+		if (typeof AbortSignal?.timeout === "function") return AbortSignal.timeout(ms);
+		const controller = new AbortController();
+		setTimeout(() => controller.abort(), ms);
+		return controller.signal;
+	};
 	let state = null,
 		pending = null,
 		pendingUri = "",
@@ -644,7 +650,7 @@ Object.assign(messages["zh-Hant"], {
 						body: JSON.stringify(input),
 					}
 				: { cache: "no-store" }),
-			signal: AbortSignal.timeout(12000),
+			signal: timeoutSignal(12000),
 		});
 		if (response.status === 404 || response.status === 405) {
 			const error = new Error(t("The campaign service is not connected. Pages only, for now."));
@@ -872,7 +878,10 @@ Object.assign(messages["zh-Hant"], {
 						: remaining <= 60
 							? t("ONE MINUTE. NO PRESSURE.")
 							: t("TIME UNTIL SOMEONE GETS NOTHING");
-		const stale = !offline && (Date.now() - lastSync > 15000 || state.watcher.stale);
+		const stale =
+			!offline &&
+			!syncing &&
+			!!state.watcher?.stale;
 		$("live-round").textContent = $("round-label").textContent;
 		$("live-timer").textContent = $("timer").textContent;
 		$("live-pool").textContent = `${money(r?.amount || "0")} ${currency}`;

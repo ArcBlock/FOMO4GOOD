@@ -200,3 +200,42 @@ test("watcher does not advance cursor on RPC failure; restart resumes from persi
 		false,
 	);
 });
+test("empty ledger JSON reseeds instead of staying unreadable", async (t) => {
+	const { store, space, config } = await fixture(t);
+	await store.intent({ amount: "1", team: "dogs" }, 1000);
+	await space.afs.write("/campaign/ledger.json", { content: "" });
+	const recovered = new Store(space.afs, config);
+	await recovered.init();
+	assert.equal((await recovered.read()).state.intents.length, 0);
+	assert.equal((await recovered.state(2000)).mode, config.mode);
+});
+test("watcher is not stale before the first chain timestamp", async (t) => {
+	const { store } = await fixture(t);
+	store.config = { ...store.config, preview: false };
+	const catchingUp = store.projectState(
+		{
+			intents: [],
+			payments: [],
+			rounds: [],
+			round: null,
+			cursor: null,
+			chainTime: 0,
+			visits: 0,
+		},
+		Date.now(),
+	);
+	assert.equal(catchingUp.watcher.stale, false);
+	const delayed = store.projectState(
+		{
+			intents: [],
+			payments: [],
+			rounds: [],
+			round: null,
+			cursor: null,
+			chainTime: Date.now() - 60_000,
+			visits: 0,
+		},
+		Date.now(),
+	);
+	assert.equal(delayed.watcher.stale, true);
+});

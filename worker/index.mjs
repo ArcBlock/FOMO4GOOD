@@ -149,6 +149,7 @@ export class FomoCampaign {
 				}
 				return response;
 			} catch (e) {
+				if (/Unexpected end of JSON/i.test(e.message || "")) this.ready = null;
 				console.error(e);
 				return Response.json(
 					{
@@ -166,6 +167,8 @@ export class FomoCampaign {
 			this.ctx.waitUntil(
 				this.watcher.tick().catch((e) => {
 					this.watcher.lastError = e.message;
+					if (/Unexpected end of JSON/i.test(e.message || ""))
+						this.ready = null;
 					console.error("Watcher paused:", e.message);
 				}),
 			);

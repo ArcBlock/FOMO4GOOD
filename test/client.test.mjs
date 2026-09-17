@@ -362,6 +362,33 @@ test("pages-only deployment: a 404 campaign API renders the shipped teams, disab
 	}
 });
 
+test("a healthy mainnet poll does not flash the reconnecting banner", async (t) => {
+	const state = empty();
+	state.mode = "mainnet";
+	state.campaign = { ended: false, accepting: true };
+	state.watcher = { stale: false, block: 1, chainTime: Date.now() };
+	const dom = new JSDOM(render().html, {
+		url: "http://fomo4good.localhost/",
+		runScripts: "outside-only",
+	});
+	t.after(() => dom.window.close());
+	const w = dom.window;
+	w.AbortSignal = {};
+	w.fetch = async (path) => {
+		if (path === "/arc/api/fomo/state")
+			return { ok: true, json: async () => structuredClone(state) };
+		if (path === "/arc/api/fomo/visit")
+			return { ok: true, json: async () => ({ ok: true }) };
+		throw new Error("Unexpected " + path);
+	};
+	w.eval(script);
+	const q = (s) => w.document.querySelector(s);
+	await waitFor(() => /ARC NETWORK/.test(q("[data-notice]").textContent));
+	await new Promise((r) => setTimeout(r, 40));
+	assert.equal(q("[data-notice]").classList.contains("error"), false);
+	assert.match(q("[data-notice]").textContent, /ARC NETWORK · USDC ON ARC/);
+});
+
 test('rank invitation uses the Top 10 cutoff minus existing contributions and prefills without donating', async context => {
  const state = { ...empty(), mode:'practice', currency:'FUSD', wallet:{id:'outside-top10',balance:'997',allTimeDonated:'3',roundDonated:'0'} };
  state.topDonors=Array.from({length:10},(_,i)=>({address:`player-${i}`,name:`Player ${i}`,amount:String(20-i),count:1}));

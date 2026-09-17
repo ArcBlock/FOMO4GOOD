@@ -24,34 +24,55 @@ export class Store {
 			teams: c.charities,
 		});
 	}
+	emptyLedger() {
+		return {
+			schema: 1,
+			binding: this.binding(),
+			intents: [],
+			payments: [],
+			rounds: [],
+			round: null,
+			cursor: null,
+			chainTime: 0,
+			visits: 0,
+		};
+	}
+	isEmptyLedgerError(e) {
+		return (
+			e?.code === "AFS_NOT_FOUND" ||
+			e instanceof SyntaxError ||
+			/Unexpected end of JSON/i.test(e?.message || "")
+		);
+	}
+	async seed() {
+		await this.afs.write(PATH, {
+			content: JSON.stringify(this.emptyLedger()),
+		});
+		return this.read();
+	}
 	async init() {
+		await this.ensure();
+	}
+	async ensure() {
 		try {
-			await this.read();
+			return await this.read();
 		} catch (e) {
-			const empty =
-				e.code === "AFS_NOT_FOUND" ||
-				e instanceof SyntaxError ||
-				/Unexpected end of JSON/i.test(e.message || "");
-			if (!empty) throw e;
-			// Called only after acquiring the service's exclusive listener, before accepting requests.
-			await this.afs.write(PATH, {
-				content: JSON.stringify({
-					schema: 1,
-					binding: this.binding(),
-					intents: [],
-					payments: [],
-					rounds: [],
-					round: null,
-					cursor: null,
-					chainTime: 0,
-					visits: 0,
-				}),
-			});
+			if (!this.isEmptyLedgerError(e)) throw e;
+			await new Promise((r) => setTimeout(r, 50));
+			try {
+				return await this.read();
+			} catch (retry) {
+				if (!this.isEmptyLedgerError(retry)) throw retry;
+				return this.seed();
+			}
 		}
 	}
 	async read() {
 		const { data } = await this.afs.read(PATH);
-		const state = JSON.parse(data.content);
+		const raw = data?.content;
+		if (raw == null || raw === "")
+			throw new SyntaxError("Unexpected end of JSON input");
+		const state = JSON.parse(raw);
 		if (state.schema !== 1 || state.binding !== this.binding())
 			throw new Error(
 				"DID Space campaign configuration mismatch. Use the original configuration or a new campaign instance.",
@@ -63,7 +84,7 @@ export class Store {
 	update(fn) {
 		const work = this.queue.then(async () => {
 			for (let tries = 0; tries < 12; tries++) {
-				const { state, version } = await this.read();
+				const { state, version } = await this.ensure();
 				const before = JSON.stringify(state);
 				const result = fn(state);
 				const content = JSON.stringify(state);
@@ -234,7 +255,7 @@ export class Store {
 	}
 	async state(now = Date.now(), { settle = true } = {}) {
 		if (this.config.preview && settle) await this.update((s) => this.closeAt(s, now));
-		const { state: s } = await this.read();
+		const { state: s } = await this.ensure();
     return this.projectState(s, now);
   }
   projectState(s, now) {
@@ -304,7 +325,10 @@ export class Store {
 			watcher: {
 				block: s.cursor?.block || null,
 				chainTime: s.chainTime,
-				stale: !this.config.preview && now - s.chainTime > 30_000,
+				stale:
+					!this.config.preview &&
+					s.chainTime > 0 &&
+					now - s.chainTime > 30_000,
 			},
 			campaign: {
 				startsAt: this.config.startsAt,
