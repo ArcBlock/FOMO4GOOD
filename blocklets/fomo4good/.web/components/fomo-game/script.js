@@ -1049,7 +1049,9 @@ Object.assign(messages["zh-Hant"], {
 			pickup.hidden = false;
 			open.hidden = false;
 			open.href = uri;
-			share.hidden = typeof navigator.share !== "function";
+			share.hidden =
+				typeof navigator.share !== "function" ||
+				!window.matchMedia("(pointer: coarse)").matches;
 			if (typeof FOMOQR?.toString === "function") {
 				new Promise((resolve, reject) => {
 					let settled = false;
@@ -1093,6 +1095,7 @@ Object.assign(messages["zh-Hant"], {
 			qr.hidden = true;
 			qr.removeAttribute("src");
 		}
+		$("payment").scrollIntoView({ block: "start", behavior: "smooth" });
 		tick();
 	}
 	let practiceSessionReady = false, refreshQueued = false;

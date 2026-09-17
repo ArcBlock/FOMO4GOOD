@@ -568,6 +568,9 @@ body {
 	font-size: 13px;
 }
 @media (max-width: 650px) {
+	.f-payment > strong {
+		font-size: 36px;
+	}
 	.f-pay-pickup {
 		grid-template-columns: 1fr;
 		justify-items: center;
@@ -1588,7 +1591,7 @@ body {
 .f-page-heading > p:last-child { font-size: 19px; color: var(--muted); }
 .f-home-note { margin: 0 0 56px; font-size: 18px; max-width: 70ch; }
 .f-home-note a { color: var(--mint); text-decoration: underline; }
-#play, #rules, #faq, #teams, #donors { scroll-margin-top: 120px; }
+#play, #rules, #faq, #teams, #donors, #donate, .f-payment { scroll-margin-top: 120px; }
 @media (max-width: 800px) {
  .f-livebar-inner { padding: 12px 20px; gap: 12px; flex-wrap: wrap; }
  .f-livebar [data-live-status] { display: none; }
