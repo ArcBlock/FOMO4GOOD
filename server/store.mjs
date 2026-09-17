@@ -28,7 +28,11 @@ export class Store {
 		try {
 			await this.read();
 		} catch (e) {
-			if (e.code !== "AFS_NOT_FOUND") throw e;
+			const empty =
+				e.code === "AFS_NOT_FOUND" ||
+				e instanceof SyntaxError ||
+				/Unexpected end of JSON/i.test(e.message || "");
+			if (!empty) throw e;
 			// Called only after acquiring the service's exclusive listener, before accepting requests.
 			await this.afs.write(PATH, {
 				content: JSON.stringify({
