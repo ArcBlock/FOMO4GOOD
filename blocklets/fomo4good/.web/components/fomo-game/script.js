@@ -509,6 +509,46 @@ Object.assign(messages["zh-Hant"], {
 		const saved = localStorage.getItem(localeKey);
 		locale = supported.includes(requested) ? requested : supported.includes(saved) ? saved : navigator.language?.startsWith("zh") ? "zh-Hant" : "en";
 	} catch {}
+	const analyticsLive = (() => {
+		const host = String(location.hostname || "");
+		return host !== "" && host !== "localhost" && host !== "127.0.0.1" && !host.endsWith(".localhost");
+	})();
+	const moneyValue = (amount) => {
+		const n = Number(amount);
+		return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
+	};
+	// Queue-only: ARC injects gtag.js after window.load (`seo/analytics-strategy=idle`).
+	const track = (name, params = {}) => {
+		if (!analyticsLive || typeof window.gtag !== "function") return;
+		try {
+			window.gtag("event", name, {
+				campaign_mode: practiceMode ? "practice" : "real",
+				ui_locale: locale,
+				content_group: root.dataset.view,
+				...params,
+			});
+		} catch {}
+	};
+	const trackOnce = (bucket, id, name, params) => {
+		if (!id) return;
+		const storageKey = "fomo4good.ga." + bucket;
+		let seen = [];
+		try { seen = JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch {}
+		if (!Array.isArray(seen)) seen = [];
+		if (seen.includes(id)) return;
+		seen.push(id);
+		try { localStorage.setItem(storageKey, JSON.stringify(seen.slice(-40))); } catch {}
+		track(name, params);
+	};
+	const syncAnalyticsUser = () => {
+		if (!analyticsLive || typeof window.gtag !== "function") return;
+		try {
+			window.gtag("set", "user_properties", {
+				campaign_mode: practiceMode ? "practice" : "real",
+				ui_locale: locale,
+			});
+		} catch {}
+	};
 	const t = (source, values = {}) => {
   source = practiceMode ? (practiceCopy[source] || source) : source;
   return String(messages[locale]?.[source] || source || "").replace(/\{(\w+)\}/g, (match, key) => String(values[key] ?? match));
@@ -565,9 +605,10 @@ Object.assign(messages["zh-Hant"], {
 		}
 	}
 	applyLocale();
+	syncAnalyticsUser();
 
 	const $ = (key) => root.querySelector(`[data-${key}]`);
- $("copy-prepared").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("prepared-address").value);$("prepared-feedback").textContent=t("COPIED ✓");}catch{$("prepared-address").select();$("prepared-feedback").textContent=t("Clipboard unavailable. Select and copy the value manually.");}});
+ $("copy-prepared").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("prepared-address").value);$("prepared-feedback").textContent=t("COPIED ✓");track("copy_payment_detail",{method:"prepared_address"});}catch{$("prepared-address").select();$("prepared-feedback").textContent=t("Clipboard unavailable. Select and copy the value manually.");}});
 	const esc = (value) =>
 		String(value ?? "").replace(
 			/[&<>"']/g,
@@ -788,9 +829,10 @@ Object.assign(messages["zh-Hant"], {
  async function copyBrag() {
   const info=shareInfo();try{await navigator.clipboard.writeText(info.text+"\n"+info.url);$("share-feedback").textContent=t("Copied. Your ego is portable now.");}catch{$("share-feedback").textContent=info.text+"\n"+info.url;}
  }
- $("share-copy").addEventListener("click",copyBrag);
- $("share").addEventListener("click",async()=>{if(!navigator.share)return copyBrag();try{await navigator.share(shareInfo());}catch(e){$("share-feedback").textContent=t(e.name==="AbortError"?"Share cancelled. Your ego stays here.":"Sharing unavailable. Copy the text below.");}});
+ $("share-copy").addEventListener("click",()=>{copyBrag();track("share",{method:"copy"});});
+ $("share").addEventListener("click",async()=>{if(!navigator.share){copyBrag();track("share",{method:"copy"});return;}try{await navigator.share(shareInfo());track("share",{method:"native"});}catch(e){$("share-feedback").textContent=t(e.name==="AbortError"?"Share cancelled. Your ego stays here.":"Sharing unavailable. Copy the text below.");}});
  $("share-card").addEventListener("click",()=>{
+  track("share",{method:"card"});
   const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=630;const c=canvas.getContext("2d");
   c.fillStyle="#090b17";c.fillRect(0,0,1200,630);c.strokeStyle="#b39aff";c.lineWidth=8;c.strokeRect(28,28,1144,574);
   c.fillStyle="#b39aff";c.font="bold 30px monospace";c.fillText(practiceMode?"PRACTICE / FUSD / $0 REAL VALUE":"FOMO4GOOD / CHARITY",65,90);
@@ -1198,6 +1240,13 @@ Object.assign(messages["zh-Hant"], {
 					const firstRestore = !pending.amount;
 					const newlyPaid = !!(i.payment && !pending.payment);
 					if (newlyPaid) celebrate("donate");
+					if (i.payment) trackOnce("purchase", i.id, "purchase", {
+						transaction_id: i.id,
+						currency: "USD",
+						value: moneyValue(i.amount),
+						team_id: i.team,
+						token: "USDC",
+					});
 					if (i.payment && firstRestore) save(null);
 					else {
 						save(i);
@@ -1230,7 +1279,7 @@ let practiceAttempt = null;
  $("refill").addEventListener("click", async () => {
   if (busy || !practiceMode) return;
   busy = true; $("refill").disabled = true;
-  try { await api("refill", {}); celebrate("refill"); $("wallet-feedback").textContent = t("1,000 FUSD printed. Reserves remain zero."); await sync(); }
+  try { await api("refill", {}); celebrate("refill"); track("refill_fusd"); $("wallet-feedback").textContent = t("1,000 FUSD printed. Reserves remain zero."); await sync(); }
   catch (error) { $("wallet-feedback").textContent = error.message; }
   finally { busy = false; $("refill").disabled = !state?.wallet || state.wallet.canRefill !== true; }
  });
@@ -1263,6 +1312,7 @@ let practiceAttempt = null;
     practiceAttempt = null;
     try { localStorage.removeItem("fomo4good.practice.retry"); } catch {}
     feedback(t("FUSD spent. Your team takes the imaginary lead."));
+    track("practice_play", { currency: "USD", value: moneyValue(input.amount), team_id: input.team, token: "FUSD" });
     $("form").hidden = false; $("payment").hidden = true;
     await sync();
     celebrate(state.topDonors.findIndex(d => d.address === state.wallet?.id) >= 0 && previousRank < 0 ? "rank" : "donate");
@@ -1273,6 +1323,13 @@ let practiceAttempt = null;
 			const i = await api("intents", Object.fromEntries(form));
 			save(i);
 			feedback("");
+			track("begin_checkout", {
+				currency: "USD",
+				value: moneyValue(form.get("amount")),
+				team_id: form.get("team"),
+				token: "USDC",
+				items: [{ item_id: form.get("team"), quantity: 1, price: moneyValue(form.get("amount")) }],
+			});
 			payment(i, { scroll: true });
 		} catch (e) {
 			feedback(e.message);
@@ -1281,13 +1338,18 @@ let practiceAttempt = null;
 			tick();
 		}
 	});
-	$("choices").addEventListener("change", (event) => { rememberTeam(event.target.value); tick(); });
+	$("choices").addEventListener("change", (event) => {
+		rememberTeam(event.target.value);
+		track("select_content", { content_type: "team", item_id: event.target.value });
+		tick();
+	});
 	root.querySelectorAll("[data-amount]").forEach((button) =>
 		button.addEventListener("click", () => {
 			$("form").elements.amount.value = button.dataset.amount;
 			root
 				.querySelectorAll("[data-amount]")
 				.forEach((b) => b.classList.toggle("selected", b === button));
+			track("select_amount", { currency: "USD", value: moneyValue(button.dataset.amount), token: currency, method: "preset" });
 		}),
 	);
 	$("form").elements.amount.addEventListener("input", () => {
@@ -1303,6 +1365,7 @@ let practiceAttempt = null;
 	});
 	$("ranking").addEventListener("change", (e) => {
 		board = e.target.value;
+		track("leaderboard_filter", { period: board });
 		renderBoard();
     renderCompetition();
 	});
@@ -1315,6 +1378,7 @@ let practiceAttempt = null;
 	function resumeOpenPayment(event) {
 		if (practiceMode || !pending?.amount) return;
 		event?.preventDefault();
+		track("resume_payment", { status: sessionKind() || "pending", team_id: pending.team });
 		payment(pending, { scroll: true });
 	}
 	$("live-cta").addEventListener("click", (event) => {
@@ -1325,12 +1389,18 @@ let practiceAttempt = null;
 	async function copy(text, button) {
 		try {
 			await navigator.clipboard.writeText(text);
-			const label = button.hasAttribute("data-copy-amount")
-				? "COPY AMOUNT"
+			const method = button.hasAttribute("data-copy-amount")
+				? "amount"
 				: button.hasAttribute("data-copy-uri")
+					? "payment_link"
+					: "address";
+			const label = method === "amount"
+				? "COPY AMOUNT"
+				: method === "payment_link"
 					? "COPY PAYMENT LINK"
 					: "COPY ADDRESS";
 			button.textContent = t("COPIED ✓");
+			track("copy_payment_detail", { method });
 			setTimeout(() => (button.textContent = t(label)), 1500);
 		} catch {
 			$("payment-status").textContent =
@@ -1353,6 +1423,7 @@ let practiceAttempt = null;
 				title: "FOMO4GOOD",
 				text: `${pending.amount} USDC\n${state.payment.recipient}\n${pendingUri}`,
 			});
+			track("share", { method: "payment_link" });
 		} catch {}
 	});
 	$("simulate").addEventListener("click", async () => {
@@ -1377,6 +1448,8 @@ let practiceAttempt = null;
 		url.searchParams.set("lang", locale);
 		history.replaceState(null, "", url);
 		applyLocale();
+		syncAnalyticsUser();
+		track("language_change", { ui_locale: locale });
     soundLabel();
 		const selected = chosenTeam || $("form").elements.team?.value;
 		$("choices").replaceChildren();
@@ -1387,6 +1460,25 @@ let practiceAttempt = null;
 			tick();
 		}
 	});
+	root.addEventListener("click", (event) => {
+		const world = event.target.closest("[data-world]");
+		if (world) {
+			const destination = world.getAttribute("data-world");
+			const current = practiceMode ? "practice" : "real";
+			if (destination && destination !== current) track("world_switch", { destination });
+		}
+		if (event.target.closest("[data-rank-cta]")) track("rank_invite_click");
+		if (event.target.closest(".f-team-play")) track("select_content", { content_type: "team_play" });
+		if (event.target.closest("[data-share-x]")) track("share", { method: "twitter" });
+		if (event.target.closest("[data-share-telegram]")) track("share", { method: "telegram" });
+		if (event.target.closest("[data-open-wallet]")) track("open_wallet", { team_id: pending?.team });
+	});
+	root.addEventListener("toggle", (event) => {
+		const details = event.target;
+		if (details?.open && details.closest?.(".f-faq")) {
+			track("faq_open", { faq_id: details.querySelector("summary")?.textContent?.trim().slice(0, 80) });
+		}
+	}, true);
  const suggestedAmount = new URL(location.href).searchParams.get("donate");
  if(suggestedAmount && /^\d+(?:\.\d{1,2})?$/.test(suggestedAmount) && Number(suggestedAmount)>=1 && Number(suggestedAmount)<=100000) {
   $("form").elements.amount.value=suggestedAmount;

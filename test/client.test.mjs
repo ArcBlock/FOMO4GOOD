@@ -631,3 +631,147 @@ test('every public ARC view declares a dedicated 1200x630 social card', async ()
   assert.ok(bytes.length>100_000,`${card} should contain the full illustrated card`);
  }
 });
+
+test("site SEO pins the GA4 measurement id and idle loader strategy", async () => {
+	const seo = new URL("../blocklets/fomo4good/.web/seo/", import.meta.url);
+	assert.equal((await readFile(new URL("analytics-ga4", seo), "utf8")).trim(), "G-PFHNJD5JV6");
+	assert.equal((await readFile(new URL("analytics-strategy", seo), "utf8")).trim(), "idle");
+	assert.doesNotMatch(script, /googletagmanager|G-PFHNJD5JV6/);
+	assert.doesNotMatch(render().html, /googletagmanager|G-PFHNJD5JV6/);
+});
+
+test("GA4 funnel events fire on production hosts, skip localhost, and purchase once", async (t) => {
+	const callsOf = (calls, name) =>
+		calls.filter((c) => c[0] === "event" && c[1] === name).map((c) => c[2] || {});
+	function instrument(url, saved) {
+		const state = empty();
+		state.campaign = { ...state.campaign, accepting: true };
+		let intent = {
+			id: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+			team: "dogs",
+			amount: "5.004237",
+			expiresAt: Date.now() + 600000,
+			payment: null,
+		};
+		const calls = [];
+		const dom = new JSDOM(render().html, { url, runScripts: "outside-only" });
+		const w = dom.window;
+		t.after(() => w.close());
+		w.AbortSignal = globalThis.AbortSignal;
+		w.gtag = (...args) => calls.push(args);
+		if (saved) {
+			w.localStorage.setItem("fomo4good.intent.v2", saved.id);
+			w.localStorage.setItem("fomo4good.ga.purchase", JSON.stringify(saved.purchases || []));
+			intent.payment = saved.payment || null;
+		}
+		let pulse = null;
+		const realSetInterval = w.setInterval.bind(w);
+		w.setInterval = (fn, ms, ...args) => {
+			if (ms === 3000) pulse = fn;
+			return realSetInterval(fn, ms, ...args);
+		};
+		w.fetch = async (path, options) => {
+			if (path === "/arc/api/fomo/state") return { ok: true, json: async () => structuredClone(state) };
+			if (path === "/arc/api/fomo/visit") return { ok: true, json: async () => ({ ok: true }) };
+			if (path === "/arc/api/fomo/intents" && options?.body) {
+				return { ok: true, json: async () => structuredClone(intent) };
+			}
+			if (path === `/arc/api/fomo/intents/${intent.id}`) {
+				return { ok: true, json: async () => structuredClone(intent) };
+			}
+			throw new Error("Unexpected " + path);
+		};
+		w.eval(script);
+		return { w, calls, intent, pulse: () => pulse };
+	}
+
+	const local = instrument("http://fomo4good.localhost/arc/");
+	await waitFor(() => local.w.document.querySelector('[name="team"]'));
+	local.w.document.querySelector('[name="team"]').checked = true;
+	local.w.document.querySelector('[name="team"]').dispatchEvent(new local.w.Event("change", { bubbles: true }));
+	local.w.document.querySelector("[data-form]").dispatchEvent(new local.w.Event("submit", { bubbles: true, cancelable: true }));
+	await waitFor(() => !local.w.document.querySelector("[data-payment]").hidden);
+	assert.equal(local.calls.length, 0, "dev hosts must not send GA4");
+
+	const live = instrument("https://fomo4good.com/arc/");
+	await waitFor(() => live.w.document.querySelector('[name="team"]'));
+	assert.ok(live.calls.some((c) => c[0] === "set" && c[1] === "user_properties"));
+	live.w.document.querySelector('[name="team"]').checked = true;
+	live.w.document.querySelector('[name="team"]').dispatchEvent(new live.w.Event("change", { bubbles: true }));
+	assert.equal(callsOf(live.calls, "select_content")[0].item_id, "dogs");
+	live.w.document.querySelector("[data-amount='10']").click();
+	assert.equal(callsOf(live.calls, "select_amount")[0].value, 10);
+	live.w.document.querySelector("[data-amount='5']").click();
+	live.w.document.querySelector("[data-form]").dispatchEvent(new live.w.Event("submit", { bubbles: true, cancelable: true }));
+	await waitFor(() => !live.w.document.querySelector("[data-payment]").hidden);
+	const checkout = callsOf(live.calls, "begin_checkout");
+	assert.equal(checkout.length, 1);
+	assert.equal(checkout[0].value, 5);
+	assert.equal(checkout[0].team_id, "dogs");
+	assert.equal(checkout[0].token, "USDC");
+	assert.equal(checkout[0].campaign_mode, "real");
+	assert.doesNotMatch(JSON.stringify(checkout), /5\.004237/);
+	live.intent.payment = { rogue: false };
+	await live.pulse()();
+	await waitFor(() => callsOf(live.calls, "purchase").length === 1);
+	const purchase = callsOf(live.calls, "purchase")[0];
+	assert.equal(purchase.transaction_id, live.intent.id);
+	assert.equal(purchase.value, 5);
+	assert.equal(purchase.currency, "USD");
+	await live.pulse()();
+	assert.equal(callsOf(live.calls, "purchase").length, 1, "the same confirmation must not purchase twice");
+
+	const resumed = instrument("https://fomo4good.com/arc/", {
+		id: live.intent.id,
+		purchases: [live.intent.id],
+		payment: { rogue: false },
+	});
+	await waitFor(() => resumed.w.localStorage.getItem("fomo4good.intent.v2") === null);
+	assert.equal(callsOf(resumed.calls, "purchase").length, 0, "a later visit must not re-send purchase");
+});
+
+test("practice play is a distinct GA4 event and never a purchase", async (t) => {
+	const state = {
+		...empty(),
+		mode: "practice",
+		currency: "FUSD",
+		wallet: { id: "practice-player", balance: "1000" },
+	};
+	const calls = [];
+	const dom = new JSDOM(render({ props: { mode: "practice" } }).html, {
+		url: "https://fomo4good.com/arc/practice/",
+		runScripts: "outside-only",
+	});
+	const w = dom.window;
+	t.after(() => w.close());
+	w.AbortSignal = globalThis.AbortSignal;
+	w.gtag = (...args) => calls.push(args);
+	w.fetch = async (path, options) => {
+		assert.ok(path.startsWith("/arc/api/practice/"), path);
+		if (path === "/arc/api/practice/donate") {
+			const input = JSON.parse(options.body);
+			state.wallet.balance = String(1000 - Number(input.amount));
+			return { ok: true, json: async () => ({ wallet: state.wallet }) };
+		}
+		return { ok: true, json: async () => structuredClone(path.endsWith("/session") ? state.wallet : state) };
+	};
+	w.eval(script);
+	const q = (s) => w.document.querySelector(s);
+	await waitFor(() => q('[name="team"]'));
+	q('[name="team"]').checked = true;
+	q("[data-form]").dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+	await waitFor(() => q("[data-balance]").textContent === "995.00 FUSD");
+	const plays = calls.filter((c) => c[0] === "event" && c[1] === "practice_play").map((c) => c[2]);
+	assert.equal(plays.length, 1);
+	assert.equal(plays[0].token, "FUSD");
+	assert.equal(plays[0].campaign_mode, "practice");
+	assert.equal(plays[0].value, 5);
+	assert.equal(
+		calls.filter((c) => c[0] === "event" && c[1] === "purchase").length,
+		0,
+	);
+	assert.equal(
+		calls.filter((c) => c[0] === "event" && c[1] === "begin_checkout").length,
+		0,
+	);
+});

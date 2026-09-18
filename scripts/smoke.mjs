@@ -36,6 +36,15 @@ assert.equal(
 const html = await (await api("/arc/")).text();
 assert.match(html, /data-fomo/);
 assert.match(html, /MAKE CRYPTO/);
+const gaLoader = /googletagmanager\.com\/gtag\/js/;
+const gaBlocking = /<script[^>]+src=["'][^"']*googletagmanager\.com\/gtag\/js/;
+assert.match(html, /G-PFHNJD5JV6/);
+assert.match(html, gaLoader);
+assert.doesNotMatch(
+	html,
+	gaBlocking,
+	"GA4 must stay on ARC idle injection — a head src= loader is visible to the preload scanner",
+);
 for (const page of ["rules", "teams", "leaderboard", "practice", "practice/rules", "practice/teams", "practice/leaderboard"]) {
  const view = page === "practice" ? "play" : page.split("/").pop();
  const response = await api(`/arc/${page}`);
@@ -57,6 +66,8 @@ for (const page of ["rules", "teams", "leaderboard", "practice", "practice/rules
  assert.ok(body.includes('data-live-timer'));
  assert.ok(body.includes('href="/#play"'));
  assert.ok(body.includes(`rel="canonical" href="${origin}/${page}/"`));
+ assert.match(body, /G-PFHNJD5JV6/);
+ assert.doesNotMatch(body, gaBlocking);
  assert.equal((await api(`/${page}/`)).status, 200);
 }
 assert.equal((await api('/unknown')).status, 404);
